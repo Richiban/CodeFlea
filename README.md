@@ -9,14 +9,16 @@ CodeFlea addresses this by giving simple, intuitive commands for moving the curs
 The rules for figuring out the locations of interesting lines and interesting points are as follows:
 
 An interesting line is defined as a line that (all of the below):
-* Is not "boring" (see below)
-* Is immediately preceded by either:
-    * A boring line
-    * A change of indentation
+
+- Is not "boring" (see below)
+- Is immediately preceded by either:
+  - A boring line
+  - A change of indentation
 
 A "boring" line is one that either:
-* is empty
-* contains nothing but punctuation
+
+- is empty
+- contains nothing but punctuation
 
 In the following example code, "interesting" lines have been marked with the ░ symbol to illustrate the positions.
 
@@ -31,8 +33,9 @@ In the following example code, "interesting" lines have been marked with the ░
                 {
                    ░var x = 4;
                     var y = 5;
+                    var z = 6;
 
-                   ░DoSomething();
+                   ░DoSomething(x + y + z);
                 }
                ░else
                 {
@@ -50,8 +53,9 @@ In the following example code, "interesting" lines have been marked with the ░
 There will be keyboard shortcuts for jumping to the next/prev interesting line in the file, as well as for jumping to the next/prev interesting line at the same indentation level
 
 _Interesting points_ within a line are defined as:
-* The beginning of the line
-* The first non-whitespace character after a punctuation mark or bracket \* The end of the line
+
+- The beginning of the line
+- The first non-whitespace character after a punctuation mark or bracket \* The end of the line
 
 Example:
 
