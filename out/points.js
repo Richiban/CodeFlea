@@ -22,15 +22,18 @@ function getIndexOfNextPunctuationChar(s, options = {
         : (x) => x + 1;
     do {
         idx = advance(idx);
-        if (idx <= 0)
+        if (idx === 0)
             return 0;
-        if (idx >= s.length)
+        if (idx < 0)
+            return undefined;
+        if (idx === s.length)
             return s.length;
+        if (idx > s.length)
+            return undefined;
         if (isPunctuation(s[idx - 1]) && !isPunctuation(s[idx])) {
             return nextNonWhiteSpaceChar(s, idx);
         }
     } while (true);
-    return idx;
 }
 function moveToInterestingPoint(direction) {
     const cursorPosition = editor_1.default.getCursorPosition();
@@ -44,6 +47,15 @@ function moveToInterestingPoint(direction) {
     });
     if (index)
         editor_1.default.moveCursorTo(cursorPosition.line, index);
+    else {
+        if (direction === "backwards" && cursorPosition.line > 0) {
+            editor_1.default.moveCursorToEndOfLine(document.lineAt(cursorPosition.line - 1));
+        }
+        else if (direction === "forwards" &&
+            cursorPosition.line < document.lineCount - 1) {
+            editor_1.default.moveCursorToBeginningOfLine(document.lineAt(cursorPosition.line + 1));
+        }
+    }
 }
 exports.default = { moveToInterestingPoint };
 //# sourceMappingURL=points.js.map

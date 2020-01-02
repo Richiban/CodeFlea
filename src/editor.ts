@@ -30,6 +30,17 @@ function moveCursorToBeginningOfLine(line: vscode.TextLine) {
   );
 }
 
+function moveCursorToEndOfLine(line: vscode.TextLine) {
+  const editor = getEditor();
+
+  if (!editor) return;
+
+  editor.selection = new vscode.Selection(
+    new vscode.Position(line.lineNumber, line.range.end.character),
+    new vscode.Position(line.lineNumber, line.range.end.character)
+  );
+}
+
 function getCursorPosition() {
   const editor = getEditor();
 
@@ -42,6 +53,7 @@ function getCursorPosition() {
 
 export default {
   moveCursorToBeginningOfLine,
+  moveCursorToEndOfLine,
   moveCursorTo,
   getCursorPosition,
   getDocument

@@ -33,16 +33,15 @@ function getIndexOfNextPunctuationChar(
   do {
     idx = advance(idx);
 
-    if (idx <= 0) return 0;
-
-    if (idx >= s.length) return s.length;
+    if (idx === 0) return 0;
+    if (idx < 0) return undefined;
+    if (idx === s.length) return s.length;
+    if (idx > s.length) return undefined;
 
     if (isPunctuation(s[idx - 1]) && !isPunctuation(s[idx])) {
       return nextNonWhiteSpaceChar(s, idx);
     }
   } while (true);
-
-  return idx;
 }
 
 function moveToInterestingPoint(direction: Direction) {
@@ -59,6 +58,18 @@ function moveToInterestingPoint(direction: Direction) {
   });
 
   if (index) editor.moveCursorTo(cursorPosition.line, index);
+  else {
+    if (direction === "backwards" && cursorPosition.line > 0) {
+      editor.moveCursorToEndOfLine(document.lineAt(cursorPosition.line - 1));
+    } else if (
+      direction === "forwards" &&
+      cursorPosition.line < document.lineCount - 1
+    ) {
+      editor.moveCursorToBeginningOfLine(
+        document.lineAt(cursorPosition.line + 1)
+      );
+    }
+  }
 }
 
 export default { moveToInterestingPoint };
