@@ -10,19 +10,49 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:extension.nextInterestingLine",
-    "onCommand:extension.prevInterestingLine"
+    "onCommand:codeFlea.nextInterestingLine",
+    "onCommand:codeFlea.prevInterestingLine",
+    "onCommand:codeFlea.nearestLineOfLesserIndentation",
+    "onCommand:codeFlea.nearestLineOfGreaterIndentation",
+    "onCommand:codeFlea.prevLineOfSameIndentation",
+    "onCommand:codeFlea.nextLineOfSameIndentation",
+    "onCommand:codeFlea.prevInterestingPoint",
+    "onCommand:codeFlea.nextInterestingPoint"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "extension.nextInterestingLine",
+        "command": "codeFlea.nextInterestingLine",
         "title": "Next interesting line"
       },
       {
-        "command": "extension.prevInterestingLine",
+        "command": "codeFlea.prevInterestingLine",
         "title": "Previous interesting line"
+      },
+      {
+        "command": "codeFlea.nearestLineOfLesserIndentation",
+        "title": "Go to nearest line of lesser indentation"
+      },
+      {
+        "command": "codeFlea.nearestLineOfGreaterIndentation",
+        "title": "Go to nearest line of greater indentation"
+      },
+      {
+        "command": "codeFlea.prevLineOfSameIndentation",
+        "title": "Go to the previous line of the same indentation"
+      },
+      {
+        "command": "codeFlea.nextLineOfSameIndentation",
+        "title": "Go to the next line of the same indentation"
+      },
+      {
+        "command": "codeFlea.prevInterestingPoint",
+        "title": "Go to the previous interesting point"
+      },
+      {
+        "command": "codeFlea.nextInterestingPoint",
+        "title": "Go to the next interesting point"
       }
     ]
   },
