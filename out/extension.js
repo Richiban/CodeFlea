@@ -5,7 +5,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const vscode = require("vscode");
 const lines_1 = require("./lines");
 const points_1 = require("./points");
-const metago_1 = require("./metago");
+const fleajump_1 = require("./fleajump");
 const config_1 = require("./config");
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -22,7 +22,7 @@ function activate(context) {
     context.subscriptions.push(vscode.commands.registerCommand("codeFlea.nextInterestingPoint", () => points_1.default.moveToInterestingPoint("forwards")));
     let config = new config_1.Config();
     config.loadConfig();
-    var fleaJumper = new metago_1.FleaJumper(context, config);
+    var fleaJumper = new fleajump_1.FleaJumper(context, config);
     vscode.workspace.onDidChangeConfiguration(_ => {
         config.loadConfig();
         fleaJumper.updateConfig();

@@ -3,7 +3,7 @@
 import * as vscode from "vscode";
 import lines from "./lines";
 import points from "./points";
-import { FleaJumper } from "./metago";
+import { FleaJumper } from "./fleajump";
 import { Config } from "./config";
 
 // this method is called when your extension is activated

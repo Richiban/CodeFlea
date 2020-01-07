@@ -111,8 +111,6 @@ export class FleaJumper {
   private jump() {
     let editor = vscode.window.activeTextEditor!;
 
-    if (!editor) return;
-
     let jumpTimeoutId: NodeJS.Timeout | null = null;
 
     if (!this.isJumping) {
@@ -142,9 +140,9 @@ export class FleaJumper {
     }
   }
 
-  private jump2 = (
+  private jump2(
     jumped: (editor: vscode.TextEditor, model: DecorationModel) => void
-  ): Promise<void> => {
+  ): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       let editor = vscode.window.activeTextEditor;
 
