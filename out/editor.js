@@ -5,7 +5,9 @@ function moveCursorTo(lineNumber, column) {
     const editor = getEditor();
     if (!editor)
         return;
-    editor.selection = new vscode.Selection(new vscode.Position(lineNumber, column), new vscode.Position(lineNumber, column));
+    const position = new vscode.Position(lineNumber, column);
+    editor.selection = new vscode.Selection(position, position);
+    editor.revealRange(new vscode.Range(position, position), vscode.TextEditorRevealType.InCenter);
 }
 function getEditor() {
     return vscode.window.activeTextEditor;

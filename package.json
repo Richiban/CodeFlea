@@ -19,7 +19,8 @@
     "onCommand:codeFlea.prevLineOfSameIndentation",
     "onCommand:codeFlea.nextLineOfSameIndentation",
     "onCommand:codeFlea.prevInterestingPoint",
-    "onCommand:codeFlea.nextInterestingPoint"
+    "onCommand:codeFlea.nextInterestingPoint",
+    "onCommand:codeFlea.jump"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -55,6 +56,10 @@
       {
         "command": "codeFlea.nextInterestingPoint",
         "title": "Go to the next interesting point"
+      },
+      {
+        "command": "codeFlea.jump",
+        "title": "Jump to an interesting line"
       }
     ]
   },

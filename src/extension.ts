@@ -3,6 +3,8 @@
 import * as vscode from "vscode";
 import lines from "./lines";
 import points from "./points";
+import { FleaJumper } from "./metago";
+import { Config } from "./config";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -70,6 +72,16 @@ export function activate(context: vscode.ExtensionContext) {
       points.moveToInterestingPoint("forwards")
     )
   );
+
+  let config = new Config();
+  config.loadConfig();
+
+  var fleaJumper = new FleaJumper(context, config);
+
+  vscode.workspace.onDidChangeConfiguration(_ => {
+    config.loadConfig();
+    fleaJumper.updateConfig();
+  });
 }
 
 export function deactivate() {}
