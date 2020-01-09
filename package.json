@@ -3,8 +3,10 @@
   "displayName": "CodeFlea",
   "description": "An extension for intuitively moving the cursor around a code file",
   "publisher": "Richibansoft",
-  "repository": {"url": "https://github.com/Richiban/CodeFlea/"},
-  "version": "0.0.1",
+  "repository": {
+    "url": "https://github.com/Richiban/CodeFlea/"
+  },
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.41.0"
   },
