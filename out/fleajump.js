@@ -15,20 +15,6 @@ const editor_1 = require("./editor");
 const lines_1 = require("./lines");
 const inline_input_1 = require("./inline-input");
 const common_1 = require("./common");
-function EmptySelection() {
-    return { text: "", startLine: 0, lastLine: 0 };
-}
-class ViewPort {
-    moveCursorToCenter(select) {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield vscode.commands.executeCommand("cursorMove", {
-                to: "viewPortCenter",
-                select: select
-            });
-        });
-    }
-}
-exports.ViewPort = ViewPort;
 class FleaJumper {
     constructor(context, config) {
         this.isJumping = false;
@@ -58,10 +44,6 @@ class FleaJumper {
         };
         let disposables = [];
         this.config = config;
-        this.viewPort = new ViewPort();
-        //this.halfViewPortRange = Math.trunc(this.config.jumper.range / 2); // 0.5
-        // determines whether to find from center of the screen.
-        this.findFromCenterScreenRange = Math.trunc((this.config.jumper.range * 2) / 5); // 0.4
         this.jumpInterface = new jump_interface_1.JumpInterface(config, {}, {});
         disposables.push(vscode.commands.registerCommand("codeFlea.jump", () => __awaiter(this, void 0, void 0, function* () {
             try {
@@ -87,20 +69,6 @@ class FleaJumper {
             inline_input_1.InlineInput.instances[0].cancelInput();
         }
         this.isJumping = false;
-    }
-    getPosition() {
-        return __awaiter(this, void 0, void 0, function* () {
-            let editor = vscode.window.activeTextEditor;
-            let fromLine = editor.selection.active.line;
-            let fromChar = editor.selection.active.character;
-            yield this.viewPort.moveCursorToCenter(false);
-            let toLine = editor.selection.active.line;
-            let cursorMoveBoundary = this.findFromCenterScreenRange;
-            if (Math.abs(toLine - fromLine) < cursorMoveBoundary) {
-                // back
-                editor.selection = new vscode.Selection(new vscode.Position(fromLine, fromChar), new vscode.Position(fromLine, fromChar));
-            }
-        });
     }
     jump() {
         return __awaiter(this, void 0, void 0, function* () {

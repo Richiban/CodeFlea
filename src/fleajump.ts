@@ -6,44 +6,20 @@ import lines from "./lines";
 import { InlineInput } from "./inline-input";
 import { zip, JumpLocations } from "./common";
 
-function EmptySelection(): Selection {
-  return { text: "", startLine: 0, lastLine: 0 };
-}
-
 type Selection = {
   text: string;
   startLine: number;
   lastLine: number;
 };
 
-export class ViewPort {
-  async moveCursorToCenter(select: boolean) {
-    await vscode.commands.executeCommand("cursorMove", {
-      to: "viewPortCenter",
-      select: select
-    });
-  }
-}
-
-type SelectionRange = { selectionBefore: Selection; selectionAfter: Selection };
-
 export class FleaJumper {
   private config: Config;
   private isJumping: boolean = false;
-  private viewPort: ViewPort;
-  private findFromCenterScreenRange: number;
   private jumpInterface: JumpInterface;
 
   constructor(context: vscode.ExtensionContext, config: Config) {
     let disposables: vscode.Disposable[] = [];
     this.config = config;
-    this.viewPort = new ViewPort();
-    //this.halfViewPortRange = Math.trunc(this.config.jumper.range / 2); // 0.5
-    // determines whether to find from center of the screen.
-    this.findFromCenterScreenRange = Math.trunc(
-      (this.config.jumper.range * 2) / 5
-    ); // 0.4
-
     this.jumpInterface = new JumpInterface(config, {}, {});
 
     disposables.push(
@@ -79,24 +55,6 @@ export class FleaJumper {
       InlineInput.instances[0].cancelInput();
     }
     this.isJumping = false;
-  }
-
-  private async getPosition() {
-    let editor = vscode.window.activeTextEditor!;
-    let fromLine = editor.selection.active.line;
-    let fromChar = editor.selection.active.character;
-
-    await this.viewPort.moveCursorToCenter(false);
-    let toLine = editor.selection.active.line;
-    let cursorMoveBoundary = this.findFromCenterScreenRange;
-
-    if (Math.abs(toLine - fromLine) < cursorMoveBoundary) {
-      // back
-      editor.selection = new vscode.Selection(
-        new vscode.Position(fromLine, fromChar),
-        new vscode.Position(fromLine, fromChar)
-      );
-    }
   }
 
   private async jump(): Promise<void> {
