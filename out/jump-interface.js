@@ -1,7 +1,17 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const vscode = require("vscode");
-class Decorator {
+const inline_input_1 = require("./inline-input");
+class JumpInterface {
     constructor(config, cache, decorations = {}) {
         this.config = config;
         this.cache = cache;
@@ -62,32 +72,40 @@ class Decorator {
             return vscode.Uri.parse(svg);
         };
     }
-    addCommandIndicator(editor) {
-        let line = editor.selection.anchor.line;
-        let char = editor.selection.anchor.character;
-        let option = [new vscode.Range(line, char, line, char)];
-        editor.setDecorations(this.charDecorationType, option);
+    pick(editor, jumpLocations) {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.addDecorations(editor, jumpLocations);
+            const choice = yield this.getUserChoice(editor, jumpLocations);
+            this.removeDecorations(editor);
+            return choice;
+        });
     }
-    removeCommandIndicator(editor) {
-        var _a;
-        let locations = [];
-        (_a = vscode.window.activeTextEditor) === null || _a === void 0 ? void 0 : _a.setDecorations(this.charDecorationType, locations);
+    getUserChoice(editor, jumpLocations) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const input = yield new inline_input_1.InlineInput().show(editor, v => v);
+            for (const loc of jumpLocations.locations) {
+                if (loc.jumpCode === input) {
+                    return loc;
+                }
+            }
+        });
     }
-    addDecorations(editor, decorationModel) {
+    addDecorations(editor, jumpLocations) {
         let decorationType = this.createTextEditorDecorationType(1);
         let decorationType2 = this.createTextEditorDecorationType(2);
         let options = [];
         let options2 = [];
+        const decorationModel = jumpLocations.locations;
         decorationModel.forEach(model => {
-            let code = model.code;
+            let code = model.jumpCode;
             let len = code.length;
             let option;
             if (len === 1) {
-                option = this.createDecorationOptions(model.line, model.character + 1, model.character + 1, code);
+                option = this.createDecorationOptions(model.lineNumber, model.charIndex + 1, model.charIndex + 1, code);
                 options.push(option);
             }
             else {
-                option = this.createDecorationOptions(model.line, model.character + 1, model.character + len, code);
+                option = this.createDecorationOptions(model.lineNumber, model.charIndex + 1, model.charIndex + len, code);
                 options2.push(option);
             }
         });
@@ -118,5 +136,5 @@ class Decorator {
         return decorationType;
     }
 }
-exports.Decorator = Decorator;
-//# sourceMappingURL=decoration.js.map
+exports.JumpInterface = JumpInterface;
+//# sourceMappingURL=jump-interface.js.map

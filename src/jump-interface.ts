@@ -1,15 +1,17 @@
 import * as vscode from "vscode";
-import { DecorationModel } from "./decoration-model";
 import { Config } from "./config";
+import { JumpLocations, JumpLocation } from "./common";
+import { InlineInput } from "./inline-input";
 
-export class Decorator {
+export class JumpInterface {
+  public charDecorationType!: vscode.TextEditorDecorationType;
+
   constructor(
     private config: Config,
     private cache: { [index: string]: vscode.Uri },
     private decorations: {
       [index: number]: vscode.TextEditorDecorationType;
-    } = {},
-    public charDecorationType: any
+    } = {}
   ) {}
 
   initialize = (config: Config) => {
@@ -30,72 +32,86 @@ export class Decorator {
     });
   };
 
-  addCommandIndicator = (editor: vscode.TextEditor) => {
-    let line = editor.selection.anchor.line;
-    let char = editor.selection.anchor.character;
-    let option = [new vscode.Range(line, char, line, char)];
-    editor.setDecorations(this.charDecorationType, option);
-  };
-
-  removeCommandIndicator = (editor: vscode.TextEditor) => {
-    let locations: vscode.Range[] = [];
-    vscode.window.activeTextEditor?.setDecorations(
-      this.charDecorationType,
-      locations
-    );
-  };
-
-  addDecorations = (
+  async pick(
     editor: vscode.TextEditor,
-    decorationModel: DecorationModel[]
-  ) => {
+    jumpLocations: JumpLocations
+  ): Promise<JumpLocation | undefined> {
+    this.addDecorations(editor, jumpLocations);
+
+    const choice = await this.getUserChoice(editor, jumpLocations);
+
+    this.removeDecorations(editor);
+
+    return choice;
+  }
+
+  private async getUserChoice(
+    editor: vscode.TextEditor,
+    jumpLocations: JumpLocations
+  ): Promise<JumpLocation | undefined> {
+    const input = await new InlineInput().show(editor, v => v);
+
+    for (const loc of jumpLocations.locations) {
+      if (loc.jumpCode === input) {
+        return loc;
+      }
+    }
+  }
+
+  private addDecorations(
+    editor: vscode.TextEditor,
+    jumpLocations: JumpLocations
+  ) {
     let decorationType = this.createTextEditorDecorationType(1);
     let decorationType2 = this.createTextEditorDecorationType(2);
 
     let options: vscode.DecorationOptions[] = [];
     let options2: vscode.DecorationOptions[] = [];
 
+    const decorationModel = jumpLocations.locations;
+
     decorationModel.forEach(model => {
-      let code = model.code;
+      let code = model.jumpCode;
       let len = code.length;
 
       let option: vscode.DecorationOptions;
+
       if (len === 1) {
         option = this.createDecorationOptions(
-          null,
-          model.line,
-          model.character + 1,
-          model.character + 1,
+          model.lineNumber,
+          model.charIndex + 1,
+          model.charIndex + 1,
           code
         );
         options.push(option);
       } else {
         option = this.createDecorationOptions(
-          null,
-          model.line,
-          model.character + 1,
-          model.character + len,
+          model.lineNumber,
+          model.charIndex + 1,
+          model.charIndex + len,
           code
         );
         options2.push(option);
       }
     });
+
     editor.setDecorations(decorationType, options);
     editor.setDecorations(decorationType2, options2);
-  };
+  }
 
-  removeDecorations = (editor: vscode.TextEditor) => {
+  removeDecorations(editor: vscode.TextEditor) {
     for (var dec in this.decorations) {
       if (this.decorations[dec] === null) continue;
       editor.setDecorations(this.decorations[dec], []);
       this.decorations[dec].dispose();
       this.decorations[dec] = null!;
     }
-  };
+  }
 
-  private createTextEditorDecorationType = (charsToOffset: number) => {
+  private createTextEditorDecorationType(charsToOffset: number) {
     let decorationType = this.decorations[charsToOffset];
     if (decorationType) return decorationType;
+
     decorationType = vscode.window.createTextEditorDecorationType({
       after: {
         margin: `0 0 0 ${charsToOffset * -this.config.decoration.width}px`,
@@ -103,12 +119,13 @@ export class Decorator {
         width: `${charsToOffset * this.config.decoration.width}px`
       }
     });
+
     this.decorations[charsToOffset] = decorationType;
+
     return decorationType;
-  };
+  }
 
   private createDecorationOptions = (
-    context: vscode.ExtensionContext | null,
     line: number,
     startCharacter: number,
     endCharacter: number,

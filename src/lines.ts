@@ -1,6 +1,10 @@
 import * as vscode from "vscode";
-import editor from "./editor";
 import { Change, Direction, DirectionOrNearest } from "./common";
+import {
+  getCursorPosition,
+  getEditor,
+  moveCursorToBeginningOfLine
+} from "./editor";
 
 function lineIsBoring(line: vscode.TextLine) {
   return !/[a-zA-Z0-9]/.test(line.text);
@@ -169,8 +173,8 @@ export function moveToChangeOfIndentation(
   change: Change,
   direction: DirectionOrNearest
 ) {
-  const cursorPosition = editor.getCursorPosition();
-  const document = editor.getDocument();
+  const cursorPosition = getCursorPosition();
+  const document = getEditor()?.document;
 
   if (cursorPosition && document) {
     let line: vscode.TextLine | undefined;
@@ -197,13 +201,13 @@ export function moveToChangeOfIndentation(
       }
     }
 
-    if (line) editor.moveCursorToBeginningOfLine(line);
+    if (line) moveCursorToBeginningOfLine(line);
   }
 }
 
-function moveToNextInterestingLine(direction: Direction) {
-  const cursorPosition = editor.getCursorPosition();
-  const document = editor.getDocument();
+function* interestingLines(direction: Direction) {
+  const cursorPosition = getCursorPosition();
+  const document = getEditor()?.document;
 
   if (cursorPosition && document) {
     const documentLines = iterLinesWithPrevious(
@@ -214,16 +218,22 @@ function moveToNextInterestingLine(direction: Direction) {
 
     for (const { prevLine, currentLine } of documentLines) {
       if (lineIsInteresting(prevLine, currentLine)) {
-        editor.moveCursorToBeginningOfLine(currentLine);
-        break;
+        yield currentLine;
       }
     }
   }
 }
 
+function moveToNextInterestingLine(direction: Direction) {
+  for (const line of interestingLines(direction)) {
+    moveCursorToBeginningOfLine(line);
+    return;
+  }
+}
+
 function moveToLineOfSameIndentation(direction: Direction) {
-  const cursorPosition = editor.getCursorPosition();
-  const document = editor.getDocument();
+  const cursorPosition = getCursorPosition();
+  const document = getEditor()?.document;
 
   if (cursorPosition && document) {
     const documentLines = iterLines(document, cursorPosition.line, direction);
@@ -236,7 +246,7 @@ function moveToLineOfSameIndentation(direction: Direction) {
           line.firstNonWhitespaceCharacterIndex &&
         !line.isEmptyOrWhitespace
       ) {
-        editor.moveCursorToBeginningOfLine(line);
+        moveCursorToBeginningOfLine(line);
         break;
       }
     }
@@ -246,5 +256,7 @@ function moveToLineOfSameIndentation(direction: Direction) {
 export default {
   moveToLineOfSameIndentation,
   moveToChangeOfIndentation,
-  moveToNextInterestingLine
+  moveToNextInterestingLine,
+  interestingLines,
+  lineIsInteresting
 };

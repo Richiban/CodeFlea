@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-function moveCursorTo(lineNumber: number, column: number) {
+export function moveCursorTo(lineNumber: number, column: number) {
   const editor = getEditor();
 
   if (!editor) return;
@@ -14,15 +14,11 @@ function moveCursorTo(lineNumber: number, column: number) {
   );
 }
 
-function getEditor() {
+export function getEditor() {
   return vscode.window.activeTextEditor;
 }
 
-function getDocument() {
-  return getEditor()?.document;
-}
-
-function moveCursorToBeginningOfLine(line: vscode.TextLine) {
+export function moveCursorToBeginningOfLine(line: vscode.TextLine) {
   const editor = getEditor();
 
   if (!editor) return;
@@ -33,7 +29,7 @@ function moveCursorToBeginningOfLine(line: vscode.TextLine) {
   );
 }
 
-function moveCursorToEndOfLine(line: vscode.TextLine) {
+export function moveCursorToEndOfLine(line: vscode.TextLine) {
   const editor = getEditor();
 
   if (!editor) return;
@@ -44,7 +40,7 @@ function moveCursorToEndOfLine(line: vscode.TextLine) {
   );
 }
 
-function getCursorPosition() {
+export function getCursorPosition() {
   const editor = getEditor();
 
   if (!editor) return;
@@ -53,11 +49,3 @@ function getCursorPosition() {
     return editor.selection.active;
   }
 }
-
-export default {
-  moveCursorToBeginningOfLine,
-  moveCursorToEndOfLine,
-  moveCursorTo,
-  getCursorPosition,
-  getDocument
-};

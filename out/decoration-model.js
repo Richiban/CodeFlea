@@ -1,24 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-class CharIndex {
-    constructor(charIndex) {
-        this.charIndex = charIndex;
-    }
-}
-exports.CharIndex = CharIndex;
 var Direction;
 (function (Direction) {
     Direction[Direction["up"] = -1] = "up";
     Direction[Direction["down"] = 1] = "down";
 })(Direction = exports.Direction || (exports.Direction = {}));
-class LineCharIndex {
-    constructor(line = -1, char = -1, indexInModels = -1) {
-        this.line = line;
-        this.char = char;
-        this.indexInModels = indexInModels;
-    }
-}
-LineCharIndex.END = new LineCharIndex();
 class LineCharIndexState {
     constructor(lineIndexes, direction = Direction.up, up, down) {
         this.lineIndexes = lineIndexes;
@@ -51,7 +37,7 @@ class LineCharIndexState {
     findUp() {
         let lineCharIndex = this.up;
         let line = lineCharIndex.line;
-        let charIndexes = this.lineIndexes.indexes[line];
+        let charIndexes = [this.lineIndexes.locations[line]];
         if (!charIndexes)
             return { lineCharIndex: LineCharIndex.END, lineChanged: false }; //to end;
         if (lineCharIndex.char >= 0) {
@@ -61,7 +47,7 @@ class LineCharIndexState {
         }
         else {
             lineCharIndex.line -= 1;
-            charIndexes = this.lineIndexes.indexes[lineCharIndex.line];
+            charIndexes = [this.lineIndexes.locations[lineCharIndex.line]];
             if (!charIndexes)
                 return { lineCharIndex: LineCharIndex.END, lineChanged: false }; //to end;
             lineCharIndex.char = charIndexes.length - 1;
@@ -74,7 +60,7 @@ class LineCharIndexState {
     findDown() {
         let lineCharIndex = this.down;
         let line = lineCharIndex.line;
-        let charIndexes = this.lineIndexes.indexes[line];
+        let charIndexes = [this.lineIndexes.locations[line]];
         if (!charIndexes)
             return { lineCharIndex: LineCharIndex.END, lineChanged: false }; //to end;
         if (lineCharIndex.char < charIndexes.length) {
@@ -93,16 +79,14 @@ class LineCharIndexState {
     }
 }
 class DecorationModelBuilder {
-    constructor() {
-        this.initialize = (config) => {
-            this.config = config;
-        };
+    constructor(config) {
+        this.config = config;
         this.buildDecorationModel = (lineIndexes) => {
             let models = [];
             let line = lineIndexes.focusLine;
-            let lineIndexesState = new LineCharIndexState(lineIndexes, Direction.up, new LineCharIndex(line, lineIndexes.indexes[line].length - 1), new LineCharIndex(line + 1, 0));
+            let lineIndexesState = new LineCharIndexState(lineIndexes, Direction.up, new LineCharIndex(line, 0 /* TODO  wong? */), new LineCharIndex(line + 1, 0));
             let twoCharsMax = Math.pow(this.config.jumper.characters.length, 2);
-            let leadChars = lineIndexes.count > twoCharsMax ? twoCharsMax : lineIndexes.count;
+            let leadChars = Math.min(twoCharsMax, lineIndexes.locations.length);
             leadChars = Math.trunc(leadChars / this.config.jumper.characters.length); // just process two letter codes
             // one char codes
             for (let i = leadChars; i < this.config.jumper.characters.length; i++) {

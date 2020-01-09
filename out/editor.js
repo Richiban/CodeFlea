@@ -9,25 +9,25 @@ function moveCursorTo(lineNumber, column) {
     editor.selection = new vscode.Selection(position, position);
     editor.revealRange(new vscode.Range(position, position), vscode.TextEditorRevealType.InCenter);
 }
+exports.moveCursorTo = moveCursorTo;
 function getEditor() {
     return vscode.window.activeTextEditor;
 }
-function getDocument() {
-    var _a;
-    return (_a = getEditor()) === null || _a === void 0 ? void 0 : _a.document;
-}
+exports.getEditor = getEditor;
 function moveCursorToBeginningOfLine(line) {
     const editor = getEditor();
     if (!editor)
         return;
     editor.selection = new vscode.Selection(new vscode.Position(line.lineNumber, line.firstNonWhitespaceCharacterIndex), new vscode.Position(line.lineNumber, line.firstNonWhitespaceCharacterIndex));
 }
+exports.moveCursorToBeginningOfLine = moveCursorToBeginningOfLine;
 function moveCursorToEndOfLine(line) {
     const editor = getEditor();
     if (!editor)
         return;
     editor.selection = new vscode.Selection(new vscode.Position(line.lineNumber, line.range.end.character), new vscode.Position(line.lineNumber, line.range.end.character));
 }
+exports.moveCursorToEndOfLine = moveCursorToEndOfLine;
 function getCursorPosition() {
     const editor = getEditor();
     if (!editor)
@@ -36,11 +36,5 @@ function getCursorPosition() {
         return editor.selection.active;
     }
 }
-exports.default = {
-    moveCursorToBeginningOfLine,
-    moveCursorToEndOfLine,
-    moveCursorTo,
-    getCursorPosition,
-    getDocument
-};
+exports.getCursorPosition = getCursorPosition;
 //# sourceMappingURL=editor.js.map

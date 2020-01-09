@@ -94,8 +94,9 @@ function getNextLineOfChangeOfIndentation(change, direction, document, currentLi
 }
 exports.getNextLineOfChangeOfIndentation = getNextLineOfChangeOfIndentation;
 function moveToChangeOfIndentation(change, direction) {
-    const cursorPosition = editor_1.default.getCursorPosition();
-    const document = editor_1.default.getDocument();
+    var _a;
+    const cursorPosition = editor_1.getCursorPosition();
+    const document = (_a = editor_1.getEditor()) === null || _a === void 0 ? void 0 : _a.document;
     if (cursorPosition && document) {
         let line;
         const currentLine = document.lineAt(cursorPosition.line);
@@ -111,26 +112,33 @@ function moveToChangeOfIndentation(change, direction) {
             }
         }
         if (line)
-            editor_1.default.moveCursorToBeginningOfLine(line);
+            editor_1.moveCursorToBeginningOfLine(line);
     }
 }
 exports.moveToChangeOfIndentation = moveToChangeOfIndentation;
-function moveToNextInterestingLine(direction) {
-    const cursorPosition = editor_1.default.getCursorPosition();
-    const document = editor_1.default.getDocument();
+function* interestingLines(direction) {
+    var _a;
+    const cursorPosition = editor_1.getCursorPosition();
+    const document = (_a = editor_1.getEditor()) === null || _a === void 0 ? void 0 : _a.document;
     if (cursorPosition && document) {
         const documentLines = iterLinesWithPrevious(document, cursorPosition.line, direction);
         for (const { prevLine, currentLine } of documentLines) {
             if (lineIsInteresting(prevLine, currentLine)) {
-                editor_1.default.moveCursorToBeginningOfLine(currentLine);
-                break;
+                yield currentLine;
             }
         }
     }
 }
+function moveToNextInterestingLine(direction) {
+    for (const line of interestingLines(direction)) {
+        editor_1.moveCursorToBeginningOfLine(line);
+        return;
+    }
+}
 function moveToLineOfSameIndentation(direction) {
-    const cursorPosition = editor_1.default.getCursorPosition();
-    const document = editor_1.default.getDocument();
+    var _a;
+    const cursorPosition = editor_1.getCursorPosition();
+    const document = (_a = editor_1.getEditor()) === null || _a === void 0 ? void 0 : _a.document;
     if (cursorPosition && document) {
         const documentLines = iterLines(document, cursorPosition.line, direction);
         const currentLine = document.lineAt(cursorPosition.line);
@@ -138,7 +146,7 @@ function moveToLineOfSameIndentation(direction) {
             if (currentLine.firstNonWhitespaceCharacterIndex ===
                 line.firstNonWhitespaceCharacterIndex &&
                 !line.isEmptyOrWhitespace) {
-                editor_1.default.moveCursorToBeginningOfLine(line);
+                editor_1.moveCursorToBeginningOfLine(line);
                 break;
             }
         }
@@ -147,6 +155,8 @@ function moveToLineOfSameIndentation(direction) {
 exports.default = {
     moveToLineOfSameIndentation,
     moveToChangeOfIndentation,
-    moveToNextInterestingLine
+    moveToNextInterestingLine,
+    interestingLines,
+    lineIsInteresting
 };
 //# sourceMappingURL=lines.js.map
