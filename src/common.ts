@@ -15,16 +15,3 @@ export type JumpLocation = {
   lineNumber: number;
   charIndex: number;
 };
-
-export function* zip<A, B>(left: Iterator<A>, right: Iterator<B>) {
-  while (true) {
-    const lResult = left.next();
-    const rResult = right.next();
-
-    if (lResult.done || rResult.done) {
-      return;
-    } else {
-      yield [lResult.value, rResult.value] as const;
-    }
-  }
-}

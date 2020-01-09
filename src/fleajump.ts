@@ -4,7 +4,7 @@ import * as vscode from "vscode";
 import { moveCursorTo } from "./editor";
 import lines from "./lines";
 import { InlineInput } from "./inline-input";
-import { zip, JumpLocations } from "./common";
+import { JumpLocations, JumpLocation } from "./common";
 
 type Selection = {
   text: string;
@@ -109,26 +109,87 @@ export class FleaJumper {
     const interestingLinesBackwards = lines.interestingLines("backwards");
     const jumpCodes = this.getJumpCodes();
 
-    const forwardLocations = Array.from(
-      zip(interestingLinesForwards, jumpCodes)
-    ).map(([l, c]) => {
-      return {
-        jumpCode: c,
-        lineNumber: l.lineNumber,
-        charIndex: l.firstNonWhitespaceCharacterIndex
-      };
-    });
+    var { start: viewportStart, end: viewportEnd } = editor.visibleRanges[0];
 
-    const backwardLocations = Array.from(
-      zip(interestingLinesBackwards, jumpCodes)
-    ).map(([l, c]) => {
+    const toJumpLocation = ([l, c]: readonly [vscode.TextLine, string]) => {
       return {
         jumpCode: c,
         lineNumber: l.lineNumber,
         charIndex: l.firstNonWhitespaceCharacterIndex
       };
-    });
+    };
+
+    const inBounds = (loc: JumpLocation) =>
+      loc.lineNumber >= viewportStart.line &&
+      loc.lineNumber <= viewportEnd.line;
+
+    const forwardLocations = linq(interestingLinesForwards)
+      .zip(jumpCodes)
+      .map(toJumpLocation)
+      .takeWhile(inBounds)
+      .toArray();
+
+    const backwardLocations = linq(interestingLinesBackwards)
+      .zip(jumpCodes)
+      .map(toJumpLocation)
+      .takeWhile(inBounds)
+      .toArray();
 
     return { focusLine, forwardLocations, backwardLocations };
   };
+}
+
+function linq<T>(i: Generator<T>) {
+  return new Linq(i);
+}
+
+class Linq<T> {
+  constructor(private iter: Generator<T>) {}
+
+  map<R>(f: (x: T) => R): Linq<R> {
+    const iter = this.iter;
+
+    return new Linq(
+      (function*() {
+        for (const x of iter) {
+          yield f(x);
+        }
+      })()
+    );
+  }
+
+  takeWhile(f: (x: T) => boolean): Linq<T> {
+    const iter = this.iter;
+    return new Linq(
+      (function*() {
+        for (const x of iter) {
+          if (f(x) === false) return;
+
+          yield x;
+        }
+      })()
+    );
+  }
+
+  zip<T2>(iter2: Iterator<T2>) {
+    const iter = this.iter;
+    return new Linq(
+      (function*() {
+        while (true) {
+          const lResult = iter.next();
+          const rResult = iter2.next();
+
+          if (lResult.done || rResult.done) {
+            return;
+          } else {
+            yield [lResult.value, rResult.value] as const;
+          }
+        }
+      })()
+    );
+  }
+
+  toArray() {
+    return Array.from(this.iter);
+  }
 }

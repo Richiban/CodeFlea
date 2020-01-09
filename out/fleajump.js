@@ -14,7 +14,6 @@ const vscode = require("vscode");
 const editor_1 = require("./editor");
 const lines_1 = require("./lines");
 const inline_input_1 = require("./inline-input");
-const common_1 = require("./common");
 class FleaJumper {
     constructor(context, config) {
         this.isJumping = false;
@@ -26,20 +25,26 @@ class FleaJumper {
             const interestingLinesForwards = lines_1.default.interestingLines("forwards");
             const interestingLinesBackwards = lines_1.default.interestingLines("backwards");
             const jumpCodes = this.getJumpCodes();
-            const forwardLocations = Array.from(common_1.zip(interestingLinesForwards, jumpCodes)).map(([l, c]) => {
+            var { start: viewportStart, end: viewportEnd } = editor.visibleRanges[0];
+            const toJumpLocation = ([l, c]) => {
                 return {
                     jumpCode: c,
                     lineNumber: l.lineNumber,
                     charIndex: l.firstNonWhitespaceCharacterIndex
                 };
-            });
-            const backwardLocations = Array.from(common_1.zip(interestingLinesBackwards, jumpCodes)).map(([l, c]) => {
-                return {
-                    jumpCode: c,
-                    lineNumber: l.lineNumber,
-                    charIndex: l.firstNonWhitespaceCharacterIndex
-                };
-            });
+            };
+            const inBounds = (loc) => loc.lineNumber >= viewportStart.line &&
+                loc.lineNumber <= viewportEnd.line;
+            const forwardLocations = linq(interestingLinesForwards)
+                .zip(jumpCodes)
+                .map(toJumpLocation)
+                .takeWhile(inBounds)
+                .toArray();
+            const backwardLocations = linq(interestingLinesBackwards)
+                .zip(jumpCodes)
+                .map(toJumpLocation)
+                .takeWhile(inBounds)
+                .toArray();
             return { focusLine, forwardLocations, backwardLocations };
         };
         let disposables = [];
@@ -112,4 +117,48 @@ class FleaJumper {
     }
 }
 exports.FleaJumper = FleaJumper;
+function linq(i) {
+    return new Linq(i);
+}
+class Linq {
+    constructor(iter) {
+        this.iter = iter;
+    }
+    map(f) {
+        const iter = this.iter;
+        return new Linq((function* () {
+            for (const x of iter) {
+                yield f(x);
+            }
+        })());
+    }
+    takeWhile(f) {
+        const iter = this.iter;
+        return new Linq((function* () {
+            for (const x of iter) {
+                if (f(x) === false)
+                    return;
+                yield x;
+            }
+        })());
+    }
+    zip(iter2) {
+        const iter = this.iter;
+        return new Linq((function* () {
+            while (true) {
+                const lResult = iter.next();
+                const rResult = iter2.next();
+                if (lResult.done || rResult.done) {
+                    return;
+                }
+                else {
+                    yield [lResult.value, rResult.value];
+                }
+            }
+        })());
+    }
+    toArray() {
+        return Array.from(this.iter);
+    }
+}
 //# sourceMappingURL=fleajump.js.map
