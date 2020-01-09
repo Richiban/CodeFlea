@@ -1,5 +1,11 @@
 import { Direction } from "./common";
-import editor from "./editor";
+import {
+  getEditor,
+  getCursorPosition,
+  moveCursorTo,
+  moveCursorToEndOfLine,
+  moveCursorToBeginningOfLine
+} from "./editor";
 
 const nonPunctuationRegex = /[a-zA-Z0-9]/;
 
@@ -45,8 +51,8 @@ function getIndexOfNextPunctuationChar(
 }
 
 function moveToInterestingPoint(direction: Direction) {
-  const cursorPosition = editor.getCursorPosition();
-  const document = editor.getDocument();
+  const cursorPosition = getCursorPosition();
+  const document = getEditor()?.document;
 
   if (!cursorPosition || !document) return;
 
@@ -57,17 +63,15 @@ function moveToInterestingPoint(direction: Direction) {
     startingIndex: cursorPosition.character
   });
 
-  if (index) editor.moveCursorTo(cursorPosition.line, index);
+  if (index) moveCursorTo(cursorPosition.line, index);
   else {
     if (direction === "backwards" && cursorPosition.line > 0) {
-      editor.moveCursorToEndOfLine(document.lineAt(cursorPosition.line - 1));
+      moveCursorToEndOfLine(document.lineAt(cursorPosition.line - 1));
     } else if (
       direction === "forwards" &&
       cursorPosition.line < document.lineCount - 1
     ) {
-      editor.moveCursorToBeginningOfLine(
-        document.lineAt(cursorPosition.line + 1)
-      );
+      moveCursorToBeginningOfLine(document.lineAt(cursorPosition.line + 1));
     }
   }
 }

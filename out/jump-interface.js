@@ -101,11 +101,11 @@ class JumpInterface {
             let len = code.length;
             let option;
             if (len === 1) {
-                option = this.createDecorationOptions(model.lineNumber, model.charIndex + 1, model.charIndex + 1, code);
+                option = this.createDecorationOptions(model.lineNumber, model.charIndex, model.charIndex, code);
                 options.push(option);
             }
             else {
-                option = this.createDecorationOptions(model.lineNumber, model.charIndex + 1, model.charIndex + len, code);
+                option = this.createDecorationOptions(model.lineNumber, model.charIndex, model.charIndex + len, code);
                 options2.push(option);
             }
         });

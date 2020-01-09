@@ -115,7 +115,7 @@ class FleaJumper {
                 const locations = this.findJumpLocations(editor);
                 const loc = yield this.jumpInterface.pick(editor, locations);
                 if (loc)
-                    editor_1.moveCursorTo(loc.lineNumber, loc.charIndex + 1);
+                    editor_1.moveCursorTo(loc.lineNumber, loc.charIndex);
             }
             catch (reason) {
                 if (!reason)

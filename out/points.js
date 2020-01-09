@@ -36,8 +36,9 @@ function getIndexOfNextPunctuationChar(s, options = {
     } while (true);
 }
 function moveToInterestingPoint(direction) {
-    const cursorPosition = editor_1.default.getCursorPosition();
-    const document = editor_1.default.getDocument();
+    var _a;
+    const cursorPosition = editor_1.getCursorPosition();
+    const document = (_a = editor_1.getEditor()) === null || _a === void 0 ? void 0 : _a.document;
     if (!cursorPosition || !document)
         return;
     const currentLine = document.lineAt(cursorPosition.line);
@@ -46,14 +47,14 @@ function moveToInterestingPoint(direction) {
         startingIndex: cursorPosition.character
     });
     if (index)
-        editor_1.default.moveCursorTo(cursorPosition.line, index);
+        editor_1.moveCursorTo(cursorPosition.line, index);
     else {
         if (direction === "backwards" && cursorPosition.line > 0) {
-            editor_1.default.moveCursorToEndOfLine(document.lineAt(cursorPosition.line - 1));
+            editor_1.moveCursorToEndOfLine(document.lineAt(cursorPosition.line - 1));
         }
         else if (direction === "forwards" &&
             cursorPosition.line < document.lineCount - 1) {
-            editor_1.default.moveCursorToBeginningOfLine(document.lineAt(cursorPosition.line + 1));
+            editor_1.moveCursorToBeginningOfLine(document.lineAt(cursorPosition.line + 1));
         }
     }
 }

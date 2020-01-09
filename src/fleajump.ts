@@ -128,7 +128,7 @@ export class FleaJumper {
 
       const loc = await this.jumpInterface.pick(editor, locations);
 
-      if (loc) moveCursorTo(loc.lineNumber, loc.charIndex + 1);
+      if (loc) moveCursorTo(loc.lineNumber, loc.charIndex);
     } catch (reason) {
       if (!reason) reason = "Canceled!";
       vscode.window.setStatusBarMessage(`CodeFlea: ${reason}`, 2000);
