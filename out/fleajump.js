@@ -37,16 +37,24 @@ class FleaJumper {
         };
         this.findJumpLocations = (editor) => {
             const focusLine = editor.selection.active.line;
-            const interestingLines = lines_1.default.interestingLines("forwards");
+            const interestingLinesForwards = lines_1.default.interestingLines("forwards");
+            const interestingLinesBackwards = lines_1.default.interestingLines("backwards");
             const jumpCodes = this.getJumpCodes();
-            const locations = Array.from(common_1.zip(interestingLines, jumpCodes)).map(([l, c]) => {
+            const forwardLocations = Array.from(common_1.zip(interestingLinesForwards, jumpCodes)).map(([l, c]) => {
                 return {
                     jumpCode: c,
                     lineNumber: l.lineNumber,
                     charIndex: l.firstNonWhitespaceCharacterIndex
                 };
             });
-            return { focusLine, locations };
+            const backwardLocations = Array.from(common_1.zip(interestingLinesBackwards, jumpCodes)).map(([l, c]) => {
+                return {
+                    jumpCode: c,
+                    lineNumber: l.lineNumber,
+                    charIndex: l.firstNonWhitespaceCharacterIndex
+                };
+            });
+            return { focusLine, forwardLocations, backwardLocations };
         };
         let disposables = [];
         this.config = config;

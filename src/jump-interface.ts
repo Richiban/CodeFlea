@@ -51,7 +51,13 @@ export class JumpInterface {
   ): Promise<JumpLocation | undefined> {
     const input = await new InlineInput().show(editor, v => v);
 
-    for (const loc of jumpLocations.locations) {
+    for (const loc of jumpLocations.forwardLocations) {
+      if (loc.jumpCode === input) {
+        return loc;
+      }
+    }
+
+    for (const loc of jumpLocations.backwardLocations) {
       if (loc.jumpCode === input) {
         return loc;
       }
@@ -68,32 +74,55 @@ export class JumpInterface {
     let options: vscode.DecorationOptions[] = [];
     let options2: vscode.DecorationOptions[] = [];
 
-    const decorationModel = jumpLocations.locations;
-
-    decorationModel.forEach(model => {
-      let code = model.jumpCode;
+    for (const loc of jumpLocations.forwardLocations) {
+      let code = loc.jumpCode;
       let len = code.length;
 
       let option: vscode.DecorationOptions;
 
       if (len === 1) {
         option = this.createDecorationOptions(
-          model.lineNumber,
-          model.charIndex,
-          model.charIndex,
+          loc.lineNumber,
+          loc.charIndex,
+          loc.charIndex,
           code
         );
         options.push(option);
       } else {
         option = this.createDecorationOptions(
-          model.lineNumber,
-          model.charIndex,
-          model.charIndex + len,
+          loc.lineNumber,
+          loc.charIndex,
+          loc.charIndex + len,
           code
         );
         options2.push(option);
       }
-    });
+    }
+
+    for (const loc of jumpLocations.backwardLocations) {
+      let code = loc.jumpCode;
+      let len = code.length;
+
+      let option: vscode.DecorationOptions;
+
+      if (len === 1) {
+        option = this.createDecorationOptions(
+          loc.lineNumber,
+          loc.charIndex,
+          loc.charIndex,
+          code
+        );
+        options.push(option);
+      } else {
+        option = this.createDecorationOptions(
+          loc.lineNumber,
+          loc.charIndex,
+          loc.charIndex + len,
+          code
+        );
+        options2.push(option);
+      }
+    }
 
     editor.setDecorations(decorationType, options);
     editor.setDecorations(decorationType2, options2);

@@ -5,7 +5,8 @@ export type Change = "greaterThan" | "lessThan";
 export type Direction = "forwards" | "backwards";
 
 export type JumpLocations = {
-  locations: JumpLocation[];
+  forwardLocations: JumpLocation[];
+  backwardLocations: JumpLocation[];
   focusLine: number;
 };
 

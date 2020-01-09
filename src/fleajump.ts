@@ -147,19 +147,30 @@ export class FleaJumper {
   private findJumpLocations = (editor: vscode.TextEditor): JumpLocations => {
     const focusLine = editor.selection.active.line;
 
-    const interestingLines = lines.interestingLines("forwards");
+    const interestingLinesForwards = lines.interestingLines("forwards");
+    const interestingLinesBackwards = lines.interestingLines("backwards");
     const jumpCodes = this.getJumpCodes();
 
-    const locations = Array.from(zip(interestingLines, jumpCodes)).map(
-      ([l, c]) => {
-        return {
-          jumpCode: c,
-          lineNumber: l.lineNumber,
-          charIndex: l.firstNonWhitespaceCharacterIndex
-        };
-      }
-    );
+    const forwardLocations = Array.from(
+      zip(interestingLinesForwards, jumpCodes)
+    ).map(([l, c]) => {
+      return {
+        jumpCode: c,
+        lineNumber: l.lineNumber,
+        charIndex: l.firstNonWhitespaceCharacterIndex
+      };
+    });
 
-    return { focusLine, locations };
+    const backwardLocations = Array.from(
+      zip(interestingLinesBackwards, jumpCodes)
+    ).map(([l, c]) => {
+      return {
+        jumpCode: c,
+        lineNumber: l.lineNumber,
+        charIndex: l.firstNonWhitespaceCharacterIndex
+      };
+    });
+
+    return { focusLine, forwardLocations, backwardLocations };
   };
 }
