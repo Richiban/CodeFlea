@@ -40,7 +40,7 @@ class Config {
 exports.Config = Config;
 class DecoratorConfig {
     constructor() {
-        this.bgOpacity = "0.88";
+        this.bgOpacity = "1.0";
         this.bgColor = "lime,yellow";
         this.color = "black";
         this.borderColor = "black";

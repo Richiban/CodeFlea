@@ -26,35 +26,35 @@ export class JumpInterface {
     const input = await new InlineInput().show(editor, v => v);
     this.removeDecorations(editor);
 
-    return jumpLocations.locations.find(x => x.jumpCode === input)
+    return jumpLocations.find(x => x.jumpCode === input);
   }
 
   private addDecorations(
     editor: vscode.TextEditor,
     jumpLocations: JumpLocations
   ) {
-    const regular = this.createTextEditorDecorationType(1);
-    const beginning = this.createTextEditorDecorationType(0);
-
-    const { _true: options1, _false: options2 } = linqish(
-      jumpLocations.locations
-    ).partition(loc => loc.charIndex > 0);
-
-    const x = options1.map(loc =>
-      this.createDecorationOptions(
-        loc.lineNumber,
-        loc.charIndex,
-        loc.charIndex,
-        loc.jumpCode
+    const {
+      _true: standardOptions,
+      _false: optionsWithNoSpaceToLeft
+    } = linqish(jumpLocations)
+      .map(loc =>
+        this.createDecorationOptions(
+          loc.lineNumber,
+          loc.charIndex,
+          loc.jumpCode
+        )
       )
+      .partition(loc => loc.range.start.character > 0);
+
+    editor.setDecorations(
+      this.createTextEditorDecorationType(1),
+      standardOptions
     );
 
-    const y = options2.map(loc =>
-      this.createDecorationOptions(loc.lineNumber, 0, 0, loc.jumpCode)
+    editor.setDecorations(
+      this.createTextEditorDecorationType(0),
+      optionsWithNoSpaceToLeft
     );
-
-    editor.setDecorations(regular, x);
-    editor.setDecorations(beginning, y);
   }
 
   removeDecorations(editor: vscode.TextEditor) {
@@ -86,12 +86,11 @@ export class JumpInterface {
 
   private createDecorationOptions = (
     line: number,
-    startCharacter: number,
-    endCharacter: number,
+    char: number,
     code: string
   ): vscode.DecorationOptions => {
     return {
-      range: new vscode.Range(line, startCharacter, line, endCharacter),
+      range: new vscode.Range(line, char, line, char),
       renderOptions: {
         dark: {
           after: {
@@ -121,14 +120,16 @@ export class JumpInterface {
   };
 
   private buildUri = (code: string) => {
-    let cf = this.config.decoration;
-    let key = this.config.decoration.upperCase
+    const cf = this.config.decoration;
+    const key = this.config.decoration.upperCase
       ? code.toUpperCase()
       : code.toLowerCase();
-    let width = code.length * cf.width;
-    let colors = cf.bgColor.split(",");
-    let bgColor = colors[(code.length - 1) % colors.length];
-    let svg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${cf.height}" height="${cf.height}" width="${width}"><rect width="${width}" height="${cf.height}" rx="2" ry="3" style="fill: ${bgColor};fill-opacity:${cf.bgOpacity};stroke:${cf.borderColor};stroke-opacity:${cf.bgOpacity};"/><text font-family="${cf.fontFamily}" font-weight="${cf.fontWeight}" font-size="${cf.fontSize}px" style="fill:${cf.color}" x="${cf.x}" y="${cf.y}">${key}</text></svg>`;
+    const width = code.length * cf.width;
+    const colors = cf.bgColor.split(",");
+    const bgColor = "lime"; //colors[(code.length - 1) % colors.length];
+
+    const svg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${cf.height}" height="${cf.height}" width="${width}"><rect width="${width}" height="${cf.height}" rx="2" ry="3" style="fill: ${bgColor};fill-opacity:1;stroke:${cf.borderColor};stroke-opacity:${cf.bgOpacity};"/><text font-family="${cf.fontFamily}" font-weight="${cf.fontWeight}" font-size="${cf.fontSize}px" style="fill:${cf.color}" x="${cf.x}" y="${cf.y}">${key}</text></svg>`;
+
     return vscode.Uri.parse(svg);
   };
 }

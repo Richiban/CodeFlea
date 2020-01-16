@@ -4,6 +4,22 @@ class Linqish {
     constructor(iter) {
         this.iter = iter;
     }
+    [Symbol.iterator]() {
+        return this.iter[Symbol.iterator]();
+    }
+    pairwise() {
+        const iter = this.iter;
+        return new Linqish((function* () {
+            const iterator = iter[Symbol.iterator]();
+            let r = iterator.next();
+            let prev = r.value;
+            while (!r.done) {
+                yield [prev, r.value];
+                prev = r.value;
+                r = iterator.next();
+            }
+        })());
+    }
     map(f) {
         const iter = this.iter;
         return new Linqish((function* () {
@@ -22,7 +38,7 @@ class Linqish {
             }
         })());
     }
-    zip(iter2) {
+    zipWith(iter2) {
         const i1 = this.iter[Symbol.iterator]();
         const i2 = iter2[Symbol.iterator]();
         return new Linqish((function* () {
@@ -63,19 +79,21 @@ class Linqish {
         const i1 = this.iter[Symbol.iterator]();
         const i2 = iter2[Symbol.iterator]();
         return new Linqish((function* () {
-            let current = i1;
+            let currentIterator = i1;
             const swapIterators = () => {
-                if (current === i1)
-                    current = i2;
+                if (currentIterator === i1)
+                    currentIterator = i2;
                 else
-                    current = i1;
+                    currentIterator = i1;
             };
             while (true) {
-                const result = current.next();
+                const result = currentIterator.next();
                 if (result.done) {
                     swapIterators();
-                    for (const item of current) {
-                        yield item;
+                    let { value, done } = currentIterator.next();
+                    while (!done) {
+                        yield value;
+                        ({ value, done } = currentIterator.next());
                     }
                     return;
                 }

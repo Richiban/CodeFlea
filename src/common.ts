@@ -4,10 +4,7 @@ export type Change = "greaterThan" | "lessThan";
 
 export type Direction = "forwards" | "backwards";
 
-export type JumpLocations = {
-  locations: JumpLocation[];
-  focusLine: number;
-};
+export type JumpLocations = JumpLocation[];
 
 export type JumpLocation = {
   jumpCode: string;
@@ -20,6 +17,26 @@ class Linqish<T> implements Iterable<T> {
 
   [Symbol.iterator](): Iterator<T, any, undefined> {
     return this.iter[Symbol.iterator]();
+  }
+
+  pairwise(): Linqish<[T, T]> {
+    const iter = this.iter;
+
+    return new Linqish(
+      (function*() {
+        const iterator = iter[Symbol.iterator]();
+
+        let r = iterator.next();
+        let prev = r.value;
+
+        while (!r.done) {
+          yield [prev, r.value] as [T, T];
+          prev = r.value;
+
+          r = iterator.next();
+        }
+      })()
+    );
   }
 
   map<R>(f: (x: T) => R): Linqish<R> {
@@ -48,7 +65,7 @@ class Linqish<T> implements Iterable<T> {
     );
   }
 
-  zip<T2>(iter2: Iterable<T2>) {
+  zipWith<T2>(iter2: Iterable<T2>) {
     const i1 = this.iter[Symbol.iterator]();
     const i2 = iter2[Symbol.iterator]();
 

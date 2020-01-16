@@ -20,8 +20,7 @@ class FleaJumper {
         this.updateConfig = () => {
             this.jumpInterface.initialize(this.config);
         };
-        this.findJumpLocations = (editor) => {
-            const focusLine = editor.selection.active.line;
+        this.findJumpLines = (editor) => {
             const interestingLines = lines_1.getInterestingLines("alternate", "forwards");
             const jumpCodes = this.getJumpCodes();
             const { start: viewportStart, end: viewportEnd } = editor.visibleRanges[0];
@@ -35,11 +34,11 @@ class FleaJumper {
                 };
             };
             const locations = interestingLines
-                .zip(jumpCodes)
+                .zipWith(jumpCodes)
                 .map(toJumpLocation)
                 .takeWhile(inBounds)
                 .toArray();
-            return { focusLine, locations };
+            return locations;
         };
         let disposables = [];
         this.config = config;
@@ -87,7 +86,7 @@ class FleaJumper {
             let msg = "CodeFlea: Type To Jump";
             let messageDisposable = vscode.window.setStatusBarMessage(msg);
             try {
-                const locations = this.findJumpLocations(editor);
+                const locations = this.findJumpLines(editor);
                 const loc = yield this.jumpInterface.pick(editor, locations);
                 if (loc)
                     editor_1.moveCursorTo(loc.lineNumber, loc.charIndex);
