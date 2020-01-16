@@ -1,63 +1,67 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
-import lines from "./lines";
 import points from "./points";
 import { FleaJumper } from "./fleajump";
 import { Config } from "./config";
+import {
+  moveToNextInterestingLine,
+  moveToChangeOfIndentation,
+  moveToLineOfSameIndentation
+} from "./lines";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand("codeFlea.nextInterestingLine", () =>
-      lines.moveToNextInterestingLine("forwards")
+      moveToNextInterestingLine("forwards")
     )
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand("codeFlea.prevInterestingLine", () =>
-      lines.moveToNextInterestingLine("backwards")
+      moveToNextInterestingLine("backwards")
     )
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand(
       "codeFlea.nearestLineOfGreaterIndentation",
-      () => lines.moveToChangeOfIndentation("greaterThan", "nearest")
+      () => moveToChangeOfIndentation("greaterThan", "nearest")
     )
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand(
       "codeFlea.nearestLineOfLesserIndentation",
-      () => lines.moveToChangeOfIndentation("lessThan", "nearest")
+      () => moveToChangeOfIndentation("lessThan", "nearest")
     )
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand(
       "codeFlea.nextLineOfGreaterIndentation",
-      () => lines.moveToChangeOfIndentation("greaterThan", "forwards")
+      () => moveToChangeOfIndentation("greaterThan", "forwards")
     )
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand(
       "codeFlea.prevLineOfLesserIndentation",
-      () => lines.moveToChangeOfIndentation("lessThan", "backwards")
+      () => moveToChangeOfIndentation("lessThan", "backwards")
     )
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand("codeFlea.nextLineOfSameIndentation", () =>
-      lines.moveToLineOfSameIndentation("forwards")
+      moveToLineOfSameIndentation("forwards")
     )
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand("codeFlea.prevLineOfSameIndentation", () =>
-      lines.moveToLineOfSameIndentation("backwards")
+      moveToLineOfSameIndentation("backwards")
     )
   );
 
@@ -76,7 +80,7 @@ export function activate(context: vscode.ExtensionContext) {
   let config = new Config();
   config.loadConfig();
 
-  var fleaJumper = new FleaJumper(context, config);
+  const fleaJumper = new FleaJumper(context, config);
 
   vscode.workspace.onDidChangeConfiguration(_ => {
     config.loadConfig();

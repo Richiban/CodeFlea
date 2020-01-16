@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const vscode = require("vscode");
+const common_1 = require("./common");
 const inline_input_1 = require("./inline-input");
 class JumpInterface {
     constructor(config, cache, decorations = {}) {
@@ -19,19 +20,6 @@ class JumpInterface {
         this.initialize = (config) => {
             this.config = config;
             this.updateCache();
-            this.charDecorationType = vscode.window.createTextEditorDecorationType({
-                backgroundColor: "rgba(0,255,0,0.3)",
-                borderWidth: "2px",
-                borderStyle: "solid",
-                light: {
-                    // this color will be used in light color themes
-                    borderColor: "rgba(0,255,0,0.3)"
-                },
-                dark: {
-                    // this color will be used in dark color themes
-                    borderColor: "rgba(0,255,0,0.3)"
-                }
-            });
         };
         this.createDecorationOptions = (line, startCharacter, endCharacter, code) => {
             return {
@@ -75,20 +63,9 @@ class JumpInterface {
     pick(editor, jumpLocations) {
         return __awaiter(this, void 0, void 0, function* () {
             this.addDecorations(editor, jumpLocations);
-            const choice = yield this.getUserChoice(editor, jumpLocations);
-            this.removeDecorations(editor);
-            return choice;
-        });
-    }
-    getUserChoice(editor, jumpLocations) {
-        return __awaiter(this, void 0, void 0, function* () {
             const input = yield new inline_input_1.InlineInput().show(editor, v => v);
-            for (const loc of jumpLocations.forwardLocations) {
-                if (loc.jumpCode === input) {
-                    return loc;
-                }
-            }
-            for (const loc of jumpLocations.backwardLocations) {
+            this.removeDecorations(editor);
+            for (const loc of jumpLocations.locations) {
                 if (loc.jumpCode === input) {
                     return loc;
                 }
@@ -96,38 +73,13 @@ class JumpInterface {
         });
     }
     addDecorations(editor, jumpLocations) {
-        let decorationType = this.createTextEditorDecorationType(1);
-        let decorationType2 = this.createTextEditorDecorationType(2);
-        let options = [];
-        let options2 = [];
-        for (const loc of jumpLocations.forwardLocations) {
-            let code = loc.jumpCode;
-            let len = code.length;
-            let option;
-            if (len === 1) {
-                option = this.createDecorationOptions(loc.lineNumber, loc.charIndex, loc.charIndex, code);
-                options.push(option);
-            }
-            else {
-                option = this.createDecorationOptions(loc.lineNumber, loc.charIndex, loc.charIndex + len, code);
-                options2.push(option);
-            }
-        }
-        for (const loc of jumpLocations.backwardLocations) {
-            let code = loc.jumpCode;
-            let len = code.length;
-            let option;
-            if (len === 1) {
-                option = this.createDecorationOptions(loc.lineNumber, loc.charIndex, loc.charIndex, code);
-                options.push(option);
-            }
-            else {
-                option = this.createDecorationOptions(loc.lineNumber, loc.charIndex, loc.charIndex + len, code);
-                options2.push(option);
-            }
-        }
-        editor.setDecorations(decorationType, options);
-        editor.setDecorations(decorationType2, options2);
+        const regular = this.createTextEditorDecorationType(1);
+        const beginning = this.createTextEditorDecorationType(0);
+        const { _true: options1, _false: options2 } = common_1.linqish(jumpLocations.locations).partition(loc => loc.charIndex > 0);
+        const x = options1.map(loc => this.createDecorationOptions(loc.lineNumber, loc.charIndex, loc.charIndex, loc.jumpCode));
+        const y = options2.map(loc => this.createDecorationOptions(loc.lineNumber, 0, 0, loc.jumpCode));
+        editor.setDecorations(regular, x);
+        editor.setDecorations(beginning, y);
     }
     removeDecorations(editor) {
         for (var dec in this.decorations) {
@@ -138,18 +90,19 @@ class JumpInterface {
             this.decorations[dec] = null;
         }
     }
-    createTextEditorDecorationType(charsToOffset) {
-        let decorationType = this.decorations[charsToOffset];
+    createTextEditorDecorationType(charsToOffsetToLeft) {
+        let decorationType = this.decorations[charsToOffsetToLeft];
         if (decorationType)
             return decorationType;
         decorationType = vscode.window.createTextEditorDecorationType({
             after: {
-                margin: `0 0 0 ${charsToOffset * -this.config.decoration.width}px`,
+                margin: `0 0 0 ${charsToOffsetToLeft *
+                    -this.config.decoration.width}px`,
                 height: `${this.config.decoration.height}px`,
-                width: `${charsToOffset * this.config.decoration.width}px`
+                width: `${charsToOffsetToLeft * this.config.decoration.width}px`
             }
         });
-        this.decorations[charsToOffset] = decorationType;
+        this.decorations[charsToOffsetToLeft] = decorationType;
         return decorationType;
     }
 }

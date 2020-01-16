@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const common_1 = require("./common");
 const editor_1 = require("./editor");
 function lineIsBoring(line) {
     return !/[a-zA-Z0-9]/.test(line.text);
@@ -83,6 +84,7 @@ function getNearestLineOfChangeOfIndentation(document, currentLine, change) {
             return backwardsLine;
     }
 }
+exports.getNearestLineOfChangeOfIndentation = getNearestLineOfChangeOfIndentation;
 function getNextLineOfChangeOfIndentation(change, direction, document, currentLine) {
     const diff = toDiff(change);
     for (const line of iterLines(document, currentLine.lineNumber, direction)) {
@@ -116,7 +118,7 @@ function moveToChangeOfIndentation(change, direction) {
     }
 }
 exports.moveToChangeOfIndentation = moveToChangeOfIndentation;
-function* interestingLines(direction) {
+function* getNextInterestingLines(direction) {
     var _a;
     const cursorPosition = editor_1.getCursorPosition();
     const document = (_a = editor_1.getEditor()) === null || _a === void 0 ? void 0 : _a.document;
@@ -129,12 +131,47 @@ function* interestingLines(direction) {
         }
     }
 }
+exports.getNextInterestingLines = getNextInterestingLines;
+function flip(direction) {
+    switch (direction) {
+        case "forwards":
+            return "backwards";
+        case "backwards":
+            return "forwards";
+    }
+}
+function getInterestingLines(pattern, direction) {
+    var _a;
+    const cursorPosition = editor_1.getCursorPosition();
+    const document = (_a = editor_1.getEditor()) === null || _a === void 0 ? void 0 : _a.document;
+    if (!document || !cursorPosition)
+        return common_1.linqish.empty;
+    const linesForwards = iterLinesWithPrevious(document, cursorPosition.line, direction);
+    const linesBackwards = iterLinesWithPrevious(document, cursorPosition.line, flip(direction));
+    const [a, b] = direction === "forwards"
+        ? [linesForwards, linesBackwards]
+        : [linesBackwards, linesForwards];
+    switch (pattern) {
+        case "alternate":
+            return common_1.linqish(a)
+                .interleave(b)
+                .filter(({ prevLine, currentLine }) => lineIsInteresting(prevLine, currentLine))
+                .map(({ prevLine: _, currentLine }) => currentLine);
+        case "sequential":
+            return common_1.linqish(a)
+                .union(b)
+                .filter(({ prevLine, currentLine }) => lineIsInteresting(prevLine, currentLine))
+                .map(({ prevLine: _, currentLine }) => currentLine);
+    }
+}
+exports.getInterestingLines = getInterestingLines;
 function moveToNextInterestingLine(direction) {
-    for (const line of interestingLines(direction)) {
+    for (const line of getNextInterestingLines(direction)) {
         editor_1.moveCursorToBeginningOfLine(line);
         return;
     }
 }
+exports.moveToNextInterestingLine = moveToNextInterestingLine;
 function moveToLineOfSameIndentation(direction) {
     var _a;
     const cursorPosition = editor_1.getCursorPosition();
@@ -152,11 +189,5 @@ function moveToLineOfSameIndentation(direction) {
         }
     }
 }
-exports.default = {
-    moveToLineOfSameIndentation,
-    moveToChangeOfIndentation,
-    moveToNextInterestingLine,
-    interestingLines,
-    lineIsInteresting
-};
+exports.moveToLineOfSameIndentation = moveToLineOfSameIndentation;
 //# sourceMappingURL=lines.js.map

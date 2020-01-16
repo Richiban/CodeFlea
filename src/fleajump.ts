@@ -2,9 +2,9 @@ import { Config } from "./config";
 import { JumpInterface } from "./jump-interface";
 import * as vscode from "vscode";
 import { moveCursorTo } from "./editor";
-import lines from "./lines";
 import { InlineInput } from "./inline-input";
-import { JumpLocations, JumpLocation } from "./common";
+import { JumpLocations, JumpLocation, linqish } from "./common";
+import { getInterestingLines } from "./lines";
 
 type Selection = {
   text: string;
@@ -104,12 +104,14 @@ export class FleaJumper {
 
   private findJumpLocations = (editor: vscode.TextEditor): JumpLocations => {
     const focusLine = editor.selection.active.line;
-
-    const interestingLinesForwards = lines.interestingLines("forwards");
-    const interestingLinesBackwards = lines.interestingLines("backwards");
+    const interestingLines = getInterestingLines("alternate", "forwards");
     const jumpCodes = this.getJumpCodes();
 
-    var { start: viewportStart, end: viewportEnd } = editor.visibleRanges[0];
+    const { start: viewportStart, end: viewportEnd } = editor.visibleRanges[0];
+
+    const inBounds = (loc: JumpLocation) =>
+      loc.lineNumber >= viewportStart.line &&
+      loc.lineNumber <= viewportEnd.line;
 
     const toJumpLocation = ([l, c]: readonly [vscode.TextLine, string]) => {
       return {
@@ -119,77 +121,12 @@ export class FleaJumper {
       };
     };
 
-    const inBounds = (loc: JumpLocation) =>
-      loc.lineNumber >= viewportStart.line &&
-      loc.lineNumber <= viewportEnd.line;
-
-    const forwardLocations = linq(interestingLinesForwards)
+    const locations = interestingLines
       .zip(jumpCodes)
       .map(toJumpLocation)
       .takeWhile(inBounds)
       .toArray();
 
-    const backwardLocations = linq(interestingLinesBackwards)
-      .zip(jumpCodes)
-      .map(toJumpLocation)
-      .takeWhile(inBounds)
-      .toArray();
-
-    return { focusLine, forwardLocations, backwardLocations };
+    return { focusLine, locations };
   };
-}
-
-function linq<T>(i: Generator<T>) {
-  return new Linq(i);
-}
-
-class Linq<T> {
-  constructor(private iter: Generator<T>) {}
-
-  map<R>(f: (x: T) => R): Linq<R> {
-    const iter = this.iter;
-
-    return new Linq(
-      (function*() {
-        for (const x of iter) {
-          yield f(x);
-        }
-      })()
-    );
-  }
-
-  takeWhile(f: (x: T) => boolean): Linq<T> {
-    const iter = this.iter;
-    return new Linq(
-      (function*() {
-        for (const x of iter) {
-          if (f(x) === false) return;
-
-          yield x;
-        }
-      })()
-    );
-  }
-
-  zip<T2>(iter2: Iterator<T2>) {
-    const iter = this.iter;
-    return new Linq(
-      (function*() {
-        while (true) {
-          const lResult = iter.next();
-          const rResult = iter2.next();
-
-          if (lResult.done || rResult.done) {
-            return;
-          } else {
-            yield [lResult.value, rResult.value] as const;
-          }
-        }
-      })()
-    );
-  }
-
-  toArray() {
-    return Array.from(this.iter);
-  }
 }

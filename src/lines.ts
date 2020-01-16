@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { Change, Direction, DirectionOrNearest } from "./common";
+import { Change, Direction, DirectionOrNearest, linqish } from "./common";
 import {
   getCursorPosition,
   getEditor,
@@ -115,7 +115,7 @@ function toDiff(change: Change) {
   return (x: number, y: number) => x < y;
 }
 
-function getNearestLineOfChangeOfIndentation(
+export function getNearestLineOfChangeOfIndentation(
   document: vscode.TextDocument,
   currentLine: vscode.TextLine,
   change: Change
@@ -205,7 +205,7 @@ export function moveToChangeOfIndentation(
   }
 }
 
-function* interestingLines(direction: Direction) {
+export function* getNextInterestingLines(direction: Direction) {
   const cursorPosition = getCursorPosition();
   const document = getEditor()?.document;
 
@@ -224,14 +224,69 @@ function* interestingLines(direction: Direction) {
   }
 }
 
-function moveToNextInterestingLine(direction: Direction) {
-  for (const line of interestingLines(direction)) {
+function flip(direction: Direction): Direction {
+  switch (direction) {
+    case "forwards":
+      return "backwards";
+    case "backwards":
+      return "forwards";
+  }
+}
+
+export type LineEnumerationPattern = "alternate" | "sequential";
+
+export function getInterestingLines(
+  pattern: LineEnumerationPattern,
+  direction: Direction
+) {
+  const cursorPosition = getCursorPosition();
+  const document = getEditor()?.document;
+
+  if (!document || !cursorPosition) return linqish.empty;
+
+  const linesForwards = iterLinesWithPrevious(
+    document,
+    cursorPosition.line,
+    direction
+  );
+
+  const linesBackwards = iterLinesWithPrevious(
+    document,
+    cursorPosition.line,
+    flip(direction)
+  );
+
+  const [a, b] =
+    direction === "forwards"
+      ? [linesForwards, linesBackwards]
+      : [linesBackwards, linesForwards];
+
+  switch (pattern) {
+    case "alternate":
+      return linqish(a)
+        .interleave(b)
+        .filter(({ prevLine, currentLine }) =>
+          lineIsInteresting(prevLine, currentLine)
+        )
+        .map(({ prevLine: _, currentLine }) => currentLine);
+    case "sequential":
+      return linqish(a)
+        .union(b)
+        .filter(({ prevLine, currentLine }) =>
+          lineIsInteresting(prevLine, currentLine)
+        )
+        .map(({ prevLine: _, currentLine }) => currentLine);
+  }
+}
+
+export function moveToNextInterestingLine(direction: Direction) {
+  for (const line of getNextInterestingLines(direction)) {
     moveCursorToBeginningOfLine(line);
     return;
   }
 }
 
-function moveToLineOfSameIndentation(direction: Direction) {
+export function moveToLineOfSameIndentation(direction: Direction) {
   const cursorPosition = getCursorPosition();
   const document = getEditor()?.document;
 
@@ -252,11 +307,3 @@ function moveToLineOfSameIndentation(direction: Direction) {
     }
   }
 }
-
-export default {
-  moveToLineOfSameIndentation,
-  moveToChangeOfIndentation,
-  moveToNextInterestingLine,
-  interestingLines,
-  lineIsInteresting
-};
