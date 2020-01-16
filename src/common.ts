@@ -15,8 +15,12 @@ export type JumpLocation = {
   charIndex: number;
 };
 
-class Linqish<T> {
+class Linqish<T> implements Iterable<T> {
   constructor(private iter: Iterable<T>) {}
+
+  [Symbol.iterator](): Iterator<T, any, undefined> {
+    return this.iter[Symbol.iterator]();
+  }
 
   map<R>(f: (x: T) => R): Linqish<R> {
     const iter = this.iter;
@@ -99,21 +103,24 @@ class Linqish<T> {
 
     return new Linqish(
       (function*() {
-        let current = i1;
+        let currentIterator = i1;
 
         const swapIterators = () => {
-          if (current === i1) current = i2;
-          else current = i1;
+          if (currentIterator === i1) currentIterator = i2;
+          else currentIterator = i1;
         };
 
         while (true) {
-          const result = current.next();
+          const result = currentIterator.next();
 
           if (result.done) {
             swapIterators();
 
-            for (const item of current) {
-              yield item;
+            let { value, done } = currentIterator.next();
+
+            while (!done) {
+              yield value;
+              ({ value, done } = currentIterator.next());
             }
 
             return;

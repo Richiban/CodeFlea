@@ -65,11 +65,7 @@ class JumpInterface {
             this.addDecorations(editor, jumpLocations);
             const input = yield new inline_input_1.InlineInput().show(editor, v => v);
             this.removeDecorations(editor);
-            for (const loc of jumpLocations.locations) {
-                if (loc.jumpCode === input) {
-                    return loc;
-                }
-            }
+            return jumpLocations.locations.find(x => x.jumpCode === input);
         });
     }
     addDecorations(editor, jumpLocations) {
@@ -82,7 +78,7 @@ class JumpInterface {
         editor.setDecorations(beginning, y);
     }
     removeDecorations(editor) {
-        for (var dec in this.decorations) {
+        for (const dec in this.decorations) {
             if (this.decorations[dec] === null)
                 continue;
             editor.setDecorations(this.decorations[dec], []);

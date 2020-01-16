@@ -22,7 +22,7 @@ function activate(context) {
     context.subscriptions.push(vscode.commands.registerCommand("codeFlea.nextInterestingPoint", () => points_1.default.moveToInterestingPoint("forwards")));
     let config = new config_1.Config();
     config.loadConfig();
-    var fleaJumper = new fleajump_1.FleaJumper(context, config);
+    const fleaJumper = new fleajump_1.FleaJumper(context, config);
     vscode.workspace.onDidChangeConfiguration(_ => {
         config.loadConfig();
         fleaJumper.updateConfig();

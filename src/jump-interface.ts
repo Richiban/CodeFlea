@@ -26,11 +26,7 @@ export class JumpInterface {
     const input = await new InlineInput().show(editor, v => v);
     this.removeDecorations(editor);
 
-    for (const loc of jumpLocations.locations) {
-      if (loc.jumpCode === input) {
-        return loc;
-      }
-    }
+    return jumpLocations.locations.find(x => x.jumpCode === input)
   }
 
   private addDecorations(

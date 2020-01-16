@@ -24,7 +24,7 @@ class FleaJumper {
             const focusLine = editor.selection.active.line;
             const interestingLines = lines_1.getInterestingLines("alternate", "forwards");
             const jumpCodes = this.getJumpCodes();
-            var { start: viewportStart, end: viewportEnd } = editor.visibleRanges[0];
+            const { start: viewportStart, end: viewportEnd } = editor.visibleRanges[0];
             const inBounds = (loc) => loc.lineNumber >= viewportStart.line &&
                 loc.lineNumber <= viewportEnd.line;
             const toJumpLocation = ([l, c]) => {
