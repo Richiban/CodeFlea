@@ -17,12 +17,11 @@ function* getInterestingPointsInText(
     backwards: false
   }
 ) {
-  let idx = options.startingIndex;
-
   const advance = options.backwards
     ? (x: number) => x - 1
     : (x: number) => x + 1;
 
+  let idx = options.startingIndex;
   let shouldYield = false;
 
   do {
