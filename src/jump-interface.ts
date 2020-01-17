@@ -6,7 +6,7 @@ import { readKey } from "./inline-input";
 export class JumpInterface {
   constructor(
     private config: Config,
-    private cache: { [index: string]: vscode.Uri },
+    private jumpCodeImageCache: { [index: string]: vscode.Uri },
     private decorations: {
       [index: number]: vscode.TextEditorDecorationType;
     } = {}
@@ -67,21 +67,20 @@ export class JumpInterface {
   }
 
   private createTextEditorDecorationType(charsToOffsetToLeft: number) {
-    let decorationType = this.decorations[charsToOffsetToLeft];
-    if (decorationType) return decorationType;
+    if (!this.decorations[charsToOffsetToLeft]) {
+      this.decorations[
+        charsToOffsetToLeft
+      ] = vscode.window.createTextEditorDecorationType({
+        after: {
+          margin: `0 0 0 ${charsToOffsetToLeft *
+            -this.config.decoration.width}px`,
+          height: `${this.config.decoration.height}px`,
+          width: `${charsToOffsetToLeft * this.config.decoration.width}px`
+        }
+      });
+    }
 
-    decorationType = vscode.window.createTextEditorDecorationType({
-      after: {
-        margin: `0 0 0 ${charsToOffsetToLeft *
-          -this.config.decoration.width}px`,
-        height: `${this.config.decoration.height}px`,
-        width: `${charsToOffsetToLeft * this.config.decoration.width}px`
-      }
-    });
-
-    this.decorations[charsToOffsetToLeft] = decorationType;
-
-    return decorationType;
+    return this.decorations[charsToOffsetToLeft];
   }
 
   private createDecorationOptions = (
@@ -107,15 +106,16 @@ export class JumpInterface {
   };
 
   private getUri = (code: string) => {
-    if (this.cache[code] != undefined) return this.cache[code];
-    this.cache[code] = this.buildUri(code);
-    return this.cache[code];
+    if (this.jumpCodeImageCache[code] != undefined)
+      return this.jumpCodeImageCache[code];
+    this.jumpCodeImageCache[code] = this.buildUri(code);
+    return this.jumpCodeImageCache[code];
   };
 
   private updateCache = () => {
-    this.cache = {};
+    this.jumpCodeImageCache = {};
     this.config.jumper.characters.forEach(
-      code => (this.cache[code] = this.buildUri(code))
+      code => (this.jumpCodeImageCache[code] = this.buildUri(code))
     );
   };
 
