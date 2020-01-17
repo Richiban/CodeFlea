@@ -1,30 +1,16 @@
 import { Direction, linqish, Linqish } from "./common";
-import {
-  getEditor,
-  getCursorPosition,
-  moveCursorTo,
-  moveCursorToEndOfLine,
-  moveCursorToBeginningOfLine
-} from "./editor";
+import { getEditor, getCursorPosition, moveCursorTo } from "./editor";
 import { iterLines, lineIsBoring } from "./lines";
 
-const nonPunctuationRegex = /[a-zA-Z0-9]/;
+function isInteresting(char: string) {
+  return /[a-zA-Z0-9]/.test(char);
+}
 
 function isPunctuation(char: string) {
-  return !nonPunctuationRegex.test(char);
+  return !/[a-zA-Z0-9\s]/.test(char);
 }
 
-function nextNonWhiteSpaceChar(s: string, startingIndex: number) {
-  let i = startingIndex;
-
-  while (/\s/.test(s[i])) {
-    i++;
-  }
-
-  return i;
-}
-
-function* getIndexesOfPunctuation(
+function* getInterestingPointsInText(
   s: string,
   options = {
     startingIndex: 0,
@@ -37,16 +23,19 @@ function* getIndexesOfPunctuation(
     ? (x: number) => x - 1
     : (x: number) => x + 1;
 
+  let shouldYield = false;
+
   do {
     idx = advance(idx);
 
-    if (idx === 0) return 0;
-    if (idx < 0) return undefined;
-    if (idx === s.length) return s.length;
-    if (idx > s.length) return undefined;
+    if (idx < 0 || idx > s.length) return;
+    if (idx === 0 || idx === s.length) yield idx;
 
-    if (isPunctuation(s[idx - 1]) && !isPunctuation(s[idx])) {
-      yield nextNonWhiteSpaceChar(s, idx);
+    if (shouldYield && isInteresting(s[idx])) {
+      yield idx;
+      shouldYield = false;
+    } else if (isPunctuation(s[idx])) {
+      shouldYield = true;
     }
   } while (true);
 }
@@ -78,19 +67,12 @@ export function getInterestingPoints(
       )) {
         if (lineIsBoring(l)) return;
 
-        yield {
-          lineNumber: l.lineNumber,
-          charIndex: l.firstNonWhitespaceCharacterIndex
-        };
-
-        for (const c of getIndexesOfPunctuation(l.text, {
+        for (const c of getInterestingPointsInText(l.text, {
           backwards: false,
           startingIndex: 0
         })) {
           yield { lineNumber: l.lineNumber, charIndex: c };
         }
-
-        yield { lineNumber: l.lineNumber, charIndex: l.range.end.character };
       }
     })()
   );
@@ -107,7 +89,7 @@ export function getInterestingPoints2(direction: Direction = "forwards") {
       let currentLine = document.lineAt(cursorPosition.line);
 
       while (true) {
-        const index = getIndexesOfPunctuation(currentLine.text, {
+        const index = getInterestingPointsInText(currentLine.text, {
           backwards: direction === "backwards",
           startingIndex: cursorPosition.character
         });
