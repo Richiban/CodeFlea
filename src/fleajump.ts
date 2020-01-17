@@ -2,8 +2,7 @@ import { Config } from "./config";
 import { JumpInterface } from "./jump-interface";
 import * as vscode from "vscode";
 import { moveCursorTo } from "./editor";
-import { InlineInput } from "./inline-input";
-import { JumpLocations, JumpLocation, linqish } from "./common";
+import { JumpLocations, JumpLocation } from "./common";
 import { getInterestingLines } from "./lines";
 
 type Selection = {
@@ -51,9 +50,6 @@ export class FleaJumper {
   }
 
   private cancel() {
-    while (InlineInput.instances.length > 0) {
-      InlineInput.instances[0].cancelInput();
-    }
     this.isJumping = false;
   }
 

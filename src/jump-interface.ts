@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { Config } from "./config";
 import { JumpLocations, JumpLocation, linqish } from "./common";
-import { InlineInput } from "./inline-input";
+import { readKey } from "./inline-input";
 
 export class JumpInterface {
   constructor(
@@ -23,7 +23,7 @@ export class JumpInterface {
   ): Promise<JumpLocation | undefined> {
     this.addDecorations(editor, jumpLocations);
 
-    const input = await new InlineInput().show(editor, v => v);
+    const input = await readKey();
     this.removeDecorations(editor);
 
     return jumpLocations.find(x => x.jumpCode === input);
