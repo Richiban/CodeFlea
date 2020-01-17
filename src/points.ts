@@ -1,4 +1,4 @@
-import { Direction } from "./common";
+import { Direction, linqish, Linqish } from "./common";
 import {
   getEditor,
   getCursorPosition,
@@ -6,6 +6,7 @@ import {
   moveCursorToEndOfLine,
   moveCursorToBeginningOfLine
 } from "./editor";
+import { iterLines, lineIsBoring } from "./lines";
 
 const nonPunctuationRegex = /[a-zA-Z0-9]/;
 
@@ -23,7 +24,7 @@ function nextNonWhiteSpaceChar(s: string, startingIndex: number) {
   return i;
 }
 
-function getIndexOfNextPunctuationChar(
+function* getIndexesOfPunctuation(
   s: string,
   options = {
     startingIndex: 0,
@@ -45,35 +46,94 @@ function getIndexOfNextPunctuationChar(
     if (idx > s.length) return undefined;
 
     if (isPunctuation(s[idx - 1]) && !isPunctuation(s[idx])) {
-      return nextNonWhiteSpaceChar(s, idx);
+      yield nextNonWhiteSpaceChar(s, idx);
     }
   } while (true);
 }
 
-function moveToInterestingPoint(direction: Direction) {
-  const cursorPosition = getCursorPosition();
-  const document = getEditor()?.document;
-
-  if (!cursorPosition || !document) return;
-
-  const currentLine = document.lineAt(cursorPosition.line);
-
-  const index = getIndexOfNextPunctuationChar(currentLine.text, {
-    backwards: direction === "backwards",
-    startingIndex: cursorPosition.character
-  });
-
-  if (index) moveCursorTo(cursorPosition.line, index);
-  else {
-    if (direction === "backwards" && cursorPosition.line > 0) {
-      moveCursorToEndOfLine(document.lineAt(cursorPosition.line - 1));
-    } else if (
-      direction === "forwards" &&
-      cursorPosition.line < document.lineCount - 1
-    ) {
-      moveCursorToBeginningOfLine(document.lineAt(cursorPosition.line + 1));
-    }
+export function moveToNextInterestingPoint(direction: Direction = "forwards") {
+  for (const point of getInterestingPoints(direction)) {
+    moveCursorTo(point.lineNumber, point.charIndex);
+    return;
   }
 }
 
-export default { moveToInterestingPoint };
+export type Point = { lineNumber: number; charIndex: number };
+
+export function getInterestingPoints(
+  direction: Direction = "forwards"
+): Linqish<Point> {
+  return linqish(
+    (function*() {
+      const cursorPosition = getCursorPosition();
+      const document = getEditor()?.document;
+
+      if (!cursorPosition || !document) return;
+
+      for (const l of iterLines(
+        document,
+        cursorPosition.line,
+        direction,
+        false
+      )) {
+        if (lineIsBoring(l)) return;
+
+        yield {
+          lineNumber: l.lineNumber,
+          charIndex: l.firstNonWhitespaceCharacterIndex
+        };
+
+        for (const c of getIndexesOfPunctuation(l.text, {
+          backwards: false,
+          startingIndex: 0
+        })) {
+          yield { lineNumber: l.lineNumber, charIndex: c };
+        }
+
+        yield { lineNumber: l.lineNumber, charIndex: l.range.end.character };
+      }
+    })()
+  );
+}
+
+export function getInterestingPoints2(direction: Direction = "forwards") {
+  return linqish(
+    (function*() {
+      const cursorPosition = getCursorPosition();
+      const document = getEditor()?.document;
+
+      if (!cursorPosition || !document) return;
+
+      let currentLine = document.lineAt(cursorPosition.line);
+
+      while (true) {
+        const index = getIndexesOfPunctuation(currentLine.text, {
+          backwards: direction === "backwards",
+          startingIndex: cursorPosition.character
+        });
+
+        if (index)
+          yield { lineNumber: currentLine.lineNumber, charIndex: index };
+        else {
+          if (direction === "backwards" && cursorPosition.line > 0) {
+            const l = document.lineAt(currentLine.lineNumber - 1);
+            yield {
+              lineNumber: l.lineNumber,
+              charIndex: l.range.end.character
+            };
+          } else if (
+            direction === "forwards" &&
+            cursorPosition.line < document.lineCount - 1
+          ) {
+            const l = document.lineAt(currentLine.lineNumber + 1);
+
+            yield {
+              lineNumber: l.lineNumber,
+              charIndex: l.firstNonWhitespaceCharacterIndex
+            };
+          }
+        }
+      }
+    })()
+  );
+}

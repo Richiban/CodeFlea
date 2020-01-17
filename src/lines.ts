@@ -6,7 +6,7 @@ import {
   moveCursorToBeginningOfLine
 } from "./editor";
 
-function lineIsBoring(line: vscode.TextLine) {
+export function lineIsBoring(line: vscode.TextLine) {
   return !/[a-zA-Z0-9]/.test(line.text);
 }
 
@@ -61,13 +61,15 @@ function* iterLinesWithPrevious(
   }
 }
 
-function* iterLines(
+export function* iterLines(
   document: vscode.TextDocument,
   currentLineNumber: number,
-  direction: Direction
+  direction: Direction,
+  skipCurrent = true
 ) {
   const advance = fromDirection(direction);
-  currentLineNumber = advance(currentLineNumber);
+
+  if (skipCurrent) currentLineNumber = advance(currentLineNumber);
 
   while (withinBounds()) {
     yield document.lineAt(currentLineNumber);

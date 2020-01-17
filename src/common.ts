@@ -12,7 +12,7 @@ export type JumpLocation = {
   charIndex: number;
 };
 
-class Linqish<T> implements Iterable<T> {
+export class Linqish<T> implements Iterable<T> {
   constructor(private iter: Iterable<T>) {}
 
   [Symbol.iterator](): Iterator<T, any, undefined> {
@@ -114,7 +114,7 @@ class Linqish<T> implements Iterable<T> {
     );
   }
 
-  interleave(iter2: Iterable<T>) {
+  interleave(iter2: Iterable<T>): Linqish<T> {
     const i1 = this.iter[Symbol.iterator]();
     const i2 = iter2[Symbol.iterator]();
 
@@ -137,7 +137,9 @@ class Linqish<T> implements Iterable<T> {
 
             while (!done) {
               yield value;
-              ({ value, done } = currentIterator.next());
+              const r = currentIterator.next();
+              value = r.value;
+              done = r.done;
             }
 
             return;

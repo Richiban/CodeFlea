@@ -19,7 +19,7 @@ function endInput() {
 }
 
 export async function readKey() {
-  return new Promise<string | undefined>((resolve, reject) => {
+  return new Promise<string | undefined>(resolve => {
     beginInputContext();
 
     disposables.push(

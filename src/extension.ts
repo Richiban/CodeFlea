@@ -1,7 +1,6 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
-import points from "./points";
 import { FleaJumper } from "./fleajump";
 import { Config } from "./config";
 import {
@@ -9,6 +8,7 @@ import {
   moveToChangeOfIndentation,
   moveToLineOfSameIndentation
 } from "./lines";
+import { moveToNextInterestingPoint } from "./points";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -67,13 +67,13 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     vscode.commands.registerCommand("codeFlea.prevInterestingPoint", () =>
-      points.moveToInterestingPoint("backwards")
+      moveToNextInterestingPoint("backwards")
     )
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand("codeFlea.nextInterestingPoint", () =>
-      points.moveToInterestingPoint("forwards")
+      moveToNextInterestingPoint("forwards")
     )
   );
 

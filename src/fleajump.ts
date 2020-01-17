@@ -3,13 +3,8 @@ import { JumpInterface } from "./jump-interface";
 import * as vscode from "vscode";
 import { moveCursorTo } from "./editor";
 import { JumpLocations, JumpLocation } from "./common";
-import { getInterestingLines } from "./lines";
-
-type Selection = {
-  text: string;
-  startLine: number;
-  lastLine: number;
-};
+import { getInterestingLines, lineIsBoring } from "./lines";
+import { getInterestingPoints } from "./points";
 
 export class FleaJumper {
   private config: Config;
@@ -78,11 +73,26 @@ export class FleaJumper {
     let messageDisposable = vscode.window.setStatusBarMessage(msg);
 
     try {
-      const locations = this.findJumpLines(editor);
+      const jumpLines = this.findJumpLines(editor);
 
-      const loc = await this.jumpInterface.pick(editor, locations);
+      const chosenLine = await this.jumpInterface.pick(
+        editor,
+        jumpLines,
+        "primary"
+      );
 
-      if (loc) moveCursorTo(loc.lineNumber, loc.charIndex);
+      if (chosenLine) moveCursorTo(chosenLine.lineNumber, chosenLine.charIndex);
+
+      const jumpPoints = this.findJumpPoints(editor);
+
+      const chosenPoint = await this.jumpInterface.pick(
+        editor,
+        jumpPoints,
+        "secondary"
+      );
+
+      if (chosenPoint)
+        moveCursorTo(chosenPoint.lineNumber, chosenPoint.charIndex);
     } catch (reason) {
       if (!reason) reason = "Canceled!";
       vscode.window.setStatusBarMessage(`CodeFlea: ${reason}`, 2000);
@@ -97,6 +107,36 @@ export class FleaJumper {
       yield c;
     }
   }
+
+  private findJumpPoints = (editor: vscode.TextEditor): JumpLocations => {
+    const interestingPoints = getInterestingPoints();
+    const jumpCodes = this.getJumpCodes();
+
+    const { start: viewportStart, end: viewportEnd } = editor.visibleRanges[0];
+
+    const inBounds = (loc: JumpLocation) =>
+      loc.lineNumber >= viewportStart.line &&
+      loc.lineNumber <= viewportEnd.line;
+
+    const toJumpLocation = ([l, c]: readonly [
+      { lineNumber: number; charIndex: number },
+      string
+    ]): JumpLocation => {
+      return {
+        jumpCode: c,
+        lineNumber: l.lineNumber,
+        charIndex: l.charIndex
+      };
+    };
+
+    const locations = interestingPoints
+      .zipWith(jumpCodes)
+      .map(toJumpLocation)
+      .takeWhile(inBounds)
+      .toArray();
+
+    return locations;
+  };
 
   private findJumpLines = (editor: vscode.TextEditor): JumpLocations => {
     const interestingLines = getInterestingLines("alternate", "forwards");

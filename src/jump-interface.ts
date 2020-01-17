@@ -3,6 +3,8 @@ import { Config } from "./config";
 import { JumpLocations, JumpLocation, linqish } from "./common";
 import { readKey } from "./inline-input";
 
+type InterfaceType = "primary" | "secondary";
+
 export class JumpInterface {
   constructor(
     private config: Config,
@@ -19,11 +21,13 @@ export class JumpInterface {
 
   async pick(
     editor: vscode.TextEditor,
-    jumpLocations: JumpLocations
+    jumpLocations: JumpLocations,
+    interfaceType: InterfaceType
   ): Promise<JumpLocation | undefined> {
-    this.addDecorations(editor, jumpLocations);
+    this.addDecorations(editor, jumpLocations, interfaceType);
 
     const input = await readKey();
+
     this.removeDecorations(editor);
 
     return jumpLocations.find(x => x.jumpCode === input);
@@ -31,7 +35,8 @@ export class JumpInterface {
 
   private addDecorations(
     editor: vscode.TextEditor,
-    jumpLocations: JumpLocations
+    jumpLocations: JumpLocations,
+    interfaceType: InterfaceType
   ) {
     const {
       _true: standardOptions,
@@ -41,7 +46,8 @@ export class JumpInterface {
         this.createDecorationOptions(
           loc.lineNumber,
           loc.charIndex,
-          loc.jumpCode
+          loc.jumpCode,
+          interfaceType
         )
       )
       .partition(loc => loc.range.start.character > 0);
@@ -86,50 +92,58 @@ export class JumpInterface {
   private createDecorationOptions = (
     line: number,
     char: number,
-    code: string
+    code: string,
+    interfaceType: InterfaceType
   ): vscode.DecorationOptions => {
     return {
       range: new vscode.Range(line, char, line, char),
       renderOptions: {
         dark: {
           after: {
-            contentIconPath: this.getUri(code)
+            contentIconPath: this.getUri(code, interfaceType)
           }
         },
         light: {
           after: {
-            contentIconPath: this.getUri(code)
+            contentIconPath: this.getUri(code, interfaceType)
           }
         }
       }
     };
   };
 
-  private getUri = (code: string) => {
-    if (this.jumpCodeImageCache[code] != undefined)
-      return this.jumpCodeImageCache[code];
-    this.jumpCodeImageCache[code] = this.buildUri(code);
-    return this.jumpCodeImageCache[code];
+  private getUri = (code: string, t: InterfaceType) => {
+    if (this.jumpCodeImageCache[getCacheKey(t, code)] != undefined)
+      return this.jumpCodeImageCache[getCacheKey(t, code)];
+
+    this.jumpCodeImageCache[getCacheKey(t, code)] = this.buildUri(code, t);
+
+    return this.jumpCodeImageCache[getCacheKey(t, code)];
   };
 
   private updateCache = () => {
     this.jumpCodeImageCache = {};
-    this.config.jumper.characters.forEach(
-      code => (this.jumpCodeImageCache[code] = this.buildUri(code))
-    );
+    this.config.jumper.characters.forEach(code => {
+      (["primary", "secondary"] as const).forEach(t => {
+        this.jumpCodeImageCache[getCacheKey(t, code)] = this.buildUri(code, t);
+      });
+    });
   };
 
-  private buildUri = (code: string) => {
+  private buildUri = (code: string, interfaceType: InterfaceType) => {
     const cf = this.config.decoration;
     const key = this.config.decoration.upperCase
       ? code.toUpperCase()
       : code.toLowerCase();
     const width = code.length * cf.width;
     const colors = cf.bgColor.split(",");
-    const bgColor = "lime"; //colors[(code.length - 1) % colors.length];
+    const bgColor = colors[interfaceType === "primary" ? 0 : 1];
 
     const svg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${cf.height}" height="${cf.height}" width="${width}"><rect width="${width}" height="${cf.height}" rx="2" ry="3" style="fill: ${bgColor};fill-opacity:1;stroke:${cf.borderColor};stroke-opacity:${cf.bgOpacity};"/><text font-family="${cf.fontFamily}" font-weight="${cf.fontWeight}" font-size="${cf.fontSize}px" style="fill:${cf.color}" x="${cf.x}" y="${cf.y}">${key}</text></svg>`;
 
     return vscode.Uri.parse(svg);
   };
+}
+function getCacheKey(t: string, code: string) {
+  return `${t}(${code})`;
 }
