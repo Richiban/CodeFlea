@@ -1,22 +1,36 @@
 import * as vscode from "vscode";
-import { JumpLocations, JumpLocation, linqish, getJumpCodes } from "./common";
+import { JumpLocations, JumpLocation, linqish, Cache } from "./common";
 import { readKey } from "./inline-input";
 import { Config } from "./config";
 
 type InterfaceType = "primary" | "secondary";
 
 export class JumpInterface {
-  constructor(
-    private config: Config,
-    private jumpCodeImageCache: { [index: string]: vscode.Uri },
-    private decorations: {
-      [index: number]: vscode.TextEditorDecorationType;
-    } = {}
-  ) {}
+  private jumpCodeImageCache: Cache<[string, InterfaceType], vscode.Uri>;
+  private decorations: Cache<[number], vscode.TextEditorDecorationType>;
+
+  constructor(private config: Config) {
+    this.jumpCodeImageCache = new Cache<[string, InterfaceType], vscode.Uri>(
+      (code, t) => this.buildUri(code, t)
+    );
+    this.jumpCodeImageCache.getCacheKey = (code, t) => `${t}(${code})`;
+
+    this.decorations = new Cache<[number], vscode.TextEditorDecorationType>(
+      charsToOffsetToLeft =>
+        vscode.window.createTextEditorDecorationType({
+          after: {
+            margin: `0 0 0 ${charsToOffsetToLeft *
+              -this.config.decoration.width}px`,
+            height: `${this.config.decoration.height}px`,
+            width: `${charsToOffsetToLeft * this.config.decoration.width}px`
+          }
+        })
+    );
+  }
 
   initialize = (config: Config) => {
     this.config = config;
-    this.updateCache();
+    this.resetCache();
   };
 
   async pick(
@@ -52,41 +66,19 @@ export class JumpInterface {
       )
       .partition(loc => loc.range.start.character > 0);
 
-    editor.setDecorations(
-      this.createTextEditorDecorationType(1),
-      standardOptions
-    );
-
-    editor.setDecorations(
-      this.createTextEditorDecorationType(0),
-      optionsWithNoSpaceToLeft
-    );
+    editor.setDecorations(this.decorations.get(1), standardOptions);
+    editor.setDecorations(this.decorations.get(0), optionsWithNoSpaceToLeft);
   }
 
   removeDecorations(editor: vscode.TextEditor) {
-    for (const dec in this.decorations) {
-      if (this.decorations[dec] === null) continue;
-      editor.setDecorations(this.decorations[dec], []);
-      this.decorations[dec].dispose();
-      this.decorations[dec] = null!;
-    }
-  }
+    for (const dec of this.decorations) {
+      if (dec === null) continue;
 
-  private createTextEditorDecorationType(charsToOffsetToLeft: number) {
-    if (!this.decorations[charsToOffsetToLeft]) {
-      this.decorations[
-        charsToOffsetToLeft
-      ] = vscode.window.createTextEditorDecorationType({
-        after: {
-          margin: `0 0 0 ${charsToOffsetToLeft *
-            -this.config.decoration.width}px`,
-          height: `${this.config.decoration.height}px`,
-          width: `${charsToOffsetToLeft * this.config.decoration.width}px`
-        }
-      });
+      editor.setDecorations(dec, []);
+      dec.dispose();
     }
 
-    return this.decorations[charsToOffsetToLeft];
+    this.decorations.reset();
   }
 
   private createDecorationOptions = (
@@ -100,36 +92,20 @@ export class JumpInterface {
       renderOptions: {
         dark: {
           after: {
-            contentIconPath: this.getUri(code, interfaceType)
+            contentIconPath: this.jumpCodeImageCache.get(code, interfaceType)
           }
         },
         light: {
           after: {
-            contentIconPath: this.getUri(code, interfaceType)
+            contentIconPath: this.jumpCodeImageCache.get(code, interfaceType)
           }
         }
       }
     };
   };
 
-  private getUri = (code: string, t: InterfaceType) => {
-    const cacheKey = getCacheKey(t, code);
-
-    if (cacheKey in this.jumpCodeImageCache)
-      return this.jumpCodeImageCache[cacheKey];
-
-    this.jumpCodeImageCache[cacheKey] = this.buildUri(code, t);
-
-    return this.jumpCodeImageCache[cacheKey];
-  };
-
-  private updateCache = () => {
-    this.jumpCodeImageCache = {};
-    getJumpCodes(this.config).forEach(code => {
-      (["primary", "secondary"] as const).forEach(t => {
-        this.jumpCodeImageCache[getCacheKey(t, code)] = this.buildUri(code, t);
-      });
-    });
+  private resetCache = () => {
+    this.jumpCodeImageCache.reset();
   };
 
   private buildUri = (code: string, interfaceType: InterfaceType) => {
@@ -147,7 +123,4 @@ export class JumpInterface {
 
     return vscode.Uri.parse(svg);
   };
-}
-function getCacheKey(t: string, code: string) {
-  return `${t}(${code})`;
 }

@@ -70,7 +70,11 @@ export function getInterestingPoints(
           backwards: false,
           startingIndex: 0
         })) {
-          yield { lineNumber: l.lineNumber, charIndex: c };
+          if (
+            l.lineNumber !== cursorPosition.line ||
+            c !== cursorPosition.character + 1
+          )
+            yield { lineNumber: l.lineNumber, charIndex: c };
         }
       }
     })()

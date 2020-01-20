@@ -36,15 +36,18 @@ function fromDirection(direction: Direction) {
   return direction === "forwards" ? (x: number) => x + 1 : (x: number) => x - 1;
 }
 
+type Bounds = { start: { line: number }; end: { line: number } };
+
 function* iterLinesWithPrevious(
   document: vscode.TextDocument,
   currentLineNumber: number,
-  direction: Direction
+  direction: Direction,
+  bounds: Bounds = { start: { line: 0 }, end: { line: document.lineCount } }
 ) {
   const advance = fromDirection(direction);
   currentLineNumber = advance(currentLineNumber);
 
-  while (withinBounds()) {
+  while (inBounds(currentLineNumber)) {
     const prevLine =
       currentLineNumber === 0
         ? undefined
@@ -56,8 +59,8 @@ function* iterLinesWithPrevious(
     currentLineNumber = advance(currentLineNumber);
   }
 
-  function withinBounds() {
-    return currentLineNumber >= 0 && currentLineNumber < document.lineCount;
+  function inBounds(num: number) {
+    return num >= bounds.start.line && num <= bounds.end.line;
   }
 }
 
@@ -239,7 +242,8 @@ export type LineEnumerationPattern = "alternate" | "sequential";
 
 export function getInterestingLines(
   pattern: LineEnumerationPattern,
-  direction: Direction
+  direction: Direction,
+  bounds: vscode.Range
 ) {
   const cursorPosition = getCursorPosition();
   const document = getEditor()?.document;
@@ -249,13 +253,15 @@ export function getInterestingLines(
   const linesForwards = iterLinesWithPrevious(
     document,
     cursorPosition.line,
-    direction
+    "forwards",
+    bounds
   );
 
   const linesBackwards = iterLinesWithPrevious(
     document,
     cursorPosition.line,
-    flip(direction)
+    "backwards",
+    bounds
   );
 
   const [a, b] =

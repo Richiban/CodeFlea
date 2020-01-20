@@ -18,6 +18,35 @@ export function getJumpCodes(config: Config) {
   return config.jump.characters.split(/[\s,]+/);
 }
 
+export class Cache<TArgs extends any[], TValue> implements Iterable<TValue> {
+  private _getCacheKey = (...args: TArgs) => `${args}`;
+  private _cache: Record<string, TValue> = {};
+
+  constructor(private generate: (...key: TArgs) => TValue) {}
+
+  set getCacheKey(f: (...args: TArgs) => string) {
+    this._getCacheKey = f;
+  }
+
+  get(...args: TArgs): TValue {
+    const cacheKey = this._getCacheKey(...args);
+    if (!(cacheKey in this._cache)) {
+      this._cache[cacheKey] = this.generate(...args);
+    }
+    return this._cache[cacheKey];
+  }
+
+  reset() {
+    this._cache = {};
+  }
+
+  *[Symbol.iterator](): Iterator<TValue> {
+    for (const key in this._cache) {
+      yield this._cache[key];
+    }
+  }
+}
+
 export class Linqish<T> implements Iterable<T> {
   constructor(private iter: Iterable<T>) {}
 

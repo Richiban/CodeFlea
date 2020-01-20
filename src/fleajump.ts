@@ -14,7 +14,7 @@ export class FleaJumper {
   constructor(context: vscode.ExtensionContext, config: Config) {
     const disposables: vscode.Disposable[] = [];
     this.config = config;
-    this.jumpInterface = new JumpInterface(config, {}, {});
+    this.jumpInterface = new JumpInterface(config);
 
     disposables.push(
       vscode.commands.registerCommand("codeFlea.jump", async () => {
@@ -138,32 +138,27 @@ export class FleaJumper {
   };
 
   private findJumpLines = (editor: vscode.TextEditor): JumpLocations => {
-    const interestingLines = getInterestingLines("alternate", "forwards");
+    const bounds = editor.visibleRanges[0];
     const jumpCodes = getJumpCodes(this.config);
 
-    const { start: viewportStart, end: viewportEnd } = editor.visibleRanges[0];
-
-    const inBounds = (loc: JumpLocation) =>
-      loc.lineNumber >= viewportStart.line &&
-      loc.lineNumber <= viewportEnd.line;
+    const interestingLines = getInterestingLines(
+      "alternate",
+      "forwards",
+      bounds
+    );
 
     const toJumpLocation = ([l, c]: readonly [
       vscode.TextLine,
       string
-    ]): JumpLocation => {
-      return {
-        jumpCode: c,
-        lineNumber: l.lineNumber,
-        charIndex: l.firstNonWhitespaceCharacterIndex
-      };
-    };
+    ]): JumpLocation => ({
+      jumpCode: c,
+      lineNumber: l.lineNumber,
+      charIndex: l.firstNonWhitespaceCharacterIndex
+    });
 
-    const locations = interestingLines
+    return interestingLines
       .zipWith(jumpCodes)
       .map(toJumpLocation)
-      .takeWhile(inBounds)
       .toArray();
-
-    return locations;
   };
 }
