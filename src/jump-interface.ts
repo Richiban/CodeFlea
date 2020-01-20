@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import { Config } from "./config";
-import { JumpLocations, JumpLocation, linqish } from "./common";
+import { JumpLocations, JumpLocation, linqish, getJumpCodes } from "./common";
 import { readKey } from "./inline-input";
+import { Config } from "./config";
 
 type InterfaceType = "primary" | "secondary";
 
@@ -113,17 +113,19 @@ export class JumpInterface {
   };
 
   private getUri = (code: string, t: InterfaceType) => {
-    if (this.jumpCodeImageCache[getCacheKey(t, code)] != undefined)
-      return this.jumpCodeImageCache[getCacheKey(t, code)];
+    const cacheKey = getCacheKey(t, code);
 
-    this.jumpCodeImageCache[getCacheKey(t, code)] = this.buildUri(code, t);
+    if (cacheKey in this.jumpCodeImageCache)
+      return this.jumpCodeImageCache[cacheKey];
 
-    return this.jumpCodeImageCache[getCacheKey(t, code)];
+    this.jumpCodeImageCache[cacheKey] = this.buildUri(code, t);
+
+    return this.jumpCodeImageCache[cacheKey];
   };
 
   private updateCache = () => {
     this.jumpCodeImageCache = {};
-    this.config.jumper.characters.forEach(code => {
+    getJumpCodes(this.config).forEach(code => {
       (["primary", "secondary"] as const).forEach(t => {
         this.jumpCodeImageCache[getCacheKey(t, code)] = this.buildUri(code, t);
       });
@@ -136,10 +138,12 @@ export class JumpInterface {
       ? code.toUpperCase()
       : code.toLowerCase();
     const width = code.length * cf.width;
-    const colors = cf.bgColor.split(",");
-    const bgColor = colors[interfaceType === "primary" ? 0 : 1];
+    const bgColor =
+      interfaceType === "primary"
+        ? cf.backgroundColor
+        : cf.secondaryBackgroundColor;
 
-    const svg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${cf.height}" height="${cf.height}" width="${width}"><rect width="${width}" height="${cf.height}" rx="2" ry="3" style="fill: ${bgColor};fill-opacity:1;stroke:${cf.borderColor};stroke-opacity:${cf.bgOpacity};"/><text font-family="${cf.fontFamily}" font-weight="${cf.fontWeight}" font-size="${cf.fontSize}px" style="fill:${cf.color}" x="${cf.x}" y="${cf.y}">${key}</text></svg>`;
+    const svg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${cf.height}" height="${cf.height}" width="${width}"><rect width="${width}" height="${cf.height}" rx="2" ry="3" style="fill:${bgColor};fill-opacity:1;stroke:${cf.borderColor};stroke-opacity:${cf.backgroundOpacity};"/><text font-family="${cf.fontFamily}" font-weight="${cf.fontWeight}" font-size="${cf.fontSize}px" style="fill:${cf.color}" x="${cf.x}" y="${cf.y}">${key}</text></svg>`;
 
     return vscode.Uri.parse(svg);
   };

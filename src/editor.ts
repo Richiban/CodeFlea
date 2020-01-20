@@ -1,5 +1,13 @@
 import * as vscode from "vscode";
 
+export function centerEditorOnCurrentLine() {
+  const editor = getEditor();
+
+  if (!editor) return;
+
+  editor.revealRange(editor.selection, vscode.TextEditorRevealType.InCenter);
+}
+
 export function moveCursorTo(lineNumber: number, column: number) {
   const editor = getEditor();
 
@@ -10,7 +18,7 @@ export function moveCursorTo(lineNumber: number, column: number) {
   editor.selection = new vscode.Selection(position, position);
   editor.revealRange(
     new vscode.Range(position, position),
-    vscode.TextEditorRevealType.InCenter
+    vscode.TextEditorRevealType.Default
   );
 }
 

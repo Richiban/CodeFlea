@@ -1,8 +1,8 @@
 import { Config } from "./config";
 import { JumpInterface } from "./jump-interface";
 import * as vscode from "vscode";
-import { moveCursorTo } from "./editor";
-import { JumpLocations, JumpLocation } from "./common";
+import { moveCursorTo, centerEditorOnCurrentLine } from "./editor";
+import { JumpLocations, JumpLocation, getJumpCodes } from "./common";
 import { getInterestingLines, lineIsBoring } from "./lines";
 import { getInterestingPoints } from "./points";
 
@@ -12,7 +12,7 @@ export class FleaJumper {
   private jumpInterface: JumpInterface;
 
   constructor(context: vscode.ExtensionContext, config: Config) {
-    let disposables: vscode.Disposable[] = [];
+    const disposables: vscode.Disposable[] = [];
     this.config = config;
     this.jumpInterface = new JumpInterface(config, {}, {});
 
@@ -36,8 +36,8 @@ export class FleaJumper {
     this.jumpInterface.initialize(this.config);
   }
 
-  updateConfig = () => {
-    this.jumpInterface.initialize(this.config);
+  updateConfig = (config: Config) => {
+    this.jumpInterface.initialize(config);
   };
 
   private done() {
@@ -60,17 +60,17 @@ export class FleaJumper {
     jumpTimeoutId = setTimeout(() => {
       jumpTimeoutId = null;
       this.cancel();
-    }, this.config.jumper.timeout);
+    }, this.config.jump.timeout);
 
-    let editor = vscode.window.activeTextEditor;
+    const editor = vscode.window.activeTextEditor;
 
     if (!editor) {
       return;
     }
 
-    let msg = "CodeFlea: Type To Jump";
+    const msg = "CodeFlea: Type To Jump";
 
-    let messageDisposable = vscode.window.setStatusBarMessage(msg);
+    const messageDisposable = vscode.window.setStatusBarMessage(msg);
 
     try {
       const jumpLines = this.findJumpLines(editor);
@@ -81,7 +81,9 @@ export class FleaJumper {
         "primary"
       );
 
-      if (chosenLine) moveCursorTo(chosenLine.lineNumber, chosenLine.charIndex);
+      if (!chosenLine) return;
+
+      moveCursorTo(chosenLine.lineNumber, chosenLine.charIndex);
 
       const jumpPoints = this.findJumpPoints(editor);
 
@@ -91,8 +93,11 @@ export class FleaJumper {
         "secondary"
       );
 
-      if (chosenPoint)
+      if (chosenPoint) {
         moveCursorTo(chosenPoint.lineNumber, chosenPoint.charIndex);
+
+        if (this.config.jump.centerLineAfterJump) centerEditorOnCurrentLine();
+      }
     } catch (reason) {
       if (!reason) reason = "Canceled!";
       vscode.window.setStatusBarMessage(`CodeFlea: ${reason}`, 2000);
@@ -102,15 +107,9 @@ export class FleaJumper {
     }
   }
 
-  private *getJumpCodes() {
-    for (const c of this.config.jumper.characters) {
-      yield c;
-    }
-  }
-
   private findJumpPoints = (editor: vscode.TextEditor): JumpLocations => {
     const interestingPoints = getInterestingPoints();
-    const jumpCodes = this.getJumpCodes();
+    const jumpCodes = getJumpCodes(this.config);
 
     const { start: viewportStart, end: viewportEnd } = editor.visibleRanges[0];
 
@@ -140,7 +139,7 @@ export class FleaJumper {
 
   private findJumpLines = (editor: vscode.TextEditor): JumpLocations => {
     const interestingLines = getInterestingLines("alternate", "forwards");
-    const jumpCodes = this.getJumpCodes();
+    const jumpCodes = getJumpCodes(this.config);
 
     const { start: viewportStart, end: viewportEnd } = editor.visibleRanges[0];
 

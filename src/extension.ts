@@ -2,13 +2,13 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
 import { FleaJumper } from "./fleajump";
-import { Config } from "./config";
 import {
   moveToNextInterestingLine,
   moveToChangeOfIndentation,
   moveToLineOfSameIndentation
 } from "./lines";
 import { moveToNextInterestingPoint } from "./points";
+import { loadConfig } from "./config";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -77,14 +77,10 @@ export function activate(context: vscode.ExtensionContext) {
     )
   );
 
-  let config = new Config();
-  config.loadConfig();
-
-  const fleaJumper = new FleaJumper(context, config);
+  const fleaJumper = new FleaJumper(context, loadConfig());
 
   vscode.workspace.onDidChangeConfiguration(_ => {
-    config.loadConfig();
-    fleaJumper.updateConfig();
+    fleaJumper.updateConfig(loadConfig());
   });
 }
 

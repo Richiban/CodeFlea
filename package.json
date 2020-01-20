@@ -26,6 +26,83 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "configuration": {
+      "title": "",
+      "type": "",
+      "properties": {
+        "codeFlea.decoration.backgroundColor": {
+          "type": "string",
+          "default": "blue",
+          "description": "primary decorator background color"
+        },
+        "codeFlea.decoration.secondaryBackgroundColor": {
+          "type": "string",
+          "default": "yellow",
+          "description": "secondary decorator background color"
+        },
+        "codeFlea.decoration.backgroundOpacity": {
+          "type": "string",
+          "default": "0.8"
+        },
+        "codeFlea.decoration.color": {
+          "type": "string",
+          "default": "black"
+        },
+        "codeFlea.decoration.borderColor": {
+          "type": "string",
+          "default": "black"
+        },
+        "codeFlea.decoration.width": {
+          "type": "number",
+          "default": 9
+        },
+        "codeFlea.decoration.height": {
+          "type": "number",
+          "default": 15
+        },
+        "codeFlea.decoration.x": {
+          "type": "number",
+          "default": 1
+        },
+        "codeFlea.decoration.y": {
+          "type": "number",
+          "default": 12
+        },
+        "codeFlea.decoration.fontSize": {
+          "type": "number",
+          "default": 13
+        },
+        "codeFlea.decoration.fontWeight": {
+          "type": "string",
+          "default": "bold"
+        },
+        "codeFlea.decoration.fontFamily": {
+          "type": "string",
+          "default": "Consolas"
+        },
+        "codeFlea.decoration.upperCase": {
+          "type": "boolean",
+          "default": false
+        },
+        "codeFlea.jump.characters": {
+          "type": "string",
+          "default": "k, j, d, f, l, s, a, h, g, i, o, n, u, r, v, c, w, e, x, m, b, p, q, t, y, z"
+        },
+        "codeFlea.jump.wordSeparatorPattern": {
+          "type": "string",
+          "default": "[ ,-.{_(\"'<\\/[+]"
+        },
+        "codeFlea.jump.timeout": {
+          "type": "number",
+          "default": "5",
+          "description": "timeout value in seconds to cancel codeFlea jump commands."
+        },
+        "codeFlea.jump.centerLineAfterJump": {
+          "type": "boolean",
+          "default": "true"
+        }
+      }
+    },
     "commands": [
       {
         "command": "codeFlea.nextInterestingLine",

@@ -1,3 +1,5 @@
+import { Config } from "./config";
+
 export type DirectionOrNearest = Direction | "nearest";
 
 export type Change = "greaterThan" | "lessThan";
@@ -11,6 +13,10 @@ export type JumpLocation = {
   lineNumber: number;
   charIndex: number;
 };
+
+export function getJumpCodes(config: Config) {
+  return config.jump.characters.split(/[\s,]+/);
+}
 
 export class Linqish<T> implements Iterable<T> {
   constructor(private iter: Iterable<T>) {}
