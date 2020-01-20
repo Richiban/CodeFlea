@@ -47,6 +47,10 @@ function* iterLinesWithPrevious(
   const advance = fromDirection(direction);
   currentLineNumber = advance(currentLineNumber);
 
+  const inBounds = (num: number) => {
+    return num >= bounds.start.line && num <= bounds.end.line;
+  };
+
   while (inBounds(currentLineNumber)) {
     const prevLine =
       currentLineNumber === 0
@@ -57,10 +61,6 @@ function* iterLinesWithPrevious(
     yield { prevLine, currentLine };
 
     currentLineNumber = advance(currentLineNumber);
-  }
-
-  function inBounds(num: number) {
-    return num >= bounds.start.line && num <= bounds.end.line;
   }
 }
 

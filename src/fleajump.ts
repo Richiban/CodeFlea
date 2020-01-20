@@ -33,11 +33,11 @@ export class FleaJumper {
       context.subscriptions.push(disposable);
     }
 
-    this.jumpInterface.initialize(this.config);
+    this.jumpInterface.update(this.config);
   }
 
   updateConfig = (config: Config) => {
-    this.jumpInterface.initialize(config);
+    this.jumpInterface.update(config);
   };
 
   private done() {
@@ -75,7 +75,7 @@ export class FleaJumper {
     try {
       const jumpLines = this.findJumpLines(editor);
 
-      const chosenLine = await this.jumpInterface.pick(
+      const chosenLine = await this.jumpInterface.getUserSelection(
         editor,
         jumpLines,
         "primary"
@@ -87,7 +87,7 @@ export class FleaJumper {
 
       const jumpPoints = this.findJumpPoints(editor);
 
-      const chosenPoint = await this.jumpInterface.pick(
+      const chosenPoint = await this.jumpInterface.getUserSelection(
         editor,
         jumpPoints,
         "secondary"

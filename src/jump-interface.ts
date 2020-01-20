@@ -6,16 +6,16 @@ import { Config } from "./config";
 type InterfaceType = "primary" | "secondary";
 
 export class JumpInterface {
-  private jumpCodeImageCache: Cache<[string, InterfaceType], vscode.Uri>;
-  private decorations: Cache<[number], vscode.TextEditorDecorationType>;
+  private jumpCodeImages: Cache<[string, InterfaceType], vscode.Uri>;
+  private decorationTypes: Cache<[number], vscode.TextEditorDecorationType>;
 
   constructor(private config: Config) {
-    this.jumpCodeImageCache = new Cache<[string, InterfaceType], vscode.Uri>(
+    this.jumpCodeImages = new Cache<[string, InterfaceType], vscode.Uri>(
       (code, t) => this.buildUri(code, t)
     );
-    this.jumpCodeImageCache.getCacheKey = (code, t) => `${t}(${code})`;
+    this.jumpCodeImages.getCacheKey = (code, t) => `${t}(${code})`;
 
-    this.decorations = new Cache<[number], vscode.TextEditorDecorationType>(
+    this.decorationTypes = new Cache<[number], vscode.TextEditorDecorationType>(
       charsToOffsetToLeft =>
         vscode.window.createTextEditorDecorationType({
           after: {
@@ -28,12 +28,13 @@ export class JumpInterface {
     );
   }
 
-  initialize = (config: Config) => {
+  update = (config: Config) => {
     this.config = config;
-    this.resetCache();
+    this.jumpCodeImages.reset();
+    this.decorationTypes.reset();
   };
 
-  async pick(
+  async getUserSelection(
     editor: vscode.TextEditor,
     jumpLocations: JumpLocations,
     interfaceType: InterfaceType
@@ -66,19 +67,22 @@ export class JumpInterface {
       )
       .partition(loc => loc.range.start.character > 0);
 
-    editor.setDecorations(this.decorations.get(1), standardOptions);
-    editor.setDecorations(this.decorations.get(0), optionsWithNoSpaceToLeft);
+    editor.setDecorations(this.decorationTypes.get(1), standardOptions);
+    editor.setDecorations(
+      this.decorationTypes.get(0),
+      optionsWithNoSpaceToLeft
+    );
   }
 
   removeDecorations(editor: vscode.TextEditor) {
-    for (const dec of this.decorations) {
+    for (const dec of this.decorationTypes) {
       if (dec === null) continue;
 
       editor.setDecorations(dec, []);
       dec.dispose();
     }
 
-    this.decorations.reset();
+    this.decorationTypes.reset();
   }
 
   private createDecorationOptions = (
@@ -92,20 +96,16 @@ export class JumpInterface {
       renderOptions: {
         dark: {
           after: {
-            contentIconPath: this.jumpCodeImageCache.get(code, interfaceType)
+            contentIconPath: this.jumpCodeImages.get(code, interfaceType)
           }
         },
         light: {
           after: {
-            contentIconPath: this.jumpCodeImageCache.get(code, interfaceType)
+            contentIconPath: this.jumpCodeImages.get(code, interfaceType)
           }
         }
       }
     };
-  };
-
-  private resetCache = () => {
-    this.jumpCodeImageCache.reset();
   };
 
   private buildUri = (code: string, interfaceType: InterfaceType) => {
@@ -119,7 +119,7 @@ export class JumpInterface {
         ? cf.backgroundColor
         : cf.secondaryBackgroundColor;
 
-    const svg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${cf.height}" height="${cf.height}" width="${width}"><rect width="${width}" height="${cf.height}" rx="2" ry="3" style="fill:${bgColor};fill-opacity:1;stroke:${cf.borderColor};stroke-opacity:${cf.backgroundOpacity};"/><text font-family="${cf.fontFamily}" font-weight="${cf.fontWeight}" font-size="${cf.fontSize}px" style="fill:${cf.color}" x="${cf.x}" y="${cf.y}">${key}</text></svg>`;
+    const svg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${cf.height}" height="${cf.height}" width="${width}"><rect width="${width}" height="${cf.height}" rx="4" ry="4" style="fill:${bgColor};fill-opacity:1;stroke:${cf.borderColor};stroke-opacity:${cf.backgroundOpacity};"/><text font-family="${cf.fontFamily}" font-weight="${cf.fontWeight}" font-size="${cf.fontSize}px" style="fill:${cf.color}" x="${cf.x}" y="${cf.y}">${key}</text></svg>`;
 
     return vscode.Uri.parse(svg);
   };
