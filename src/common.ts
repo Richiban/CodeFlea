@@ -19,19 +19,17 @@ export function getJumpCodes(config: Config) {
 }
 
 export class Cache<TArgs extends any[], TValue> implements Iterable<TValue> {
-  private _getCacheKey = (...args: TArgs) => `${args}`;
   private _cache: Record<string, TValue> = {};
 
-  constructor(private generate: (...key: TArgs) => TValue) {}
-
-  set getCacheKey(f: (...args: TArgs) => string) {
-    this._getCacheKey = f;
-  }
+  constructor(
+    private generateValue: (...key: TArgs) => TValue,
+    private getCacheKey: (...args: TArgs) => string
+  ) {}
 
   get(...args: TArgs): TValue {
-    const cacheKey = this._getCacheKey(...args);
+    const cacheKey = this.getCacheKey(...args);
     if (!(cacheKey in this._cache)) {
-      this._cache[cacheKey] = this.generate(...args);
+      this._cache[cacheKey] = this.generateValue(...args);
     }
     return this._cache[cacheKey];
   }

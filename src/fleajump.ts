@@ -81,9 +81,14 @@ export class FleaJumper {
         "primary"
       );
 
-      if (!chosenLine) return;
+      if (chosenLine.tag === "Cancelled") return;
 
-      moveCursorTo(chosenLine.lineNumber, chosenLine.charIndex);
+      if (chosenLine.tag === "Ok") {
+        moveCursorTo(
+          chosenLine.userSelection.lineNumber,
+          chosenLine.userSelection.charIndex
+        );
+      }
 
       const jumpPoints = this.findJumpPoints(editor);
 
@@ -93,8 +98,11 @@ export class FleaJumper {
         "secondary"
       );
 
-      if (chosenPoint) {
-        moveCursorTo(chosenPoint.lineNumber, chosenPoint.charIndex);
+      if (chosenPoint.tag === "Ok") {
+        moveCursorTo(
+          chosenPoint.userSelection.lineNumber,
+          chosenPoint.userSelection.charIndex
+        );
 
         if (this.config.jump.centerLineAfterJump) centerEditorOnCurrentLine();
       }
@@ -120,21 +128,17 @@ export class FleaJumper {
     const toJumpLocation = ([l, c]: readonly [
       { lineNumber: number; charIndex: number },
       string
-    ]): JumpLocation => {
-      return {
-        jumpCode: c,
-        lineNumber: l.lineNumber,
-        charIndex: l.charIndex
-      };
-    };
+    ]): JumpLocation => ({
+      jumpCode: c,
+      lineNumber: l.lineNumber,
+      charIndex: l.charIndex
+    });
 
-    const locations = interestingPoints
+    return interestingPoints
       .zipWith(jumpCodes)
       .map(toJumpLocation)
       .takeWhile(inBounds)
       .toArray();
-
-    return locations;
   };
 
   private findJumpLines = (editor: vscode.TextEditor): JumpLocations => {

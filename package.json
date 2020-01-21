@@ -6,7 +6,7 @@
   "repository": {
     "url": "https://github.com/Richiban/CodeFlea/"
   },
-  "version": "0.0.5",
+  "version": "0.0.6",
   "engines": {
     "vscode": "^1.41.0"
   },
@@ -32,7 +32,7 @@
       "properties": {
         "codeFlea.decoration.backgroundColor": {
           "type": "string",
-          "default": "blue",
+          "default": "lightskyblue",
           "description": "primary decorator background color"
         },
         "codeFlea.decoration.secondaryBackgroundColor": {
@@ -58,7 +58,7 @@
         },
         "codeFlea.decoration.height": {
           "type": "number",
-          "default": 15
+          "default": 13
         },
         "codeFlea.decoration.x": {
           "type": "number",
@@ -66,11 +66,11 @@
         },
         "codeFlea.decoration.y": {
           "type": "number",
-          "default": 12
+          "default": 11
         },
         "codeFlea.decoration.fontSize": {
           "type": "number",
-          "default": 13
+          "default": 12
         },
         "codeFlea.decoration.fontWeight": {
           "type": "string",
