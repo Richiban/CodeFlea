@@ -1,6 +1,6 @@
 import { Direction, linqish, Linqish } from "./common";
 import { getEditor, getCursorPosition, moveCursorTo } from "./editor";
-import { iterLines, lineIsBoring } from "./lines";
+import { iterLines, lineIsMeaningless } from "./lines";
 
 function isInteresting(char: string) {
   return /[a-zA-Z0-9]/.test(char);
@@ -64,7 +64,7 @@ export function getInterestingPoints(
         direction,
         false
       )) {
-        if (lineIsBoring(l)) return;
+        if (lineIsMeaningless(l)) return;
 
         for (const c of getInterestingPointsInText(l.text, {
           backwards: false,
@@ -75,48 +75,6 @@ export function getInterestingPoints(
             c !== cursorPosition.character + 1
           )
             yield { lineNumber: l.lineNumber, charIndex: c };
-        }
-      }
-    })()
-  );
-}
-
-export function getInterestingPoints2(direction: Direction = "forwards") {
-  return linqish(
-    (function*() {
-      const cursorPosition = getCursorPosition();
-      const document = getEditor()?.document;
-
-      if (!cursorPosition || !document) return;
-
-      let currentLine = document.lineAt(cursorPosition.line);
-
-      while (true) {
-        const index = getInterestingPointsInText(currentLine.text, {
-          backwards: direction === "backwards",
-          startingIndex: cursorPosition.character
-        });
-
-        if (index)
-          yield { lineNumber: currentLine.lineNumber, charIndex: index };
-        else {
-          if (direction === "backwards" && cursorPosition.line > 0) {
-            const l = document.lineAt(currentLine.lineNumber - 1);
-            yield {
-              lineNumber: l.lineNumber,
-              charIndex: l.range.end.character
-            };
-          } else if (
-            direction === "forwards" &&
-            cursorPosition.line < document.lineCount - 1
-          ) {
-            const l = document.lineAt(currentLine.lineNumber + 1);
-
-            yield {
-              lineNumber: l.lineNumber,
-              charIndex: l.firstNonWhitespaceCharacterIndex
-            };
-          }
         }
       }
     })()

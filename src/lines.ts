@@ -6,7 +6,7 @@ import {
   moveCursorToBeginningOfLine
 } from "./editor";
 
-export function lineIsBoring(line: vscode.TextLine) {
+export function lineIsMeaningless(line: vscode.TextLine) {
   return !/[a-zA-Z0-9]/.test(line.text);
 }
 
@@ -24,11 +24,12 @@ function lineIsInteresting(
   prevLine: vscode.TextLine | undefined,
   currentLine: vscode.TextLine
 ) {
-  if (lineIsBoring(currentLine)) return false;
+  if (lineIsMeaningless(currentLine)) return false;
   if (!prevLine) return true;
 
   return (
-    lineIsIndentationChange(prevLine, currentLine) || lineIsBoring(prevLine)
+    lineIsIndentationChange(prevLine, currentLine) ||
+    lineIsMeaningless(prevLine)
   );
 }
 
@@ -229,15 +230,6 @@ export function* getNextInterestingLines(direction: Direction) {
   }
 }
 
-function flip(direction: Direction): Direction {
-  switch (direction) {
-    case "forwards":
-      return "backwards";
-    case "backwards":
-      return "forwards";
-  }
-}
-
 export type LineEnumerationPattern = "alternate" | "sequential";
 
 export function getInterestingLines(
@@ -272,14 +264,14 @@ export function getInterestingLines(
   switch (pattern) {
     case "alternate":
       return linqish(a)
-        .interleave(b)
+        .alternateWith(b)
         .filter(({ prevLine, currentLine }) =>
           lineIsInteresting(prevLine, currentLine)
         )
         .map(({ prevLine: _, currentLine }) => currentLine);
     case "sequential":
       return linqish(a)
-        .union(b)
+        .concat(b)
         .filter(({ prevLine, currentLine }) =>
           lineIsInteresting(prevLine, currentLine)
         )

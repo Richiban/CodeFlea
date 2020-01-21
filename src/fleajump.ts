@@ -3,7 +3,7 @@ import { JumpInterface } from "./jump-interface";
 import * as vscode from "vscode";
 import { moveCursorTo, centerEditorOnCurrentLine } from "./editor";
 import { JumpLocations, JumpLocation, getJumpCodes } from "./common";
-import { getInterestingLines, lineIsBoring } from "./lines";
+import { getInterestingLines } from "./lines";
 import { getInterestingPoints } from "./points";
 
 export class FleaJumper {

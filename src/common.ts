@@ -118,7 +118,7 @@ export class Linqish<T> implements Iterable<T> {
     );
   }
 
-  union(iter2: Iterable<T>) {
+  concat(iter2: Iterable<T>) {
     const iter = this.iter;
 
     return new Linqish(
@@ -147,7 +147,7 @@ export class Linqish<T> implements Iterable<T> {
     );
   }
 
-  interleave(iter2: Iterable<T>): Linqish<T> {
+  alternateWith(iter2: Iterable<T>): Linqish<T> {
     const i1 = this.iter[Symbol.iterator]();
     const i2 = iter2[Symbol.iterator]();
 
