@@ -15,7 +15,17 @@ export type JumpLocation = {
 };
 
 export function getJumpCodes(config: Config) {
-  return config.jump.characters.split(/[\s,]+/);
+  const rawChars = config.jump.characters.split(/[\s,]+/);
+  const chars = linqish(rawChars);
+  const numSingleCharCodes = Math.trunc(rawChars.length * 0.75);
+
+  const singleCharCodes = chars.take(numSingleCharCodes);
+  const doubleCharCodes = chars
+    .skip(numSingleCharCodes)
+    .cartesianProduct(rawChars)
+    .map(([x, y]) => `${x}${y}`);
+
+  return singleCharCodes.concat(doubleCharCodes).toArray();
 }
 
 export class Cache<TArgs extends any[], TValue> implements Iterable<TValue> {
@@ -50,6 +60,57 @@ export class Linqish<T> implements Iterable<T> {
 
   [Symbol.iterator](): Iterator<T, any, undefined> {
     return this.iter[Symbol.iterator]();
+  }
+
+  cartesianProduct<U>(other: Iterable<U>) {
+    const iter1 = this.iter;
+    const iter2 = other;
+
+    return new Linqish(
+      (function*() {
+        for (const x of iter1) {
+          for (const y of iter2) {
+            yield [x, y] as const;
+          }
+        }
+      })()
+    );
+  }
+
+  skip(count: number) {
+    const iter = this.iter;
+
+    return new Linqish(
+      (function*() {
+        let toSkip = count;
+
+        for (const x of iter) {
+          if (toSkip > 0) {
+            toSkip--;
+            continue;
+          }
+
+          yield x;
+        }
+      })()
+    );
+  }
+
+  take(count: number) {
+    const iter = this.iter;
+
+    return new Linqish(
+      (function*() {
+        let toTake = count;
+
+        for (const x of iter) {
+          if (toTake <= 0) return;
+
+          yield x;
+          toTake--;
+        }
+      })()
+    );
   }
 
   pairwise(): Linqish<[T, T]> {
