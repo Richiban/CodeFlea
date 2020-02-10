@@ -1,0 +1,163 @@
+{
+  "name": "codeflea",
+  "displayName": "CodeFlea",
+  "description": "An extension for intuitively moving the cursor around a code file",
+  "publisher": "Richibansoft",
+  "repository": {
+    "url": "https://github.com/Richiban/CodeFlea/"
+  },
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.41.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:codeFlea.nextInterestingLine",
+    "onCommand:codeFlea.prevInterestingLine",
+    "onCommand:codeFlea.nearestLineOfLesserIndentation",
+    "onCommand:codeFlea.nearestLineOfGreaterIndentation",
+    "onCommand:codeFlea.prevLineOfSameIndentation",
+    "onCommand:codeFlea.nextLineOfSameIndentation",
+    "onCommand:codeFlea.prevInterestingPoint",
+    "onCommand:codeFlea.nextInterestingPoint",
+    "onCommand:codeFlea.jump"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "",
+      "type": "",
+      "properties": {
+        "codeFlea.decoration.backgroundColor": {
+          "type": "string",
+          "default": "lightskyblue",
+          "description": "primary decorator background color"
+        },
+        "codeFlea.decoration.secondaryBackgroundColor": {
+          "type": "string",
+          "default": "yellow",
+          "description": "secondary decorator background color"
+        },
+        "codeFlea.decoration.backgroundOpacity": {
+          "type": "string",
+          "default": "0.8"
+        },
+        "codeFlea.decoration.color": {
+          "type": "string",
+          "default": "black"
+        },
+        "codeFlea.decoration.borderColor": {
+          "type": "string",
+          "default": "black"
+        },
+        "codeFlea.decoration.width": {
+          "type": "number",
+          "default": 9
+        },
+        "codeFlea.decoration.height": {
+          "type": "number",
+          "default": 13
+        },
+        "codeFlea.decoration.x": {
+          "type": "number",
+          "default": 1
+        },
+        "codeFlea.decoration.y": {
+          "type": "number",
+          "default": 11
+        },
+        "codeFlea.decoration.fontSize": {
+          "type": "number",
+          "default": 12
+        },
+        "codeFlea.decoration.fontWeight": {
+          "type": "string",
+          "default": "bold"
+        },
+        "codeFlea.decoration.fontFamily": {
+          "type": "string",
+          "default": "Consolas"
+        },
+        "codeFlea.decoration.upperCase": {
+          "type": "boolean",
+          "default": false
+        },
+        "codeFlea.jump.characters": {
+          "type": "string",
+          "default": "k, j, d, f, l, s, a, h, g, i, o, n, u, r, v, c, w, e, x, m, b, p, q, t, y, z"
+        },
+        "codeFlea.jump.wordSeparatorPattern": {
+          "type": "string",
+          "default": "[ ,-.{_(\"'<\\/[+]"
+        },
+        "codeFlea.jump.timeout": {
+          "type": "number",
+          "default": "5",
+          "description": "timeout value in seconds to cancel codeFlea jump commands."
+        },
+        "codeFlea.jump.centerLineAfterJump": {
+          "type": "boolean",
+          "default": "true"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "codeFlea.nextInterestingLine",
+        "title": "Next interesting line"
+      },
+      {
+        "command": "codeFlea.prevInterestingLine",
+        "title": "Previous interesting line"
+      },
+      {
+        "command": "codeFlea.nearestLineOfLesserIndentation",
+        "title": "Go to nearest line of lesser indentation"
+      },
+      {
+        "command": "codeFlea.nearestLineOfGreaterIndentation",
+        "title": "Go to nearest line of greater indentation"
+      },
+      {
+        "command": "codeFlea.prevLineOfSameIndentation",
+        "title": "Go to the previous line of the same indentation"
+      },
+      {
+        "command": "codeFlea.nextLineOfSameIndentation",
+        "title": "Go to the next line of the same indentation"
+      },
+      {
+        "command": "codeFlea.prevInterestingPoint",
+        "title": "Go to the previous interesting point"
+      },
+      {
+        "command": "codeFlea.nextInterestingPoint",
+        "title": "Go to the next interesting point"
+      },
+      {
+        "command": "codeFlea.jump",
+        "title": "Jump to an interesting line"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.1.1",
+    "@types/mocha": "^5.2.7",
+    "@types/node": "^12.11.7",
+    "@types/vscode": "^1.41.0",
+    "glob": "^7.1.5",
+    "mocha": "^6.2.2",
+    "typescript": "^3.6.4",
+    "tslint": "^5.20.0",
+    "vscode-test": "^1.2.2"
+  }
+}
