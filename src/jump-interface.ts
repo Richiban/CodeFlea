@@ -52,16 +52,16 @@ export class JumpInterface {
             after: {
               margin: `0 0 0 ${offset}px`,
               height: `${this.config.decoration.height}px`,
-              width: `${this.config.decoration.width}px`
-            }
+              width: `${this.config.decoration.width}px`,
+            },
           });
         } else {
           return vscode.window.createTextEditorDecorationType({
             after: {
               margin: `0 0 0 0px`,
               height: `${this.config.decoration.height}px`,
-              width: `${this.config.decoration.width}px`
-            }
+              width: `${this.config.decoration.width}px`,
+            },
           });
         }
       },
@@ -80,6 +80,8 @@ export class JumpInterface {
     jumpLocations: JumpLocations,
     interfaceType: InterfaceType
   ): Promise<UserSelection> {
+    if (jumpLocations.length === 0) return { tag: "Cancelled" };
+
     this.addDecorations(editor, jumpLocations, interfaceType);
 
     const input = await readKey();
@@ -91,7 +93,7 @@ export class JumpInterface {
       return { tag: "Cancelled" };
     }
 
-    const loc = jumpLocations.find(x => x.jumpCode === input);
+    const loc = jumpLocations.find((x) => x.jumpCode === input);
 
     if (loc) {
       return { tag: "Ok", userSelection: loc };
@@ -107,9 +109,9 @@ export class JumpInterface {
   ) {
     const {
       _true: standardOptions,
-      _false: optionsWithNoSpaceToLeft
+      _false: optionsWithNoSpaceToLeft,
     } = linqish(jumpLocations)
-      .map(loc =>
+      .map((loc) =>
         this.createDecorationOptions(
           loc.lineNumber,
           loc.charIndex,
@@ -117,7 +119,7 @@ export class JumpInterface {
           interfaceType
         )
       )
-      .partition(loc => loc.range.start.character > 0);
+      .partition((loc) => loc.range.start.character > 0);
 
     editor.setDecorations(
       this.decorationTypes.get(1, interfaceType),
@@ -151,15 +153,15 @@ export class JumpInterface {
       renderOptions: {
         dark: {
           after: {
-            contentIconPath: this.jumpCodeImages.get(code, interfaceType)
-          }
+            contentIconPath: this.jumpCodeImages.get(code, interfaceType),
+          },
         },
         light: {
           after: {
-            contentIconPath: this.jumpCodeImages.get(code, interfaceType)
-          }
-        }
-      }
+            contentIconPath: this.jumpCodeImages.get(code, interfaceType),
+          },
+        },
+      },
     };
   };
 }

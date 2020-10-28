@@ -52,11 +52,29 @@ export class Linqish<T> implements Iterable<T> {
     return this.iter[Symbol.iterator]();
   }
 
+  skip(numToSkip: number): Linqish<T> {
+    const iter = this.iter;
+
+    return new Linqish(
+      (function* () {
+        let skipped = 0;
+
+        for (const x of iter) {
+          if (skipped < numToSkip) {
+            skipped++;
+          } else {
+            yield x;
+          }
+        }
+      })()
+    );
+  }
+
   pairwise(): Linqish<[T, T]> {
     const iter = this.iter;
 
     return new Linqish(
-      (function*() {
+      (function* () {
         const iterator = iter[Symbol.iterator]();
 
         let r = iterator.next();
@@ -76,7 +94,7 @@ export class Linqish<T> implements Iterable<T> {
     const iter = this.iter;
 
     return new Linqish(
-      (function*() {
+      (function* () {
         for (const x of iter) {
           yield f(x);
         }
@@ -88,7 +106,7 @@ export class Linqish<T> implements Iterable<T> {
     const iter = this.iter;
 
     return new Linqish(
-      (function*() {
+      (function* () {
         for (const x of iter) {
           if (f(x) === false) return;
 
@@ -103,7 +121,7 @@ export class Linqish<T> implements Iterable<T> {
     const i2 = iter2[Symbol.iterator]();
 
     return new Linqish(
-      (function*() {
+      (function* () {
         while (true) {
           const lResult = i1.next();
           const rResult = i2.next();
@@ -122,7 +140,7 @@ export class Linqish<T> implements Iterable<T> {
     const iter = this.iter;
 
     return new Linqish(
-      (function*() {
+      (function* () {
         for (const item of iter) {
           yield item;
         }
@@ -137,7 +155,7 @@ export class Linqish<T> implements Iterable<T> {
     const iter = this.iter;
 
     return new Linqish(
-      (function*() {
+      (function* () {
         for (const x of iter) {
           if (f(x)) {
             yield x;
@@ -147,13 +165,13 @@ export class Linqish<T> implements Iterable<T> {
     );
   }
 
-  alternateWith(iter2: Iterable<T>): Linqish<T> {
+  alternateWith<U>(iter2: Iterable<U>): Linqish<T|U> {
     const i1 = this.iter[Symbol.iterator]();
     const i2 = iter2[Symbol.iterator]();
 
     return new Linqish(
-      (function*() {
-        let currentIterator = i1;
+      (function* () {
+        let currentIterator: Iterator<T|U> = i1;
 
         const swapIterators = () => {
           if (currentIterator === i1) currentIterator = i2;
@@ -217,4 +235,4 @@ export function linqish<T>(i: Iterable<T>) {
   return new Linqish(i);
 }
 
-linqish.empty = new Linqish((function*() {})());
+linqish.empty = new Linqish((function* () {})());

@@ -2,8 +2,12 @@ import { Direction, linqish, Linqish } from "./common";
 import { getEditor, getCursorPosition, moveCursorTo } from "./editor";
 import { iterLines, lineIsMeaningless } from "./lines";
 
+const interestingChars = new Set(
+  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+);
+
 function isInteresting(char: string) {
-  return /[a-zA-Z0-9]/.test(char);
+  return interestingChars.has(char);
 }
 
 function isPunctuation(char: string) {
@@ -14,7 +18,7 @@ function* getInterestingPointsInText(
   s: string,
   options = {
     startingIndex: 0,
-    backwards: false
+    backwards: false,
   }
 ) {
   const advance = options.backwards
@@ -22,7 +26,7 @@ function* getInterestingPointsInText(
     : (x: number) => x + 1;
 
   let idx = options.startingIndex;
-  let shouldYield = false;
+  let shouldYield = true;
 
   do {
     idx = advance(idx);
@@ -40,7 +44,7 @@ function* getInterestingPointsInText(
 }
 
 export function moveToNextInterestingPoint(direction: Direction = "forwards") {
-  for (const point of getInterestingPoints(direction)) {
+  for (const point of getInterestingPoints(direction).skip(2)) {
     moveCursorTo(point.lineNumber, point.charIndex);
     return;
   }
@@ -52,7 +56,7 @@ export function getInterestingPoints(
   direction: Direction = "forwards"
 ): Linqish<Point> {
   return linqish(
-    (function*() {
+    (function* () {
       const cursorPosition = getCursorPosition();
       const document = getEditor()?.document;
 
@@ -68,7 +72,7 @@ export function getInterestingPoints(
 
         for (const c of getInterestingPointsInText(l.text, {
           backwards: false,
-          startingIndex: 0
+          startingIndex: 0,
         })) {
           if (
             l.lineNumber !== cursorPosition.line ||
