@@ -1,4 +1,5 @@
 {
+  "preview": true,
   "name": "codeflea",
   "displayName": "CodeFlea",
   "description": "An extension for intuitively moving the cursor around a code file",
@@ -6,12 +7,20 @@
   "repository": {
     "url": "https://github.com/Richiban/CodeFlea/"
   },
-  "version": "0.1.0",
+  "version": "0.1.1",
   "engines": {
     "vscode": "^1.41.0"
   },
   "categories": [
     "Other"
+  ],
+  "icon": "logo-small.png",
+  "keywords": [
+    "acejump",
+    "cursor",
+    "EasyMotion",
+    "focus",
+    "jump"
   ],
   "activationEvents": [
     "onCommand:codeFlea.nextInterestingLine",
