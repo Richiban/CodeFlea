@@ -148,8 +148,9 @@
     "@types/vscode": "^1.41.0",
     "glob": "^7.1.5",
     "mocha": "^6.2.2",
-    "typescript": "^3.6.4",
     "tslint": "^5.20.0",
+    "typescript": "^3.6.4",
+    "vsce": "^1.81.1",
     "vscode-test": "^1.2.2"
   }
 }
