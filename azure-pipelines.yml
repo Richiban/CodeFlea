@@ -37,3 +37,11 @@ steps:
     displayName: Run Tests
     env:
       DISPLAY: ":99.0"
+
+  - bash: |
+      echo ">>> Publish"
+      yarn deploy
+    displayName: Publish
+    condition: and(succeeded(), eq(variables['Agent.OS'], 'Linux'))
+    env:
+      VSCE_PAT: $(VSCE_PAT)
