@@ -2,9 +2,7 @@ import * as vscode from "vscode";
 
 export type JumpConfig = {
   characters: string;
-  wordSeparatorPattern: string;
   timeout: number;
-  centerLineAfterJump: boolean;
 };
 
 export type DecorationConfig = {
@@ -23,8 +21,6 @@ export type DecorationConfig = {
   fontSize: number;
   fontWeight: string;
   fontFamily: string;
-
-  upperCase: boolean;
 };
 
 export type Config = {
@@ -44,6 +40,6 @@ export function loadConfig(): Config {
 
   return {
     decoration: config.get<DecorationConfig>("decoration")!,
-    jump: config.get<JumpConfig>("jump")!
+    jump: config.get<JumpConfig>("jump")!,
   };
 }

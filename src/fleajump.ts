@@ -103,8 +103,6 @@ export class FleaJumper {
           chosenPoint.userSelection.lineNumber,
           chosenPoint.userSelection.charIndex
         );
-
-        if (this.config.jump.centerLineAfterJump) centerEditorOnCurrentLine();
       }
     } catch (reason) {
       if (!reason) reason = "Canceled!";
@@ -131,7 +129,7 @@ export class FleaJumper {
     ]): JumpLocation => ({
       jumpCode: c,
       lineNumber: l.lineNumber,
-      charIndex: l.charIndex
+      charIndex: l.charIndex,
     });
 
     return interestingPoints
@@ -157,12 +155,9 @@ export class FleaJumper {
     ]): JumpLocation => ({
       jumpCode: c,
       lineNumber: l.lineNumber,
-      charIndex: l.firstNonWhitespaceCharacterIndex
+      charIndex: l.firstNonWhitespaceCharacterIndex,
     });
 
-    return interestingLines
-      .zipWith(jumpCodes)
-      .map(toJumpLocation)
-      .toArray();
+    return interestingLines.zipWith(jumpCodes).map(toJumpLocation).toArray();
   };
 }
