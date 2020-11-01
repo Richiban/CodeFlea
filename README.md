@@ -13,7 +13,7 @@
 
 CodeFlea is a language-agnostic extension for VS Code that makes it easy and intuitive to move the cursor around within a code file.
 
-VS Code has excellent code navigation abilities for jumping to a particular file or member, but it doesn't really have much to say about moving around within a file.
+VS Code has excellent code navigation abilities for jumping to a particular file or member, but it doesn't really have much functionality for moving around within a file.
 
 CodeFlea addresses this by giving simple, intuitive commands for moving the cursor around in a way that should be applicable to any programming language, even written prose! It accomplishes this by identifying "interesting" points in the file based on the presence of characters relative to whitespace.
 
@@ -31,7 +31,7 @@ A _boring_ line is one that either:
 - is empty
 - contains nothing but punctuation
 
-In the following example code, "interesting" lines have been marked with the `¤` symbol to illustrate the positions.
+In the following example code the "interesting" lines have been illustrated.
 
     ┌─  public class C
     │   {
