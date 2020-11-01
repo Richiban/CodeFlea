@@ -17,7 +17,7 @@ VS Code has excellent code navigation abilities for jumping to a particular file
 
 CodeFlea addresses this by giving simple, intuitive commands for moving the cursor around in a way that should be applicable to any programming language, even written prose! It accomplishes this by identifying "interesting" points in the file based on the presence of characters relative to whitespace.
 
-![GitHub Logo](img/jump-interface.gif)
+![CodeFlea in action](https://raw.githubusercontent.com/Richiban/CodeFlea/main/docs/jump-interface.gif)
 
 The rules for figuring out the locations of interesting lines and interesting points are as follows:
 
