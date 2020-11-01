@@ -31,32 +31,32 @@ A _boring_ line is one that either:
 - is empty
 - contains nothing but punctuation
 
-In the following example code, "interesting" lines have been marked with the ░ symbol to illustrate the positions.
+In the following example code, "interesting" lines have been marked with the `¤` symbol to illustrate the positions.
 
-       ░public class C
-        {
-           ░public string A { get; set; }
-            public string B { get; set; }
-
-           ░public void M()
-            {
-               ░if (cond)
-                {
-                   ░var x = 4;
-                    var y = 5;
-                    var z = 6;
-
-                   ░DoSomething(x + y + z);
-                }
-               ░else
-                {
-                   ░DoSomethingElse(new D {
-                       ░E = "e",
-                        F = "f",
-                        G = "g"
-                    });
-
-                   ░Console.WriteLine("Did something else")
+    ┌─  public class C
+    │   {
+    ├─────  public string A { get; set; }
+    │       public string B { get; set; }
+    │
+    ├─────  public void M()
+    │       {
+    ├─────────  if (cond)
+    │           {
+    ├─────────────  var x = 4;
+    │               var y = 5;
+    │               var z = 6;
+    │
+    ├─────────────  DoSomething(x + y + z);
+    │           }
+    ├─────────  else
+    │           {
+    ├─────────────  DoSomethingElse(new D {
+    ├─────────────────  E = "e",
+    │                   F = "f",
+    │                   G = "g"
+    │               });
+    │
+    └─────────────  Console.WriteLine("Did something else")
                 }
             }
         }
@@ -71,8 +71,10 @@ _Interesting points_ within a line are defined as:
 
 Example:
 
-    ░       ░    ░      ░  ░  ░             ░    ░  ░
-    var x = Some.Method(a, b, AnotherMethod("c", 4))
+```
+┌───────┬────┬──────┬──┬──┬──────────────┬───┬─┐
+var x = Some.Method(a, b, AnotherMethod("c", 4))
+```
 
 There are commands for jumping to the next/prev interesting point in the file.
 
