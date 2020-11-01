@@ -43,9 +43,9 @@ function* getInterestingPointsInText(
   } while (true);
 }
 
-export function moveToNextInterestingPoint(direction: Direction = "forwards") {
+export async function moveToNextInterestingPoint(direction: Direction = "forwards") {
   for (const point of getInterestingPoints(direction).skip(2)) {
-    moveCursorTo(point.lineNumber, point.charIndex);
+    await moveCursorTo(point.lineNumber, point.charIndex);
     return;
   }
 }

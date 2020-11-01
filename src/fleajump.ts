@@ -1,7 +1,7 @@
 import { Config } from "./config";
 import { JumpInterface } from "./jump-interface";
 import * as vscode from "vscode";
-import { moveCursorTo, centerEditorOnCurrentLine } from "./editor";
+import { moveCursorTo } from "./editor";
 import { JumpLocations, JumpLocation, getJumpCodes } from "./common";
 import { getInterestingLines } from "./lines";
 import { getInterestingPoints } from "./points";
@@ -73,37 +73,9 @@ export class FleaJumper {
     const messageDisposable = vscode.window.setStatusBarMessage(msg);
 
     try {
-      const jumpLines = this.findJumpLines(editor);
+      await this.jumpToLinePhase(editor);
 
-      const chosenLine = await this.jumpInterface.getUserSelection(
-        editor,
-        jumpLines,
-        "primary"
-      );
-
-      if (chosenLine.tag === "Cancelled") return;
-
-      if (chosenLine.tag === "Ok") {
-        moveCursorTo(
-          chosenLine.userSelection.lineNumber,
-          chosenLine.userSelection.charIndex
-        );
-      }
-
-      const jumpPoints = this.findJumpPoints(editor);
-
-      const chosenPoint = await this.jumpInterface.getUserSelection(
-        editor,
-        jumpPoints,
-        "secondary"
-      );
-
-      if (chosenPoint.tag === "Ok") {
-        moveCursorTo(
-          chosenPoint.userSelection.lineNumber,
-          chosenPoint.userSelection.charIndex
-        );
-      }
+      await this.jumpToPointPhase(editor);
     } catch (reason) {
       if (!reason) reason = "Canceled!";
       vscode.window.setStatusBarMessage(`CodeFlea: ${reason}`, 2000);
@@ -112,6 +84,42 @@ export class FleaJumper {
       messageDisposable.dispose();
     }
   }
+
+  private jumpToLinePhase = async (editor: vscode.TextEditor) => {
+    const jumpLines = this.findJumpLines(editor);
+
+    const chosenLine = await this.jumpInterface.getUserSelection(
+      editor,
+      jumpLines,
+      "primary"
+    );
+
+    if (chosenLine.tag === "Cancelled") return;
+
+    if (chosenLine.tag === "Ok") {
+      moveCursorTo(
+        chosenLine.userSelection.lineNumber,
+        chosenLine.userSelection.charIndex
+      );
+    }
+  };
+
+  private jumpToPointPhase = async (editor: vscode.TextEditor) => {
+    const jumpPoints = this.findJumpPoints(editor);
+
+    const chosenPoint = await this.jumpInterface.getUserSelection(
+      editor,
+      jumpPoints,
+      "secondary"
+    );
+
+    if (chosenPoint.tag === "Ok") {
+      moveCursorTo(
+        chosenPoint.userSelection.lineNumber,
+        chosenPoint.userSelection.charIndex
+      );
+    }
+  };
 
   private findJumpPoints = (editor: vscode.TextEditor): JumpLocations => {
     const interestingPoints = getInterestingPoints();
