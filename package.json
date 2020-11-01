@@ -141,6 +141,17 @@
         "command": "codeFlea.jump",
         "title": "Jump to an interesting line"
       }
+    ],
+    "keybindings": [
+      {
+        "command": "codeFlea.input.cancel",
+        "key": "escape",
+        "when": "editorTextFocus && codeFleaInput"
+      },
+      {
+        "key": "ctrl+'",
+        "command": "codeFlea.jump"
+      }
     ]
   },
   "scripts": {

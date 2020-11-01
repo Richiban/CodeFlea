@@ -1,5 +1,16 @@
 # CodeFlea
 
+## Quick reference
+
+1. Press `Ctrl` + `'` to open the jump interface on interesting lines
+1. Press the corresponding jumpcode to move the cursor to the desired line. Interesting points will now be highlighted
+   - Pressing `Esc` will cancel.
+   - Pressing `Space` will leave the cursor where it is and move to the interesting points
+1. Press the corresponding jumpcode to move the cursor to the desired point
+   - Pressing `Esc` or `Space` will leave the cursor where it is
+
+## Introduction
+
 CodeFlea is a language-agnostic extension for VS Code that makes it easy and intuitive to move the cursor around within a code file.
 
 VS Code has excellent code navigation abilities for jumping to a particular file or member, but it doesn't really have much to say about moving around within a file.
