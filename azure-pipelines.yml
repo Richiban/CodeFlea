@@ -39,8 +39,7 @@ steps:
 
   - bash: |
       echo ">>> Publish"
-      echo "$(VSCE_PAT)"
-      yarn publish
+      yarn publish -- -p "$(VSCE_PAT)"
     displayName: Publish
     condition: and(succeeded(), eq(variables['Agent.OS'], 'Linux'))
     env:
