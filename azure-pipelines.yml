@@ -16,6 +16,10 @@ pool:
   vmImage: $(imageName)
 
 steps:
+  - task: GitVersion@5
+    inputs:
+      runtime: "core"
+
   - task: NodeTool@0
     inputs:
       versionSpec: "10.x"
