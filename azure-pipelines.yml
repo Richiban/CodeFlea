@@ -3,25 +3,18 @@ trigger:
     include:
       - main
 
+variables:
+  isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+
 strategy:
   matrix:
     linux:
-      imageName: "ubuntu-16.04"
-    mac:
-      imageName: "macos-10.13"
-    windows:
-      imageName: "vs2017-win2016"
+      imageName: "ubuntu-latest"
 
 pool:
   vmImage: $(imageName)
 
 steps:
-  - task: UseDotNet@2
-    displayName: "Install .NET 5"
-    inputs:
-      version: "5.0.x"
-      includePreviewVersions: true # Required for preview versions
-
   - task: GitVersion@5
     inputs:
       runtime: "core"
