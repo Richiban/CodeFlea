@@ -1,9 +1,17 @@
 import * as vscode from "vscode";
-import { Change, Direction, DirectionOrNearest, linqish } from "./common";
+import {
+  Change,
+  Direction,
+  Indentation,
+  DirectionOrNearest,
+  linqish,
+} from "./common";
 import {
   getCursorPosition,
   getEditor,
-  moveCursorToBeginningOfLine
+  moveCursorToBeginningOfLine,
+  selectToBeginningOfLine,
+  moveCursorToNextBlankLine,
 } from "./editor";
 
 export function lineIsMeaningless(line: vscode.TextLine) {
@@ -211,7 +219,7 @@ export function moveToChangeOfIndentation(
   }
 }
 
-export function* getNextInterestingLines(direction: Direction) {
+export function* getNextBlocks(direction: Direction) {
   const cursorPosition = getCursorPosition();
   const document = getEditor()?.document;
 
@@ -232,7 +240,7 @@ export function* getNextInterestingLines(direction: Direction) {
 
 export type LineEnumerationPattern = "alternate" | "sequential";
 
-export function getInterestingLines(
+export function getBlocks(
   pattern: LineEnumerationPattern,
   direction: Direction,
   bounds: vscode.Range
@@ -279,8 +287,29 @@ export function getInterestingLines(
   }
 }
 
-export function moveToNextInterestingLine(direction: Direction) {
-  for (const line of getNextInterestingLines(direction)) {
+export function extendBlockSelection(
+  direction: Direction,
+  indentation: Indentation
+) {
+  for (const line of getNextBlocks(direction)) {
+    selectToBeginningOfLine(line);
+    return;
+  }
+}
+
+export function moveToNextBlankLine(direction: Direction) {
+  if (direction === "forwards") {
+    moveCursorToNextBlankLine((x) => x + 1);
+  } else {
+    moveCursorToNextBlankLine((x) => x - 1);
+  }
+}
+
+export function moveToNextBlock(
+  direction: Direction,
+  indentation: Indentation
+) {
+  for (const line of getNextBlocks(direction)) {
     moveCursorToBeginningOfLine(line);
     return;
   }

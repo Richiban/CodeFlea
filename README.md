@@ -15,25 +15,16 @@ CodeFlea is a language-agnostic extension for VS Code that makes it easy and int
 
 VS Code has excellent code navigation abilities for jumping to a particular file or member, but it doesn't really have much functionality for moving around within a file.
 
-CodeFlea addresses this by giving simple, intuitive commands for moving the cursor around in a way that should be applicable to any programming language, even written prose! It accomplishes this by identifying "interesting" points in the file based on the presence of characters relative to whitespace.
+CodeFlea addresses this by giving simple, intuitive commands for moving the cursor around in a way that should be applicable to any programming language, even written prose! It accomplishes this by identifying "interesting" points within the file based on blocks of code and usage of punctuation and operators.
 
 ![CodeFlea in action](https://raw.githubusercontent.com/Richiban/CodeFlea/main/docs/jump-interface.gif)
 
-The rules for figuring out the locations of interesting lines and interesting points are as follows:
+A block of code is defined as either:
 
-An interesting line is defined as a line that (all of the below):
+- being at a different indentation level from its surroundings
+- being surrounded by "empty" lines (where empty means either containing only punctuation or nothing at all)
 
-- Is not "boring" (see below)
-- Is immediately preceded by either:
-  - A boring line
-  - A change of indentation
-
-A _boring_ line is one that either:
-
-- is empty
-- contains nothing but punctuation
-
-In the following example code the "interesting" lines have been illustrated.
+Example 1: In the following example code the "interesting" lines have been illustrated.
 
     ┌─  public class C
     │   {
@@ -63,7 +54,20 @@ In the following example code the "interesting" lines have been illustrated.
             }
         }
 
-There will be keyboard shortcuts for jumping to the next/prev interesting line in the file, as well as for jumping to the next/prev interesting line at the same indentation level
+Due to the fact that CodeFlea is entirely based on whitespace and operators it should work in most programming languages without configuration:
+
+    ┌── def cheeseshop(kind, *arguments, **keywords):
+    ├────── print("-- Do you have any", kind, "?")
+    │       print("-- I'm sorry, we're all out of", kind
+    │
+    ├────── for arg in arguments:
+    ├────────── print(arg)
+    │
+    ├────── print("-" * 40)
+    │       for kw in keywords:
+    └────────── print(kw, ":", keywords[kw])
+
+There are commands for jumping to the next/prev interesting line in the file, as well as for jumping to the next/prev interesting line at the same indentation level
 
 _Interesting points_ within a line are defined as:
 
@@ -94,8 +98,8 @@ The commands can be broadly separated into three categories:
 
 The complete list of commands is:
 
-- nextInterestingLine
-- prevInterestingLine
+- nextBlock
+- prevBlock
 - nearestLineOfLesserIndentation
 - nearestLineOfGreaterIndentation
 - prevLineOfLesserIndentation
@@ -106,3 +110,8 @@ The complete list of commands is:
 - nextLineOfSameIndentation
 - prevInterestingPoint
 - nextInterestingPoint
+
+## Building and running
+
+- Run `npm install` in your terminal to install dependencies
+- Run the `Run Extension` target in the Debug View.

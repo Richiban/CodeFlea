@@ -23,15 +23,31 @@
     "jump"
   ],
   "activationEvents": [
-    "onCommand:codeFlea.nextInterestingLine",
-    "onCommand:codeFlea.prevInterestingLine",
-    "onCommand:codeFlea.nearestLineOfLesserIndentation",
+    "onCommand:",
+    "onCommand:",
+    "onCommand:",
+    "onCommand:",
+    "onCommand:",
+    "onCommand:",
+    "onCommand:",
+    "onCommand:",
+    "onCommand:",
+    "onCommand:codeFlea.extendBlockSelection",
+    "onCommand:codeFlea.extendBlockSelectionBackwards",
+    "onCommand:codeFlea.moveToNextBlankLine",
+    "onCommand:codeFlea.moveToNextBlock",
+    "onCommand:codeFlea.moveToNextBlockOfSameIndentation",
+    "onCommand:codeFlea.moveToPrevBlock",
+    "onCommand:codeFlea.moveToPrevBlockOfSameIndentation",
+    "onCommand:codeFlea.moveToPrevBlankLine",
     "onCommand:codeFlea.nearestLineOfGreaterIndentation",
-    "onCommand:codeFlea.prevLineOfSameIndentation",
+    "onCommand:codeFlea.nearestLineOfLesserIndentation",
+    "onCommand:codeFlea.nextInterestingPoint",
+    "onCommand:codeFlea.nextLineOfGreaterIndentation",
     "onCommand:codeFlea.nextLineOfSameIndentation",
     "onCommand:codeFlea.prevInterestingPoint",
-    "onCommand:codeFlea.nextInterestingPoint",
-    "onCommand:codeFlea.jump"
+    "onCommand:codeFlea.prevLineOfLesserIndentation",
+    "onCommand:codeFlea.prevLineOfSameIndentation"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -106,12 +122,28 @@
     },
     "commands": [
       {
-        "command": "codeFlea.nextInterestingLine",
-        "title": "Next interesting line"
+        "command": "codeFlea.moveToNextBlock",
+        "title": "Move to next block"
       },
       {
-        "command": "codeFlea.prevInterestingLine",
-        "title": "Previous interesting line"
+        "command": "codeFlea.moveToPrevBlock",
+        "title": "Move to previous block"
+      },
+      {
+        "command": "codeFlea.extendBlockSelection",
+        "title": "Extend block selection"
+      },
+      {
+        "command": "codeFlea.extendBlockSelectionBackwards",
+        "title": "Extend block selection backwards"
+      },
+      {
+        "command": "codeFlea.moveToNextBlankLine",
+        "title": "Move to the next blank line"
+      },
+      {
+        "command": "codeFlea.moveToPrevBlankLine",
+        "title": "Move to the previous blank line"
       },
       {
         "command": "codeFlea.nearestLineOfLesserIndentation",
@@ -139,7 +171,7 @@
       },
       {
         "command": "codeFlea.jump",
-        "title": "Jump to an interesting line"
+        "title": "Jump to an interesting point"
       }
     ],
     "keybindings": [
@@ -151,6 +183,22 @@
       {
         "key": "ctrl+'",
         "command": "codeFlea.jump"
+      },
+      {
+        "key": "alt+pagedown",
+        "command": "codeFlea.nextBlock"
+      },
+      {
+        "key": "alt+pageup",
+        "command": "codeFlea.prevBlock"
+      },
+      {
+        "key": "alt+end",
+        "command": "codeFlea.nextInterestingPoint"
+      },
+      {
+        "key": "alt+home",
+        "command": "codeFlea.prevInterestingPoint"
       }
     ]
   },

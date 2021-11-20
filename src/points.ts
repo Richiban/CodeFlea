@@ -10,41 +10,38 @@ function isInteresting(char: string) {
   return interestingChars.has(char);
 }
 
-function isPunctuation(char: string) {
-  return !/[a-zA-Z0-9\s]/.test(char);
-}
+function widen<T>(val: T) { return val; }
 
 function* getInterestingPointsInText(
   s: string,
   options = {
     startingIndex: 0,
-    backwards: false,
+    direction: widen<Direction>("backwards")
   }
 ) {
-  const advance = options.backwards
+  const advance = options.direction === "backwards"
     ? (x: number) => x - 1
     : (x: number) => x + 1;
 
   let idx = options.startingIndex;
-  let shouldYield = true;
 
   do {
     idx = advance(idx);
 
     if (idx < 0 || idx > s.length) return;
-    if (idx === 0 || idx === s.length) yield idx;
+    if (idx === 0 || idx === s.length) {
+       yield idx
+       return
+    }
 
-    if (shouldYield && isInteresting(s[idx])) {
+    if (!isInteresting(s[idx - 1]) && isInteresting(s[idx])) {
       yield idx;
-      shouldYield = false;
-    } else if (isPunctuation(s[idx])) {
-      shouldYield = true;
     }
   } while (true);
 }
 
 export async function moveToNextInterestingPoint(direction: Direction = "forwards") {
-  for (const point of getInterestingPoints(direction).skip(2)) {
+  for (const point of getInterestingPoints(direction)) {
     await moveCursorTo(point.lineNumber, point.charIndex);
     return;
   }
@@ -71,8 +68,8 @@ export function getInterestingPoints(
         if (lineIsMeaningless(l)) return;
 
         for (const c of getInterestingPointsInText(l.text, {
-          backwards: false,
-          startingIndex: 0,
+          direction: direction,
+          startingIndex: cursorPosition.character,
         })) {
           if (
             l.lineNumber !== cursorPosition.line ||

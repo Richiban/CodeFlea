@@ -3,7 +3,7 @@ import { JumpInterface } from "./jump-interface";
 import * as vscode from "vscode";
 import { moveCursorTo } from "./editor";
 import { JumpLocations, JumpLocation, getJumpCodes } from "./common";
-import { getInterestingLines } from "./lines";
+import { getBlocks } from "./lines";
 import { getInterestingPoints } from "./points";
 
 export class FleaJumper {
@@ -151,7 +151,7 @@ export class FleaJumper {
     const bounds = editor.visibleRanges[0];
     const jumpCodes = getJumpCodes(this.config);
 
-    const interestingLines = getInterestingLines(
+    const blocks = getBlocks(
       "alternate",
       "forwards",
       bounds
@@ -166,6 +166,6 @@ export class FleaJumper {
       charIndex: l.firstNonWhitespaceCharacterIndex,
     });
 
-    return interestingLines.zipWith(jumpCodes).map(toJumpLocation).toArray();
+    return blocks.zipWith(jumpCodes).map(toJumpLocation).toArray();
   };
 }

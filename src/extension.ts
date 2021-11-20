@@ -3,9 +3,11 @@
 import * as vscode from "vscode";
 import { FleaJumper } from "./fleajump";
 import {
-  moveToNextInterestingLine,
+  moveToNextBlock,
   moveToChangeOfIndentation,
-  moveToLineOfSameIndentation
+  moveToLineOfSameIndentation,
+  extendBlockSelection,
+  moveToNextBlankLine,
 } from "./lines";
 import { moveToNextInterestingPoint } from "./points";
 import { loadConfig } from "./config";
@@ -14,14 +16,53 @@ import { loadConfig } from "./config";
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
-    vscode.commands.registerCommand("codeFlea.nextInterestingLine", () =>
-      moveToNextInterestingLine("forwards")
+    vscode.commands.registerCommand("codeFlea.moveToNextBlock", () =>
+      moveToNextBlock("forwards", "any-indentation")
     )
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand("codeFlea.prevInterestingLine", () =>
-      moveToNextInterestingLine("backwards")
+    vscode.commands.registerCommand("codeFlea.extendBlockSelection", () =>
+      extendBlockSelection("forwards", "same-indentation")
+    )
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "codeFlea.moveToNextBlockOfSameIndentation",
+      () => moveToNextBlock("forwards", "same-indentation")
+    )
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("codeFlea.moveToPrevBlock", () =>
+      moveToNextBlock("backwards", "any-indentation")
+    )
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "codeFlea.moveToPrevBlockOfSameIndentation",
+      () => moveToNextBlock("backwards", "same-indentation")
+    )
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "codeFlea.extendBlockSelectionBackwards",
+      () => extendBlockSelection("backwards", "same-indentation")
+    )
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("codeFlea.moveToNextBlankLine", () =>
+      moveToNextBlankLine("forwards")
+    )
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("codeFlea.moveToPrevBlankLine", () =>
+      moveToNextBlankLine("backwards")
     )
   );
 
@@ -79,7 +120,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   const fleaJumper = new FleaJumper(context, loadConfig());
 
-  vscode.workspace.onDidChangeConfiguration(_ => {
+  vscode.workspace.onDidChangeConfiguration((_) => {
     fleaJumper.updateConfig(loadConfig());
   });
 }

@@ -6,6 +6,12 @@ export type Change = "greaterThan" | "lessThan";
 
 export type Direction = "forwards" | "backwards";
 
+export type Indentation =
+  | "greater-indentation"
+  | "less-indentation"
+  | "same-indentation"
+  | "any-indentation";
+
 export type JumpLocations = JumpLocation[];
 
 export type JumpLocation = {
@@ -165,13 +171,13 @@ export class Linqish<T> implements Iterable<T> {
     );
   }
 
-  alternateWith<U>(iter2: Iterable<U>): Linqish<T|U> {
+  alternateWith<U>(iter2: Iterable<U>): Linqish<T | U> {
     const i1 = this.iter[Symbol.iterator]();
     const i2 = iter2[Symbol.iterator]();
 
     return new Linqish(
       (function* () {
-        let currentIterator: Iterator<T|U> = i1;
+        let currentIterator: Iterator<T | U> = i1;
 
         const swapIterators = () => {
           if (currentIterator === i1) currentIterator = i2;
