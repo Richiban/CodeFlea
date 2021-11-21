@@ -29,14 +29,22 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     vscode.commands.registerCommand(
-      "codeFlea.moveToNextBlockOfSameIndentation",
-      () => moveToNextBlock("forwards", "same-indentation")
+      "codeFlea.moveToNextBlockOfLesserIndentation",
+      () => moveToNextBlock("forwards", "less-indentation")
     )
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand("codeFlea.moveToPrevBlock", () =>
-      moveToNextBlock("backwards", "any-indentation")
+    vscode.commands.registerCommand(
+      "codeFlea.moveToPrevBlockOfLesserIndentation",
+      () => moveToNextBlock("backwards", "less-indentation")
+    )
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "codeFlea.moveToNextBlockOfSameIndentation",
+      () => moveToNextBlock("forwards", "same-indentation")
     )
   );
 
@@ -44,6 +52,26 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(
       "codeFlea.moveToPrevBlockOfSameIndentation",
       () => moveToNextBlock("backwards", "same-indentation")
+    )
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "codeFlea.moveToNextBlockOfGreaterIndentation",
+      () => moveToNextBlock("forwards", "greater-indentation")
+    )
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "codeFlea.moveToPrevBlockOfGreaterIndentation",
+      () => moveToNextBlock("backwards", "greater-indentation")
+    )
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("codeFlea.moveToPrevBlock", () =>
+      moveToNextBlock("backwards", "any-indentation")
     )
   );
 

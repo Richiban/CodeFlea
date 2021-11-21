@@ -36,10 +36,14 @@
     "onCommand:codeFlea.extendBlockSelectionBackwards",
     "onCommand:codeFlea.moveToNextBlankLine",
     "onCommand:codeFlea.moveToNextBlock",
-    "onCommand:codeFlea.moveToNextBlockOfSameIndentation",
     "onCommand:codeFlea.moveToPrevBlock",
-    "onCommand:codeFlea.moveToPrevBlockOfSameIndentation",
     "onCommand:codeFlea.moveToPrevBlankLine",
+    "onCommand:codeFlea.moveToNextBlockOfLesserIndentation",
+    "onCommand:codeFlea.moveToPrevBlockOfLesserIndentation",
+    "onCommand:codeFlea.moveToNextBlockOfSameIndentation",
+    "onCommand:codeFlea.moveToPrevBlockOfSameIndentation",
+    "onCommand:codeFlea.moveToNextBlockOfGreaterIndentation",
+    "onCommand:codeFlea.moveToPrevBlockOfGreaterIndentation",
     "onCommand:codeFlea.nearestLineOfGreaterIndentation",
     "onCommand:codeFlea.nearestLineOfLesserIndentation",
     "onCommand:codeFlea.nextInterestingPoint",
@@ -130,6 +134,30 @@
         "title": "Move to previous block"
       },
       {
+        "command": "codeFlea.moveToNextBlockOfLesserIndentation",
+        "title": "Move to next block of lesser indentation"
+      },
+      {
+        "command": "codeFlea.moveToPrevBlockOfLesserIndentation",
+        "title": "Move to previous block of lesser indentation"
+      },
+      {
+        "command": "codeFlea.moveToNextBlockOfSameIndentation",
+        "title": "Move to next block of same indentation"
+      },
+      {
+        "command": "codeFlea.moveToPrevBlockOfSameIndentation",
+        "title": "Move to previous block of same indentation"
+      },
+      {
+        "command": "codeFlea.moveToNextBlockOfGreaterIndentation",
+        "title": "Move to next block of greater indentation"
+      },
+      {
+        "command": "codeFlea.moveToPrevBlockOfGreaterIndentation",
+        "title": "Move to previous block of greater indentation"
+      },
+      {
         "command": "codeFlea.extendBlockSelection",
         "title": "Extend block selection"
       },
@@ -185,19 +213,51 @@
         "command": "codeFlea.jump"
       },
       {
-        "key": "alt+pagedown",
-        "command": "codeFlea.nextBlock"
+        "key": "alt+n",
+        "command": "codeFlea.moveToNextBlockOfLesserIndentation"
       },
       {
-        "key": "alt+pageup",
-        "command": "codeFlea.prevBlock"
+        "key": "alt+l",
+        "command": "codeFlea.moveToPrevBlockOfLesserIndentation"
       },
       {
-        "key": "alt+end",
+        "key": "alt+e",
+        "command": "codeFlea.moveToNextBlockOfSameIndentation"
+      },
+      {
+        "key": "alt+u",
+        "command": "codeFlea.moveToPrevBlockOfSameIndentation"
+      },
+      {
+        "key": "alt+shift+e",
+        "command": "codeFlea.extendBlockSelection"
+      },
+      {
+        "key": "alt+shift+u",
+        "command": "codeFlea.extendBlockSelectionBackwards"
+      },
+      {
+        "key": "alt+i",
+        "command": "codeFlea.moveToNextBlockOfGreaterIndentation"
+      },
+      {
+        "key": "alt+y",
+        "command": "codeFlea.moveToPrevBlockOfGreaterIndentation"
+      },
+      {
+        "key": "alt+.",
+        "command": "codeFlea.moveToNextBlock"
+      },
+      {
+        "key": "alt+m",
+        "command": "codeFlea.moveToPrevBlock"
+      },
+      {
+        "key": "alt+o",
         "command": "codeFlea.nextInterestingPoint"
       },
       {
-        "key": "alt+home",
+        "key": "alt+h",
         "command": "codeFlea.prevInterestingPoint"
       }
     ]
