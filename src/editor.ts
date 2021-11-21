@@ -39,6 +39,19 @@ export function selectToBeginningOfLine(
   editor.revealRange(new vscode.Range(position, fromPosition));
 }
 
+export function selectToEndOfLine(
+  fromPosition: vscode.Position,
+  line: vscode.TextLine
+) {
+  const editor = getEditor();
+
+  const position = new vscode.Position(line.lineNumber, line.text.length);
+
+  editor.selection = new vscode.Selection(position, fromPosition);
+
+  editor.revealRange(new vscode.Range(fromPosition, position));
+}
+
 export function getNonActiveSelectionPoint() {
   const editor = getEditor();
 

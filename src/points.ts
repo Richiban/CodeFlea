@@ -1,6 +1,6 @@
 import { Direction, linqish, Linqish } from "./common";
 import { getEditor, getCursorPosition, moveCursorTo } from "./editor";
-import { iterLines, lineIsMeaningless } from "./lines";
+import { iterLines, lineIsStopLine } from "./lines";
 
 const interestingChars = new Set(
   "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -10,18 +10,21 @@ function isInteresting(char: string) {
   return interestingChars.has(char);
 }
 
-function widen<T>(val: T) { return val; }
+function widen<T>(val: T) {
+  return val;
+}
 
 function* getInterestingPointsInText(
   s: string,
   options = {
     startingIndex: 0,
-    direction: widen<Direction>("backwards")
+    direction: widen<Direction>("backwards"),
   }
 ) {
-  const advance = options.direction === "backwards"
-    ? (x: number) => x - 1
-    : (x: number) => x + 1;
+  const advance =
+    options.direction === "backwards"
+      ? (x: number) => x - 1
+      : (x: number) => x + 1;
 
   let idx = options.startingIndex;
 
@@ -30,8 +33,8 @@ function* getInterestingPointsInText(
 
     if (idx < 0 || idx > s.length) return;
     if (idx === 0 || idx === s.length) {
-       yield idx
-       return
+      yield idx;
+      return;
     }
 
     if (!isInteresting(s[idx - 1]) && isInteresting(s[idx])) {
@@ -40,7 +43,7 @@ function* getInterestingPointsInText(
   } while (true);
 }
 
-export async function moveToNextInterestingPoint(direction: Direction = "forwards") {
+export async function nextInterestingPoint(direction: Direction = "forwards") {
   for (const point of getInterestingPoints(direction)) {
     await moveCursorTo(point.lineNumber, point.charIndex);
     return;
@@ -65,7 +68,7 @@ export function getInterestingPoints(
         direction,
         false
       )) {
-        if (lineIsMeaningless(l)) return;
+        if (lineIsStopLine(l)) return;
 
         for (const c of getInterestingPointsInText(l.text, {
           direction: direction,

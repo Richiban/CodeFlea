@@ -100,14 +100,14 @@ The complete list of commands is:
 
 - nextBlock
 - prevBlock
-- nearestLineOfLesserIndentation
-- nearestLineOfGreaterIndentation
-- prevLineOfLesserIndentation
-- nextLineOfLesserIndentation
-- prevLineOfGreaterIndentation
-- nextLineOfGreaterIndentation
-- prevLineOfSameIndentation
-- nextLineOfSameIndentation
+- nearestOuterLine
+- nearestInnerLine
+- prevOuterLine
+- nextOuterLine
+- prevInnerLine
+- nextInnerLine
+- prevSameLine
+- nextSameLine
 - prevInterestingPoint
 - nextInterestingPoint
 

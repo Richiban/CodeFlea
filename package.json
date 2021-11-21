@@ -34,24 +34,24 @@
     "onCommand:",
     "onCommand:codeFlea.extendBlockSelection",
     "onCommand:codeFlea.extendBlockSelectionBackwards",
-    "onCommand:codeFlea.moveToNextBlankLine",
-    "onCommand:codeFlea.moveToNextBlock",
-    "onCommand:codeFlea.moveToPrevBlock",
-    "onCommand:codeFlea.moveToPrevBlankLine",
-    "onCommand:codeFlea.moveToNextBlockOfLesserIndentation",
-    "onCommand:codeFlea.moveToPrevBlockOfLesserIndentation",
-    "onCommand:codeFlea.moveToNextBlockOfSameIndentation",
-    "onCommand:codeFlea.moveToPrevBlockOfSameIndentation",
-    "onCommand:codeFlea.moveToNextBlockOfGreaterIndentation",
-    "onCommand:codeFlea.moveToPrevBlockOfGreaterIndentation",
-    "onCommand:codeFlea.nearestLineOfGreaterIndentation",
-    "onCommand:codeFlea.nearestLineOfLesserIndentation",
+    "onCommand:codeFlea.nextBlankLine",
+    "onCommand:codeFlea.nextBlock",
+    "onCommand:codeFlea.prevBlock",
+    "onCommand:codeFlea.prevBlankLine",
+    "onCommand:codeFlea.nextOuterBlock",
+    "onCommand:codeFlea.prevOuterBlock",
+    "onCommand:codeFlea.nextSameBlock",
+    "onCommand:codeFlea.prevSameBlock",
+    "onCommand:codeFlea.nextInnerBlock",
+    "onCommand:codeFlea.prevInnerBlock",
+    "onCommand:codeFlea.nearestInnerLine",
+    "onCommand:codeFlea.nearestOuterLine",
     "onCommand:codeFlea.nextInterestingPoint",
-    "onCommand:codeFlea.nextLineOfGreaterIndentation",
-    "onCommand:codeFlea.nextLineOfSameIndentation",
+    "onCommand:codeFlea.nextInnerLine",
+    "onCommand:codeFlea.nextSameLine",
     "onCommand:codeFlea.prevInterestingPoint",
-    "onCommand:codeFlea.prevLineOfLesserIndentation",
-    "onCommand:codeFlea.prevLineOfSameIndentation"
+    "onCommand:codeFlea.prevOuterLine",
+    "onCommand:codeFlea.prevSameLine"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -126,36 +126,36 @@
     },
     "commands": [
       {
-        "command": "codeFlea.moveToNextBlock",
+        "command": "codeFlea.nextBlock",
         "title": "Move to next block"
       },
       {
-        "command": "codeFlea.moveToPrevBlock",
+        "command": "codeFlea.prevBlock",
         "title": "Move to previous block"
       },
       {
-        "command": "codeFlea.moveToNextBlockOfLesserIndentation",
-        "title": "Move to next block of lesser indentation"
+        "command": "codeFlea.nextOuterBlock",
+        "title": "Move to next block at a higher level"
       },
       {
-        "command": "codeFlea.moveToPrevBlockOfLesserIndentation",
-        "title": "Move to previous block of lesser indentation"
+        "command": "codeFlea.prevOuterBlock",
+        "title": "Move to previous block at a higher level"
       },
       {
-        "command": "codeFlea.moveToNextBlockOfSameIndentation",
-        "title": "Move to next block of same indentation"
+        "command": "codeFlea.nextSameBlock",
+        "title": "Move to next block at the same level"
       },
       {
-        "command": "codeFlea.moveToPrevBlockOfSameIndentation",
-        "title": "Move to previous block of same indentation"
+        "command": "codeFlea.prevSameBlock",
+        "title": "Move to previous block at the same level"
       },
       {
-        "command": "codeFlea.moveToNextBlockOfGreaterIndentation",
-        "title": "Move to next block of greater indentation"
+        "command": "codeFlea.nextInnerBlock",
+        "title": "Move to next block at a lower level"
       },
       {
-        "command": "codeFlea.moveToPrevBlockOfGreaterIndentation",
-        "title": "Move to previous block of greater indentation"
+        "command": "codeFlea.prevInnerBlock",
+        "title": "Move to previous block at a lower level"
       },
       {
         "command": "codeFlea.extendBlockSelection",
@@ -166,27 +166,27 @@
         "title": "Extend block selection backwards"
       },
       {
-        "command": "codeFlea.moveToNextBlankLine",
+        "command": "codeFlea.nextBlankLine",
         "title": "Move to the next blank line"
       },
       {
-        "command": "codeFlea.moveToPrevBlankLine",
+        "command": "codeFlea.prevBlankLine",
         "title": "Move to the previous blank line"
       },
       {
-        "command": "codeFlea.nearestLineOfLesserIndentation",
-        "title": "Go to nearest line of lesser indentation"
+        "command": "codeFlea.nearestOuterLine",
+        "title": "Go to nearest line at a higher level"
       },
       {
-        "command": "codeFlea.nearestLineOfGreaterIndentation",
-        "title": "Go to nearest line of greater indentation"
+        "command": "codeFlea.nearestInnerLine",
+        "title": "Go to nearest line at a lower level"
       },
       {
-        "command": "codeFlea.prevLineOfSameIndentation",
+        "command": "codeFlea.prevSameLine",
         "title": "Go to the previous line of the same indentation"
       },
       {
-        "command": "codeFlea.nextLineOfSameIndentation",
+        "command": "codeFlea.nextSameLine",
         "title": "Go to the next line of the same indentation"
       },
       {
@@ -214,19 +214,19 @@
       },
       {
         "key": "alt+n",
-        "command": "codeFlea.moveToNextBlockOfLesserIndentation"
+        "command": "codeFlea.nextOuterBlock"
       },
       {
         "key": "alt+l",
-        "command": "codeFlea.moveToPrevBlockOfLesserIndentation"
+        "command": "codeFlea.prevOuterBlock"
       },
       {
         "key": "alt+e",
-        "command": "codeFlea.moveToNextBlockOfSameIndentation"
+        "command": "codeFlea.nextSameBlock"
       },
       {
         "key": "alt+u",
-        "command": "codeFlea.moveToPrevBlockOfSameIndentation"
+        "command": "codeFlea.prevSameBlock"
       },
       {
         "key": "alt+shift+e",
@@ -238,19 +238,19 @@
       },
       {
         "key": "alt+i",
-        "command": "codeFlea.moveToNextBlockOfGreaterIndentation"
+        "command": "codeFlea.nextInnerBlock"
       },
       {
         "key": "alt+y",
-        "command": "codeFlea.moveToPrevBlockOfGreaterIndentation"
+        "command": "codeFlea.prevInnerBlock"
       },
       {
         "key": "alt+.",
-        "command": "codeFlea.moveToNextBlock"
+        "command": "codeFlea.nextBlock"
       },
       {
         "key": "alt+m",
-        "command": "codeFlea.moveToPrevBlock"
+        "command": "codeFlea.prevBlock"
       },
       {
         "key": "alt+o",
