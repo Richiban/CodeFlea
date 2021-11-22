@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6]
+
+- Adds commands for block navigation up-left, up-right, up, down, down-left, down-right
+- Changes nomenclature away from "interesting" and "boring" lines to "blocks" and "stop-lines"
+
 ## [0.2]
 
 - Default keybindings and explanation in README

@@ -7,10 +7,11 @@ export type Change = "greaterThan" | "lessThan";
 export type Direction = "forwards" | "backwards";
 
 export type Indentation =
-  | "greater-indentation"
+  | "more-indentation"
   | "less-indentation"
-  | "same-indentation"
-  | "any-indentation";
+  | "same-indentation";
+
+export type IndentationRequest = Indentation | "any-indentation";
 
 export type JumpLocations = JumpLocation[];
 
@@ -19,6 +20,10 @@ export type JumpLocation = {
   lineNumber: number;
   charIndex: number;
 };
+
+export function opposite(direction: Direction) {
+  return direction === "forwards" ? "backwards" : "forwards";
+}
 
 export function getJumpCodes(config: Config) {
   return config.jump.characters.split(/[\s,]+/);

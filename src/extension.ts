@@ -3,9 +3,9 @@
 import * as vscode from "vscode";
 import { FleaJumper } from "./fleajump";
 import {
-  nextBlock,
+  nextBlockStart,
   moveToChangeOfIndentation,
-  moveToSameLine,
+  moveToNextLineSameLevel,
   extendBlockSelection,
   nextBlankLine,
   nextBlockEnd,
@@ -13,13 +13,20 @@ import {
 import { nextInterestingPoint } from "./points";
 import { loadConfig } from "./config";
 import { scrollToCursorAtCenter } from "./editor";
+import { JumpInterface } from "./jump-interface";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+  const fleaJumper = new FleaJumper(context, loadConfig());
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("codeFlea.jump", () => fleaJumper.jump())
+  );
+
   context.subscriptions.push(
     vscode.commands.registerCommand("codeFlea.nextBlock", () =>
-      nextBlock("forwards", "any-indentation")
+      nextBlockStart("forwards", "any-indentation")
     )
   );
 
@@ -31,43 +38,43 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     vscode.commands.registerCommand("codeFlea.nextOuterBlock", () =>
-      nextBlock("forwards", "less-indentation")
+      nextBlockStart("forwards", "less-indentation")
     )
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand("codeFlea.prevOuterBlock", () =>
-      nextBlock("backwards", "less-indentation")
+      nextBlockStart("backwards", "less-indentation")
     )
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand("codeFlea.nextSameBlock", () =>
-      nextBlock("forwards", "same-indentation")
+      nextBlockStart("forwards", "same-indentation")
     )
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand("codeFlea.prevSameBlock", () =>
-      nextBlock("backwards", "same-indentation")
+      nextBlockStart("backwards", "same-indentation")
     )
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand("codeFlea.nextInnerBlock", () =>
-      nextBlock("forwards", "greater-indentation")
+      nextBlockStart("forwards", "more-indentation")
     )
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand("codeFlea.prevInnerBlock", () =>
-      nextBlock("backwards", "greater-indentation")
+      nextBlockStart("backwards", "more-indentation")
     )
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand("codeFlea.prevBlock", () =>
-      nextBlock("backwards", "any-indentation")
+      nextBlockStart("backwards", "any-indentation")
     )
   );
 
@@ -116,13 +123,13 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     vscode.commands.registerCommand("codeFlea.nextSameLine", () =>
-      moveToSameLine("forwards")
+      moveToNextLineSameLevel("forwards")
     )
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand("codeFlea.prevSameLine", () =>
-      moveToSameLine("backwards")
+      moveToNextLineSameLevel("backwards")
     )
   );
 
@@ -155,8 +162,6 @@ export function activate(context: vscode.ExtensionContext) {
       nextBlockEnd("backwards", "any-indentation")
     )
   );
-
-  const fleaJumper = new FleaJumper(context, loadConfig());
 
   vscode.workspace.onDidChangeConfiguration((_) => {
     fleaJumper.updateConfig(loadConfig());

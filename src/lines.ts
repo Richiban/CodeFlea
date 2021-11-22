@@ -5,11 +5,14 @@ import {
   Indentation,
   DirectionOrNearest,
   linqish,
+  IndentationRequest,
+  opposite,
 } from "./common";
 import {
   getCursorPosition,
   getEditor,
   moveCursorToBeginningOfLine,
+  moveCursorToEndOfLine,
   selectToBeginningOfLine,
   selectToEndOfLine,
   tryGetLineAt,
@@ -36,7 +39,7 @@ function getRelativeIndentation(targetLine: vscode.TextLine): Indentation {
     currentLine.firstNonWhitespaceCharacterIndex <
     targetLine.firstNonWhitespaceCharacterIndex
   ) {
-    return "greater-indentation";
+    return "more-indentation";
   }
 
   return "same-indentation";
@@ -353,44 +356,15 @@ export function getBlocks(
   bounds: vscode.Range
 ) {
   const cursorPosition = getCursorPosition();
-  const document = getEditor()?.document;
 
-  if (!document || !cursorPosition) return linqish.empty;
-
-  const linesForwards = iterLinesWithPrevious(
-    document,
-    cursorPosition.line,
-    "forwards",
-    bounds
-  );
-
-  const linesBackwards = iterLinesWithPrevious(
-    document,
-    cursorPosition.line,
-    "backwards",
-    bounds
-  );
-
-  const [a, b] =
-    direction === "forwards"
-      ? [linesForwards, linesBackwards]
-      : [linesBackwards, linesForwards];
+  const a = iterBlockStarts(cursorPosition, direction);
+  const b = iterBlockStarts(cursorPosition, opposite(direction));
 
   switch (pattern) {
     case "alternate":
-      return linqish(a)
-        .alternateWith(b)
-        .filter(({ prevLine, currentLine }) =>
-          lineIsBlockStart(prevLine, currentLine)
-        )
-        .map(({ prevLine: _, currentLine }) => currentLine);
+      return linqish(a).alternateWith(b);
     case "sequential":
-      return linqish(a)
-        .concat(b)
-        .filter(({ prevLine, currentLine }) =>
-          lineIsBlockStart(prevLine, currentLine)
-        )
-        .map(({ prevLine: _, currentLine }) => currentLine);
+      return linqish(a).concat(b);
   }
 }
 
@@ -445,7 +419,10 @@ export function nextBlankLine(direction: Direction) {
   }
 }
 
-export function nextBlock(direction: Direction, indentation: Indentation) {
+export function nextBlockStart(
+  direction: Direction,
+  indentation: IndentationRequest
+) {
   const cursorPosition = getCursorPosition();
 
   for (const line of iterBlockStarts(cursorPosition, direction)) {
@@ -460,7 +437,10 @@ export function nextBlock(direction: Direction, indentation: Indentation) {
   }
 }
 
-export function nextBlockEnd(direction: Direction, indentation: Indentation) {
+export function nextBlockEnd(
+  direction: Direction,
+  indentation: IndentationRequest
+) {
   const cursorPosition = getCursorPosition();
 
   for (const line of iterBlockEnds(cursorPosition, direction)) {
@@ -468,14 +448,14 @@ export function nextBlockEnd(direction: Direction, indentation: Indentation) {
       indentation === "any-indentation" ||
       indentation === getRelativeIndentation(line)
     ) {
-      moveCursorToBeginningOfLine(line);
+      moveCursorToEndOfLine(line);
 
       return;
     }
   }
 }
 
-export function moveToSameLine(direction: Direction) {
+export function moveToNextLineSameLevel(direction: Direction) {
   const cursorPosition = getCursorPosition();
   const document = getEditor().document;
 

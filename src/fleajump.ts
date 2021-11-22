@@ -16,23 +16,6 @@ export class FleaJumper {
     this.config = config;
     this.jumpInterface = new JumpInterface(config);
 
-    disposables.push(
-      vscode.commands.registerCommand("codeFlea.jump", async () => {
-        try {
-          await this.jump();
-          this.done();
-          vscode.window.setStatusBarMessage("CodeFlea: Jumped!", 2000);
-        } catch (err) {
-          this.cancel();
-          console.log("codeFlea: " + err);
-        }
-      })
-    );
-
-    for (const disposable of disposables) {
-      context.subscriptions.push(disposable);
-    }
-
     this.jumpInterface.update(this.config);
   }
 
@@ -48,11 +31,20 @@ export class FleaJumper {
     this.isJumping = false;
   }
 
-  private async jump(): Promise<void> {
+  async jump(): Promise<void> {
     let jumpTimeoutId: NodeJS.Timeout | null = null;
 
     if (this.isJumping) {
       throw new Error("CodeFlea: reinvoke goto command");
+    }
+
+    try {
+      await this.jump();
+      this.done();
+      vscode.window.setStatusBarMessage("CodeFlea: Jumped!", 2000);
+    } catch (err) {
+      this.cancel();
+      console.log("codeFlea: " + err);
     }
 
     this.isJumping = true;
@@ -151,11 +143,7 @@ export class FleaJumper {
     const bounds = editor.visibleRanges[0];
     const jumpCodes = getJumpCodes(this.config);
 
-    const blocks = getBlocks(
-      "alternate",
-      "forwards",
-      bounds
-    );
+    const blocks = getBlocks("alternate", "forwards", bounds);
 
     const toJumpLocation = ([l, c]: readonly [
       vscode.TextLine,
