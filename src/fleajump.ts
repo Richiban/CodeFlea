@@ -12,10 +12,8 @@ export class FleaJumper {
   private jumpInterface: JumpInterface;
 
   constructor(context: vscode.ExtensionContext, config: Config) {
-    const disposables: vscode.Disposable[] = [];
     this.config = config;
     this.jumpInterface = new JumpInterface(config);
-
     this.jumpInterface.update(this.config);
   }
 
@@ -32,48 +30,47 @@ export class FleaJumper {
   }
 
   async jump(): Promise<void> {
-    let jumpTimeoutId: NodeJS.Timeout | null = null;
-
-    if (this.isJumping) {
-      throw new Error("CodeFlea: reinvoke goto command");
-    }
-
     try {
-      await this.jump();
+      let jumpTimeoutId: NodeJS.Timeout | null = null;
+
+      if (this.isJumping) {
+        throw new Error("CodeFlea: reinvoke goto command");
+      }
+
+      this.isJumping = true;
+
+      jumpTimeoutId = setTimeout(() => {
+        jumpTimeoutId = null;
+        this.cancel();
+      }, this.config.jump.timeout);
+
+      const editor = vscode.window.activeTextEditor;
+
+      if (!editor) {
+        return;
+      }
+
+      const msg = "CodeFlea: Type To Jump";
+
+      const messageDisposable = vscode.window.setStatusBarMessage(msg);
+
+      try {
+        await this.jumpToLinePhase(editor);
+
+        await this.jumpToPointPhase(editor);
+      } catch (reason) {
+        if (!reason) reason = "Canceled!";
+        vscode.window.setStatusBarMessage(`CodeFlea: ${reason}`, 2000);
+      } finally {
+        if (jumpTimeoutId) clearTimeout(jumpTimeoutId);
+        messageDisposable.dispose();
+      }
+
       this.done();
       vscode.window.setStatusBarMessage("CodeFlea: Jumped!", 2000);
     } catch (err) {
       this.cancel();
       console.log("codeFlea: " + err);
-    }
-
-    this.isJumping = true;
-
-    jumpTimeoutId = setTimeout(() => {
-      jumpTimeoutId = null;
-      this.cancel();
-    }, this.config.jump.timeout);
-
-    const editor = vscode.window.activeTextEditor;
-
-    if (!editor) {
-      return;
-    }
-
-    const msg = "CodeFlea: Type To Jump";
-
-    const messageDisposable = vscode.window.setStatusBarMessage(msg);
-
-    try {
-      await this.jumpToLinePhase(editor);
-
-      await this.jumpToPointPhase(editor);
-    } catch (reason) {
-      if (!reason) reason = "Canceled!";
-      vscode.window.setStatusBarMessage(`CodeFlea: ${reason}`, 2000);
-    } finally {
-      if (jumpTimeoutId) clearTimeout(jumpTimeoutId);
-      messageDisposable.dispose();
     }
   }
 

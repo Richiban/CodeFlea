@@ -1,13 +1,21 @@
 import * as vscode from "vscode";
 
-export function moveCursorTo(lineNumber: number, column: number) {
+export function moveCursorTo(
+  lineNumber: number,
+  column: number,
+  scrollEditor = true
+) {
   const editor = getEditor();
   const currentPosition = getCursorPosition();
 
-  const position = new vscode.Position(lineNumber, column);
-  editor.selection = new vscode.Selection(position, position);
+  const newPosition = new vscode.Position(lineNumber, column);
+  editor.selection = new vscode.Selection(newPosition, newPosition);
 
-  editor.revealRange(new vscode.Range(position, currentPosition));
+  if (scrollEditor) {
+    scrollToCursorAtCenterIfNearEdge();
+  } else {
+    editor.revealRange(new vscode.Range(newPosition, currentPosition));
+  }
 }
 
 export function getEditor() {
@@ -37,6 +45,20 @@ export function selectToBeginningOfLine(
   editor.selection = new vscode.Selection(position, fromPosition);
 
   editor.revealRange(new vscode.Range(position, fromPosition));
+}
+
+export function scrollToCursorAtCenterIfNearEdge() {
+  const editor = getEditor();
+  const cursorPosition = getCursorPosition();
+  const visibleRange = editor.visibleRanges[0];
+  const numVisibleLines = visibleRange.end.line - visibleRange.start.line;
+  const boundarySize = numVisibleLines / 4;
+  const lowerBound = visibleRange.start.line + boundarySize;
+  const upperBound = visibleRange.end.line - boundarySize;
+
+  if (cursorPosition.line < lowerBound || cursorPosition.line > upperBound) {
+    scrollToCursorAtCenter();
+  }
 }
 
 export function scrollToCursorAtCenter() {
