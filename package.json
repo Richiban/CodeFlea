@@ -23,15 +23,6 @@
     "jump"
   ],
   "activationEvents": [
-    "onCommand:",
-    "onCommand:",
-    "onCommand:",
-    "onCommand:",
-    "onCommand:",
-    "onCommand:",
-    "onCommand:",
-    "onCommand:",
-    "onCommand:",
     "onCommand:codeFlea.extendBlockSelection",
     "onCommand:codeFlea.extendBlockSelectionBackwards",
     "onCommand:codeFlea.nextBlankLine",
@@ -51,7 +42,10 @@
     "onCommand:codeFlea.nextSameLine",
     "onCommand:codeFlea.prevInterestingPoint",
     "onCommand:codeFlea.prevOuterLine",
-    "onCommand:codeFlea.prevSameLine"
+    "onCommand:codeFlea.prevSameLine",
+    "onCommand:codeFlea.scrollToCursor",
+    "onCommand:codeFlea.nextBlockEnd",
+    "onCommand:codeFlea.prevBlockEnd"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -200,6 +194,18 @@
       {
         "command": "codeFlea.jump",
         "title": "Jump to an interesting point"
+      },
+      {
+        "command": "codeFlea.scrollToCursor",
+        "title": "Scroll editor to the cursor"
+      },
+      {
+        "command": "codeFlea.nextBlockEnd",
+        "title": "Go to next block end"
+      },
+      {
+        "command": "codeFlea.prevBlockEnd",
+        "title": "Go to previous block end"
       }
     ],
     "keybindings": [
@@ -259,6 +265,10 @@
       {
         "key": "alt+h",
         "command": "codeFlea.prevInterestingPoint"
+      },
+      {
+        "key": "alt+/",
+        "command": "codeFlea.scrollToCursor"
       }
     ]
   },

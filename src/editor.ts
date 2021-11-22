@@ -39,6 +39,27 @@ export function selectToBeginningOfLine(
   editor.revealRange(new vscode.Range(position, fromPosition));
 }
 
+export function scrollToCursorAtCenter() {
+  const editor = getEditor();
+
+  const cursorPosition = getCursorPosition();
+
+  const viewportHeight =
+    editor.visibleRanges[0].end.line - editor.visibleRanges[0].start.line;
+
+  const rangeToReveal = new vscode.Range(
+    Math.max(0, cursorPosition.line - viewportHeight / 2),
+    0,
+    Math.min(
+      editor.document.lineCount - 1,
+      cursorPosition.line + viewportHeight / 2
+    ),
+    0
+  );
+
+  editor.revealRange(rangeToReveal);
+}
+
 export function selectToEndOfLine(
   fromPosition: vscode.Position,
   line: vscode.TextLine

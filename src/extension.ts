@@ -8,9 +8,11 @@ import {
   moveToSameLine,
   extendBlockSelection,
   nextBlankLine,
+  nextBlockEnd,
 } from "./lines";
 import { nextInterestingPoint } from "./points";
 import { loadConfig } from "./config";
+import { scrollToCursorAtCenter } from "./editor";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -133,6 +135,24 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand("codeFlea.nextInterestingPoint", () =>
       nextInterestingPoint("forwards")
+    )
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("codeFlea.scrollToCursor", () =>
+      scrollToCursorAtCenter()
+    )
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("codeFlea.nextBlockEnd", () =>
+      nextBlockEnd("forwards", "any-indentation")
+    )
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("codeFlea.prevBlockEnd", () =>
+      nextBlockEnd("backwards", "any-indentation")
     )
   );
 
