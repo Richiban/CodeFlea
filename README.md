@@ -94,7 +94,7 @@ Once you have developed an intuitive sense of where the cursor can jump to, you 
 | codeFlea.nextInnerBlock | `alt+l`            | Move to the next block with greater indentation      |
 | codeFlea.prevInnerBlock | `alt+o`            | Move to the previous block with greater indentation  |
 
-These commands are laid out on the QWERTY keybord in the following way:
+These commands are laid out on the QWERTY keyboard in the following way:
 
 ```
 ┌───┐ ┌───┐ ┌───┐       ┌───┐ ┌───┐ ┌───┐
@@ -143,9 +143,9 @@ CodeFlea includes some other commands that are generally useful for keyboard-onl
 
 | Command                 | Default keybinding | Description                                         |
 | ----------------------- | ------------------ | --------------------------------------------------- |
-| codeFlea.nextBlankLine  | `alt+h`            | Move to the next blank line in the file             |
-| codeFlea.prevBlankLine  | `alt+h`            | Move to the previous blank line in the file         |
-| codeFlea.scrollToCursor | `alt+;`            | Scroll the editor until the cursor is in the middle |
+| codeFlea.nextBlankLine  | none               | Move to the next blank line in the file             |
+| codeFlea.prevBlankLine  | none               | Move to the previous blank line in the file         |
+| codeFlea.scrollToCursor | `alt+/`            | Scroll the editor until the cursor is in the middle |
 
 ## Building and running
 
