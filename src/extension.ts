@@ -9,16 +9,15 @@ import {
   extendBlockSelection,
   nextBlankLine,
   nextBlockEnd,
+  selectAllBlocksInCurrentScope,
 } from "./lines";
 import { nextInterestingPoint } from "./points";
 import { loadConfig } from "./config";
-import { scrollToCursorAtCenter } from "./editor";
-import { JumpInterface } from "./jump-interface";
+import { scrollEditor, scrollToCursorAtCenter } from "./editor";
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-  const fleaJumper = new FleaJumper(context, loadConfig());
+  const config = loadConfig();
+  const fleaJumper = new FleaJumper(context, config);
 
   context.subscriptions.push(
     vscode.commands.registerCommand("codeFlea.jump", () => fleaJumper.jump())
@@ -160,6 +159,25 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand("codeFlea.prevBlockEnd", () =>
       nextBlockEnd("backwards", "any-indentation")
+    )
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("codeFlea.scrollEditorUp", () =>
+      scrollEditor("up", config.scrollStep)
+    )
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("codeFlea.scrollEditorDown", () =>
+      scrollEditor("down", config.scrollStep)
+    )
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "codeFlea.selectAllBlocksInCurrentScope",
+      () => selectAllBlocksInCurrentScope()
     )
   );
 

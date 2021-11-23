@@ -1,20 +1,40 @@
 import * as vscode from "vscode";
+import { Point } from "./common";
 
-export function moveCursorTo(
-  lineNumber: number,
-  column: number,
-  scrollEditor = true
-) {
+export function scrollEditor(direction: "up" | "down", lines: number) {
+  const editor = vscode.window.activeTextEditor;
+
+  if (!editor) {
+    return;
+  }
+
+  const existingRange = editor.visibleRanges[0];
+
+  const lineToReveal =
+    direction === "up"
+      ? existingRange.start.line - lines
+      : existingRange.end.line + lines;
+
+  const newRange = new vscode.Range(lineToReveal, 0, lineToReveal, 0);
+
+  editor.revealRange(newRange);
+}
+
+export function moveCursorTo(newPosition: Point, scrollEditor = true) {
   const editor = getEditor();
   const currentPosition = getCursorPosition();
 
-  const newPosition = new vscode.Position(lineNumber, column);
-  editor.selection = new vscode.Selection(newPosition, newPosition);
+  const newPosition1 = new vscode.Position(
+    newPosition.line,
+    newPosition.character
+  );
+
+  editor.selection = new vscode.Selection(newPosition1, newPosition1);
 
   if (scrollEditor) {
     scrollToCursorAtCenterIfNearEdge();
   } else {
-    editor.revealRange(new vscode.Range(newPosition, currentPosition));
+    editor.revealRange(new vscode.Range(newPosition1, currentPosition));
   }
 }
 
@@ -28,23 +48,24 @@ export function getEditor() {
   return editor;
 }
 
-export function moveCursorToBeginningOfLine(line: vscode.TextLine) {
+export function selectTo(fromPosition: Point, to: Point) {
   const editor = getEditor();
 
-  moveCursorTo(line.lineNumber, line.firstNonWhitespaceCharacterIndex);
-}
+  editor.selection = new vscode.Selection(
+    to.line,
+    to.character,
+    fromPosition.line,
+    fromPosition.character
+  );
 
-export function selectToBeginningOfLine(
-  fromPosition: vscode.Position,
-  line: vscode.TextLine
-) {
-  const editor = getEditor();
-
-  const position = new vscode.Position(line.lineNumber, 0);
-
-  editor.selection = new vscode.Selection(position, fromPosition);
-
-  editor.revealRange(new vscode.Range(position, fromPosition));
+  editor.revealRange(
+    new vscode.Range(
+      to.line,
+      to.character,
+      fromPosition.line,
+      fromPosition.character
+    )
+  );
 }
 
 export function scrollToCursorAtCenterIfNearEdge() {
@@ -82,19 +103,6 @@ export function scrollToCursorAtCenter() {
   editor.revealRange(rangeToReveal);
 }
 
-export function selectToEndOfLine(
-  fromPosition: vscode.Position,
-  line: vscode.TextLine
-) {
-  const editor = getEditor();
-
-  const position = new vscode.Position(line.lineNumber, line.text.length);
-
-  editor.selection = new vscode.Selection(position, fromPosition);
-
-  editor.revealRange(new vscode.Range(fromPosition, position));
-}
-
 export function getNonActiveSelectionPoint() {
   const editor = getEditor();
 
@@ -107,12 +115,6 @@ export function tryGetLineAt(lineNumber: number) {
   if (lineNumber >= editor.document.lineCount) return;
 
   return editor.document.lineAt(lineNumber);
-}
-
-export function moveCursorToEndOfLine(line: vscode.TextLine) {
-  const editor = getEditor();
-
-  moveCursorTo(line.lineNumber, line.range.end.character);
 }
 
 export function getCursorPosition() {

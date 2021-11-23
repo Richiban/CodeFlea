@@ -1,6 +1,7 @@
-import { Direction, linqish, Linqish } from "./common";
+import { Direction, linqish, Linqish, Point } from "./common";
 import { getEditor, getCursorPosition, moveCursorTo } from "./editor";
 import { iterLines, lineIsStopLine } from "./lines";
+import * as vscode from "vscode";
 
 const interestingChars = new Set(
   "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -14,8 +15,8 @@ function widen<T>(val: T) {
   return val;
 }
 
-function* getInterestingPointsInText(
-  s: string,
+function* getInterestingPointsInLine(
+  line: vscode.TextLine,
   options = {
     startingIndex: 0,
     direction: widen<Direction>("backwards"),
@@ -31,13 +32,13 @@ function* getInterestingPointsInText(
   do {
     idx = advance(idx);
 
-    if (idx < 0 || idx > s.length) return;
-    if (idx === 0 || idx === s.length) {
+    if (idx < 0 || idx > line.text.length) return;
+    if (idx === 0 || idx === line.text.length) {
       yield idx;
       return;
     }
 
-    if (!isInteresting(s[idx - 1]) && isInteresting(s[idx])) {
+    if (!isInteresting(line.text[idx - 1]) && isInteresting(line.text[idx])) {
       yield idx;
     }
   } while (true);
@@ -45,12 +46,10 @@ function* getInterestingPointsInText(
 
 export async function nextInterestingPoint(direction: Direction = "forwards") {
   for (const point of getInterestingPoints(direction)) {
-    await moveCursorTo(point.lineNumber, point.charIndex);
+    await moveCursorTo(point);
     return;
   }
 }
-
-export type Point = { lineNumber: number; charIndex: number };
 
 export function getInterestingPoints(
   direction: Direction = "forwards"
@@ -70,7 +69,7 @@ export function getInterestingPoints(
       )) {
         if (lineIsStopLine(l)) return;
 
-        for (const c of getInterestingPointsInText(l.text, {
+        for (const c of getInterestingPointsInLine(l, {
           direction: direction,
           startingIndex: cursorPosition.character,
         })) {
@@ -78,7 +77,7 @@ export function getInterestingPoints(
             l.lineNumber !== cursorPosition.line ||
             c !== cursorPosition.character + 1
           )
-            yield { lineNumber: l.lineNumber, charIndex: c };
+            yield { line: l.lineNumber, character: c };
         }
       }
     })()

@@ -2,7 +2,7 @@ import { Config } from "./config";
 import { JumpInterface } from "./jump-interface";
 import * as vscode from "vscode";
 import { moveCursorTo } from "./editor";
-import { JumpLocations, JumpLocation, getJumpCodes } from "./common";
+import { JumpLocations, JumpLocation, getJumpCodes, Point } from "./common";
 import { getBlocks } from "./lines";
 import { getInterestingPoints } from "./points";
 
@@ -86,10 +86,7 @@ export class FleaJumper {
     if (chosenLine.tag === "Cancelled") return;
 
     if (chosenLine.tag === "Ok") {
-      moveCursorTo(
-        chosenLine.userSelection.lineNumber,
-        chosenLine.userSelection.charIndex
-      );
+      moveCursorTo(chosenLine.userSelection.position);
     }
   };
 
@@ -103,10 +100,7 @@ export class FleaJumper {
     );
 
     if (chosenPoint.tag === "Ok") {
-      moveCursorTo(
-        chosenPoint.userSelection.lineNumber,
-        chosenPoint.userSelection.charIndex
-      );
+      moveCursorTo(chosenPoint.userSelection.position);
     }
   };
 
@@ -117,21 +111,12 @@ export class FleaJumper {
     const { start: viewportStart, end: viewportEnd } = editor.visibleRanges[0];
 
     const inBounds = (loc: JumpLocation) =>
-      loc.lineNumber >= viewportStart.line &&
-      loc.lineNumber <= viewportEnd.line;
-
-    const toJumpLocation = ([l, c]: readonly [
-      { lineNumber: number; charIndex: number },
-      string
-    ]): JumpLocation => ({
-      jumpCode: c,
-      lineNumber: l.lineNumber,
-      charIndex: l.charIndex,
-    });
+      loc.position.line >= viewportStart.line &&
+      loc.position.line <= viewportEnd.line;
 
     return interestingPoints
       .zipWith(jumpCodes)
-      .map(toJumpLocation)
+      .map(([p, c]) => ({ jumpCode: c, position: p }))
       .takeWhile(inBounds)
       .toArray();
   };
@@ -143,12 +128,11 @@ export class FleaJumper {
     const blocks = getBlocks("alternate", "forwards", bounds);
 
     const toJumpLocation = ([l, c]: readonly [
-      vscode.TextLine,
+      Point,
       string
     ]): JumpLocation => ({
       jumpCode: c,
-      lineNumber: l.lineNumber,
-      charIndex: l.firstNonWhitespaceCharacterIndex,
+      position: l,
     });
 
     return blocks.zipWith(jumpCodes).map(toJumpLocation).toArray();

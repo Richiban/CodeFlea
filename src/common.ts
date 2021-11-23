@@ -1,4 +1,5 @@
 import { Config } from "./config";
+import * as vscode from "vscode";
 
 export type DirectionOrNearest = Direction | "nearest";
 
@@ -15,10 +16,11 @@ export type IndentationRequest = Indentation | "any-indentation";
 
 export type JumpLocations = JumpLocation[];
 
+export type Point = Pick<vscode.Position, "line" | "character">;
+
 export type JumpLocation = {
   jumpCode: string;
-  lineNumber: number;
-  charIndex: number;
+  position: Point;
 };
 
 export function opposite(direction: Direction) {
@@ -39,9 +41,11 @@ export class Cache<TArgs extends any[], TValue> implements Iterable<TValue> {
 
   get(...args: TArgs): TValue {
     const cacheKey = this.getCacheKey(...args);
+
     if (!(cacheKey in this._cache)) {
       this._cache[cacheKey] = this.generateValue(...args);
     }
+
     return this._cache[cacheKey];
   }
 
@@ -231,6 +235,7 @@ export class Linqish<T> implements Iterable<T> {
     return this.fold(
       (x, state) => {
         (f(x) ? state._true : state._false).push(x);
+
         return state;
       },
       { _true: [] as T[], _false: [] as T[] }

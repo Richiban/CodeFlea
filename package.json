@@ -46,7 +46,10 @@
     "onCommand:codeFlea.prevSameLine",
     "onCommand:codeFlea.scrollToCursor",
     "onCommand:codeFlea.nextBlockEnd",
-    "onCommand:codeFlea.prevBlockEnd"
+    "onCommand:codeFlea.prevBlockEnd",
+    "onCommand:codeFlea.scrollEditorUp",
+    "onCommand:codeFlea.scrollEditorDown",
+    "onCommand:codeFlea.selectAllBlocksInCurrentScope"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -54,6 +57,11 @@
       "title": "",
       "type": "",
       "properties": {
+        "codeFlea.scrollStep": {
+          "description": "The number of lines to scroll when scrolling the editor",
+          "type": "number",
+          "default": "10"
+        },
         "codeFlea.decoration.backgroundColor": {
           "type": "string",
           "default": "lightskyblue",
@@ -207,6 +215,18 @@
       {
         "command": "codeFlea.prevBlockEnd",
         "title": "Go to previous block end"
+      },
+      {
+        "command": "codeFlea.selectAllBlocksInCurrentScope",
+        "title": "Select all blocks in current scope"
+      },
+      {
+        "command": "codeFlea.scrollEditorUp",
+        "title": "Scroll editor up"
+      },
+      {
+        "command": "codeFlea.scrollEditorDown",
+        "title": "Scroll editor down"
       }
     ],
     "keybindings": [
@@ -270,6 +290,18 @@
       {
         "key": "alt+/",
         "command": "codeFlea.scrollToCursor"
+      },
+      {
+        "key": "alt+shift+,",
+        "command": "codeFlea.selectAllBlocksInCurrentScope"
+      },
+      {
+        "key": "ctrl+up",
+        "command": "codeFlea.scrollEditorUp"
+      },
+      {
+        "key": "ctrl+down",
+        "command": "codeFlea.scrollEditorDown"
       }
     ]
   },
