@@ -107,19 +107,17 @@ export class JumpInterface {
     jumpLocations: JumpLocations,
     interfaceType: InterfaceType
   ) {
-    const {
-      _true: standardOptions,
-      _false: optionsWithNoSpaceToLeft,
-    } = linqish(jumpLocations)
-      .map((loc) =>
-        this.createDecorationOptions(
-          loc.lineNumber,
-          loc.charIndex,
-          loc.jumpCode,
-          interfaceType
+    const { _true: standardOptions, _false: optionsWithNoSpaceToLeft } =
+      linqish(jumpLocations)
+        .map((loc) =>
+          this.createDecorationOptions(
+            loc.position.line,
+            loc.position.character,
+            loc.jumpCode,
+            interfaceType
+          )
         )
-      )
-      .partition((loc) => loc.range.start.character > 0);
+        .partition((loc) => loc.range.start.character > 0);
 
     editor.setDecorations(
       this.decorationTypes.get(1, interfaceType),

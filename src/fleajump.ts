@@ -2,8 +2,8 @@ import { Config } from "./config";
 import { JumpInterface } from "./jump-interface";
 import * as vscode from "vscode";
 import { moveCursorTo } from "./editor";
-import { JumpLocations, JumpLocation, getJumpCodes } from "./common";
-import { getInterestingLines } from "./lines";
+import { JumpLocations, JumpLocation, getJumpCodes, Point } from "./common";
+import { getBlocks } from "./lines";
 import { getInterestingPoints } from "./points";
 
 export class FleaJumper {
@@ -12,27 +12,8 @@ export class FleaJumper {
   private jumpInterface: JumpInterface;
 
   constructor(context: vscode.ExtensionContext, config: Config) {
-    const disposables: vscode.Disposable[] = [];
     this.config = config;
     this.jumpInterface = new JumpInterface(config);
-
-    disposables.push(
-      vscode.commands.registerCommand("codeFlea.jump", async () => {
-        try {
-          await this.jump();
-          this.done();
-          vscode.window.setStatusBarMessage("CodeFlea: Jumped!", 2000);
-        } catch (err) {
-          this.cancel();
-          console.log("codeFlea: " + err);
-        }
-      })
-    );
-
-    for (const disposable of disposables) {
-      context.subscriptions.push(disposable);
-    }
-
     this.jumpInterface.update(this.config);
   }
 
@@ -48,40 +29,48 @@ export class FleaJumper {
     this.isJumping = false;
   }
 
-  private async jump(): Promise<void> {
-    let jumpTimeoutId: NodeJS.Timeout | null = null;
-
-    if (this.isJumping) {
-      throw new Error("CodeFlea: reinvoke goto command");
-    }
-
-    this.isJumping = true;
-
-    jumpTimeoutId = setTimeout(() => {
-      jumpTimeoutId = null;
-      this.cancel();
-    }, this.config.jump.timeout);
-
-    const editor = vscode.window.activeTextEditor;
-
-    if (!editor) {
-      return;
-    }
-
-    const msg = "CodeFlea: Type To Jump";
-
-    const messageDisposable = vscode.window.setStatusBarMessage(msg);
-
+  async jump(): Promise<void> {
     try {
-      await this.jumpToLinePhase(editor);
+      let jumpTimeoutId: NodeJS.Timeout | null = null;
 
-      await this.jumpToPointPhase(editor);
-    } catch (reason) {
-      if (!reason) reason = "Canceled!";
-      vscode.window.setStatusBarMessage(`CodeFlea: ${reason}`, 2000);
-    } finally {
-      if (jumpTimeoutId) clearTimeout(jumpTimeoutId);
-      messageDisposable.dispose();
+      if (this.isJumping) {
+        throw new Error("CodeFlea: reinvoke goto command");
+      }
+
+      this.isJumping = true;
+
+      jumpTimeoutId = setTimeout(() => {
+        jumpTimeoutId = null;
+        this.cancel();
+      }, this.config.jump.timeout);
+
+      const editor = vscode.window.activeTextEditor;
+
+      if (!editor) {
+        return;
+      }
+
+      const msg = "CodeFlea: Type To Jump";
+
+      const messageDisposable = vscode.window.setStatusBarMessage(msg);
+
+      try {
+        await this.jumpToLinePhase(editor);
+
+        await this.jumpToPointPhase(editor);
+      } catch (reason) {
+        if (!reason) reason = "Canceled!";
+        vscode.window.setStatusBarMessage(`CodeFlea: ${reason}`, 2000);
+      } finally {
+        if (jumpTimeoutId) clearTimeout(jumpTimeoutId);
+        messageDisposable.dispose();
+      }
+
+      this.done();
+      vscode.window.setStatusBarMessage("CodeFlea: Jumped!", 2000);
+    } catch (err) {
+      this.cancel();
+      console.log("codeFlea: " + err);
     }
   }
 
@@ -97,10 +86,7 @@ export class FleaJumper {
     if (chosenLine.tag === "Cancelled") return;
 
     if (chosenLine.tag === "Ok") {
-      moveCursorTo(
-        chosenLine.userSelection.lineNumber,
-        chosenLine.userSelection.charIndex
-      );
+      moveCursorTo(chosenLine.userSelection.position);
     }
   };
 
@@ -114,10 +100,7 @@ export class FleaJumper {
     );
 
     if (chosenPoint.tag === "Ok") {
-      moveCursorTo(
-        chosenPoint.userSelection.lineNumber,
-        chosenPoint.userSelection.charIndex
-      );
+      moveCursorTo(chosenPoint.userSelection.position);
     }
   };
 
@@ -128,21 +111,12 @@ export class FleaJumper {
     const { start: viewportStart, end: viewportEnd } = editor.visibleRanges[0];
 
     const inBounds = (loc: JumpLocation) =>
-      loc.lineNumber >= viewportStart.line &&
-      loc.lineNumber <= viewportEnd.line;
-
-    const toJumpLocation = ([l, c]: readonly [
-      { lineNumber: number; charIndex: number },
-      string
-    ]): JumpLocation => ({
-      jumpCode: c,
-      lineNumber: l.lineNumber,
-      charIndex: l.charIndex,
-    });
+      loc.position.line >= viewportStart.line &&
+      loc.position.line <= viewportEnd.line;
 
     return interestingPoints
       .zipWith(jumpCodes)
-      .map(toJumpLocation)
+      .map(([p, c]) => ({ jumpCode: c, position: p }))
       .takeWhile(inBounds)
       .toArray();
   };
@@ -151,21 +125,16 @@ export class FleaJumper {
     const bounds = editor.visibleRanges[0];
     const jumpCodes = getJumpCodes(this.config);
 
-    const interestingLines = getInterestingLines(
-      "alternate",
-      "forwards",
-      bounds
-    );
+    const blocks = getBlocks("alternate", "forwards", bounds);
 
     const toJumpLocation = ([l, c]: readonly [
-      vscode.TextLine,
+      Point,
       string
     ]): JumpLocation => ({
       jumpCode: c,
-      lineNumber: l.lineNumber,
-      charIndex: l.firstNonWhitespaceCharacterIndex,
+      position: l,
     });
 
-    return interestingLines.zipWith(jumpCodes).map(toJumpLocation).toArray();
+    return blocks.zipWith(jumpCodes).map(toJumpLocation).toArray();
   };
 }

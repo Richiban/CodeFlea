@@ -7,7 +7,7 @@
   "repository": {
     "url": "https://github.com/Richiban/CodeFlea/"
   },
-  "version": "0.3.0",
+  "version": "0.9.0",
   "engines": {
     "vscode": "^1.41.0"
   },
@@ -23,22 +23,45 @@
     "jump"
   ],
   "activationEvents": [
-    "onCommand:codeFlea.nextInterestingLine",
-    "onCommand:codeFlea.prevInterestingLine",
-    "onCommand:codeFlea.nearestLineOfLesserIndentation",
-    "onCommand:codeFlea.nearestLineOfGreaterIndentation",
-    "onCommand:codeFlea.prevLineOfSameIndentation",
-    "onCommand:codeFlea.nextLineOfSameIndentation",
-    "onCommand:codeFlea.prevInterestingPoint",
+    "onCommand:codeFlea.jump",
+    "onCommand:codeFlea.extendBlockSelection",
+    "onCommand:codeFlea.extendBlockSelectionBackwards",
+    "onCommand:codeFlea.nextBlankLine",
+    "onCommand:codeFlea.nextBlock",
+    "onCommand:codeFlea.prevBlock",
+    "onCommand:codeFlea.prevBlankLine",
+    "onCommand:codeFlea.nextOuterBlock",
+    "onCommand:codeFlea.prevOuterBlock",
+    "onCommand:codeFlea.nextSameBlock",
+    "onCommand:codeFlea.prevSameBlock",
+    "onCommand:codeFlea.nextInnerBlock",
+    "onCommand:codeFlea.prevInnerBlock",
+    "onCommand:codeFlea.nearestInnerLine",
+    "onCommand:codeFlea.nearestOuterLine",
     "onCommand:codeFlea.nextInterestingPoint",
-    "onCommand:codeFlea.jump"
+    "onCommand:codeFlea.nextInnerLine",
+    "onCommand:codeFlea.nextSameLine",
+    "onCommand:codeFlea.prevInterestingPoint",
+    "onCommand:codeFlea.prevOuterLine",
+    "onCommand:codeFlea.prevSameLine",
+    "onCommand:codeFlea.scrollToCursor",
+    "onCommand:codeFlea.nextBlockEnd",
+    "onCommand:codeFlea.prevBlockEnd",
+    "onCommand:codeFlea.scrollEditorUp",
+    "onCommand:codeFlea.scrollEditorDown",
+    "onCommand:codeFlea.selectAllBlocksInCurrentScope"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "configuration": {
-      "title": "",
+      "title": "CodeFlea: ",
       "type": "",
       "properties": {
+        "codeFlea.scrollStep": {
+          "description": "The number of lines to scroll when scrolling the editor",
+          "type": "number",
+          "default": "10"
+        },
         "codeFlea.decoration.backgroundColor": {
           "type": "string",
           "default": "lightskyblue",
@@ -106,40 +129,104 @@
     },
     "commands": [
       {
-        "command": "codeFlea.nextInterestingLine",
-        "title": "Next interesting line"
+        "command": "codeFlea.nextBlock",
+        "title": "CodeFlea: Go to next block"
       },
       {
-        "command": "codeFlea.prevInterestingLine",
-        "title": "Previous interesting line"
+        "command": "codeFlea.prevBlock",
+        "title": "CodeFlea: Go to previous block"
       },
       {
-        "command": "codeFlea.nearestLineOfLesserIndentation",
-        "title": "Go to nearest line of lesser indentation"
+        "command": "codeFlea.nextOuterBlock",
+        "title": "CodeFlea: Go to next block at a higher level"
       },
       {
-        "command": "codeFlea.nearestLineOfGreaterIndentation",
-        "title": "Go to nearest line of greater indentation"
+        "command": "codeFlea.prevOuterBlock",
+        "title": "CodeFlea: Go to previous block at a higher level"
       },
       {
-        "command": "codeFlea.prevLineOfSameIndentation",
-        "title": "Go to the previous line of the same indentation"
+        "command": "codeFlea.nextSameBlock",
+        "title": "CodeFlea: Go to next block at the same level"
       },
       {
-        "command": "codeFlea.nextLineOfSameIndentation",
-        "title": "Go to the next line of the same indentation"
+        "command": "codeFlea.prevSameBlock",
+        "title": "CodeFlea: Go to previous block at the same level"
+      },
+      {
+        "command": "codeFlea.nextInnerBlock",
+        "title": "CodeFlea: Go to next block at a lower level"
+      },
+      {
+        "command": "codeFlea.prevInnerBlock",
+        "title": "CodeFlea: Go to previous block at a lower level"
+      },
+      {
+        "command": "codeFlea.extendBlockSelection",
+        "title": "CodeFlea: Extend block selection"
+      },
+      {
+        "command": "codeFlea.extendBlockSelectionBackwards",
+        "title": "CodeFlea: Extend block selection backwards"
+      },
+      {
+        "command": "codeFlea.nextBlankLine",
+        "title": "CodeFlea: Go to the next blank line"
+      },
+      {
+        "command": "codeFlea.prevBlankLine",
+        "title": "CodeFlea: Go to the previous blank line"
+      },
+      {
+        "command": "codeFlea.nearestOuterLine",
+        "title": "CodeFlea: Go to nearest line at a higher level"
+      },
+      {
+        "command": "codeFlea.nearestInnerLine",
+        "title": "CodeFlea: Go to nearest line at a lower level"
+      },
+      {
+        "command": "codeFlea.prevSameLine",
+        "title": "CodeFlea: Go to the previous line of the same indentation"
+      },
+      {
+        "command": "codeFlea.nextSameLine",
+        "title": "CodeFlea: Go to the next line of the same indentation"
       },
       {
         "command": "codeFlea.prevInterestingPoint",
-        "title": "Go to the previous interesting point"
+        "title": "CodeFlea: Go to the previous interesting point"
       },
       {
         "command": "codeFlea.nextInterestingPoint",
-        "title": "Go to the next interesting point"
+        "title": "CodeFlea: Go to the next interesting point"
       },
       {
         "command": "codeFlea.jump",
-        "title": "Jump to an interesting line"
+        "title": "CodeFlea: Jump"
+      },
+      {
+        "command": "codeFlea.scrollToCursor",
+        "title": "CodeFlea: Scroll editor to the cursor"
+      },
+      {
+        "command": "codeFlea.nextBlockEnd",
+        "title": "CodeFlea: Go to next block end"
+      },
+      {
+        "command": "codeFlea.prevBlockEnd",
+        "title": "CodeFlea: Go to previous block end"
+      },
+      {
+        "command": "codeFlea.selectAllBlocksInCurrentScope",
+        "title": "CodeFlea: Select all blocks in current scope"
+      },
+      {
+        "command": "codeFlea.scrollEditorUp",
+        "title": "CodeFlea: Scroll editor up"
+      },
+      {
+        "command": "codeFlea.scrollEditorDown",
+        "title": "CodeFlea: Scroll editor down"
       }
     ],
     "keybindings": [
@@ -151,6 +238,70 @@
       {
         "key": "ctrl+'",
         "command": "codeFlea.jump"
+      },
+      {
+        "key": "alt+n",
+        "command": "codeFlea.nextOuterBlock"
+      },
+      {
+        "key": "alt+l",
+        "command": "codeFlea.prevOuterBlock"
+      },
+      {
+        "key": "alt+e",
+        "command": "codeFlea.nextSameBlock"
+      },
+      {
+        "key": "alt+u",
+        "command": "codeFlea.prevSameBlock"
+      },
+      {
+        "key": "alt+shift+e",
+        "command": "codeFlea.extendBlockSelection"
+      },
+      {
+        "key": "alt+shift+u",
+        "command": "codeFlea.extendBlockSelectionBackwards"
+      },
+      {
+        "key": "alt+i",
+        "command": "codeFlea.nextInnerBlock"
+      },
+      {
+        "key": "alt+y",
+        "command": "codeFlea.prevInnerBlock"
+      },
+      {
+        "key": "alt+.",
+        "command": "codeFlea.nextBlock"
+      },
+      {
+        "key": "alt+m",
+        "command": "codeFlea.prevBlock"
+      },
+      {
+        "key": "alt+o",
+        "command": "codeFlea.nextInterestingPoint"
+      },
+      {
+        "key": "alt+h",
+        "command": "codeFlea.prevInterestingPoint"
+      },
+      {
+        "key": "alt+/",
+        "command": "codeFlea.scrollToCursor"
+      },
+      {
+        "key": "alt+shift+,",
+        "command": "codeFlea.selectAllBlocksInCurrentScope"
+      },
+      {
+        "key": "ctrl+up",
+        "command": "codeFlea.scrollEditorUp"
+      },
+      {
+        "key": "ctrl+down",
+        "command": "codeFlea.scrollEditorDown"
       }
     ]
   },
@@ -171,7 +322,7 @@
     "mocha": "^6.2.2",
     "tslint": "^5.20.0",
     "typescript": "^3.6.4",
-    "vsce": "^1.81.1",
+    "vsce": "^2.4.0",
     "vscode-test": "^1.2.2"
   }
 }

@@ -2,68 +2,121 @@
 
 ## Quick reference
 
-1. Press `Ctrl` + `'` to open the jump interface on interesting lines
+1. Press `Ctrl` + `'` to open the jump interface
 1. Press the corresponding jumpcode to move the cursor to the desired line. Interesting points will now be highlighted
    - Pressing `Esc` will cancel.
-   - Pressing `Space` will leave the cursor where it is and move to the interesting points
+   - Pressing `Space` will leave the cursor at the beginning of the line
 1. Press the corresponding jumpcode to move the cursor to the desired point
    - Pressing `Esc` or `Space` will leave the cursor where it is
 
-## Introduction
+Alternatively, use `alt+.` or `alt+m` to go to the next block or previous block respectively.
+
+## Concept
 
 CodeFlea is a language-agnostic extension for VS Code that makes it easy and intuitive to move the cursor around within a code file.
 
 VS Code has excellent code navigation abilities for jumping to a particular file or member, but it doesn't really have much functionality for moving around within a file.
 
-CodeFlea addresses this by giving simple, intuitive commands for moving the cursor around in a way that should be applicable to any programming language, even written prose! It accomplishes this by identifying "interesting" points in the file based on the presence of characters relative to whitespace.
+CodeFlea addresses this by giving simple, intuitive commands for moving the cursor around in a way that should be applicable to any programming language, even written prose or Markdown! It accomplishes this by identifying "blocks" within the file based on indentation and usage of punctuation and operators.
 
 ![CodeFlea in action](https://raw.githubusercontent.com/Richiban/CodeFlea/main/docs/jump-interface.gif)
 
-The rules for figuring out the locations of interesting lines and interesting points are as follows:
+The beginning and end of a block of code is defined as:
 
-An interesting line is defined as a line that (all of the below):
+- a change of indentation
+- a stop-line (a "stop-line" is a line that is either empty or contains only punctuation or whitespace)
 
-- Is not "boring" (see below)
-- Is immediately preceded by either:
-  - A boring line
-  - A change of indentation
+Example 1: In the following example code the beginning of each block has been illustrated.
 
-A _boring_ line is one that either:
-
-- is empty
-- contains nothing but punctuation
-
-In the following example code the "interesting" lines have been illustrated.
-
-    ┌─  public class C
-    │   {
-    ├─────  public string A { get; set; }
-    │       public string B { get; set; }
+```
+    ┌─  export function* iterLines(
+    ├───── document: vscode.TextDocument,
+    │      currentLineNumber: number,
+    │      direction: Direction,
+    │      skipCurrent = true
+    │      ) {
+    ├───── const advance = fromDirection(direction);
     │
-    ├─────  public void M()
-    │       {
-    ├─────────  if (cond)
-    │           {
-    ├─────────────  var x = 4;
-    │               var y = 5;
-    │               var z = 6;
+    ├───── if (skipCurrent) currentLineNumber = advance(currentLineNumber);
     │
-    ├─────────────  DoSomething(x + y + z);
-    │           }
-    ├─────────  else
-    │           {
-    ├─────────────  DoSomethingElse(new D {
-    ├─────────────────  E = "e",
-    │                   F = "f",
-    │                   G = "g"
-    │               });
+    ├───── while (withinBounds()) {
+    ├────────── yield document.lineAt(currentLineNumber);
+    │           currentLineNumber = advance(currentLineNumber);
+    │       }
     │
-    └─────────────  Console.WriteLine("Did something else")
-                }
+    ├────── function withinBounds() {
+    └────────── return currentLineNumber >= 0 && currentLineNumber < document.lineCount;
             }
         }
+```
 
-There will be keyboard shortcuts for jumping to the next/prev interesting line in the file, as well as for jumping to the next/prev interesting line at the same indentation level
+Due to the fact that CodeFlea is entirely based on whitespace and operators it should just work in most programming languages, such as Javascript, C#, F#, Haskell, V, or Python:
+
+```
+    ┌── import unittest
+    │
+    ├── def median(pool):
+    ├────── copy = sorted(pool)
+    │       size = len(copy)
+    │
+    ├────── if size % 2 == 1:
+    ├────────── return copy[int((size - 1) / 2)]
+    ├────── else:
+    ├────────── return (copy[int(size/2 - 1)] + copy[int(size/2)]) / 2
+    │
+    ├── class TestMedian(unittest.TestCase):
+    ├────── def testMedian(self):
+    ├────────── self.assertEqual(median([2, 9, 9, 7, 9, 2, 4, 5, 8]), 7)
+    │
+    ├── if __name__ == '__main__':
+    └────── unittest.main()
+```
+
+## Commands for navigating blocks
+
+To get started, it is recommended that you use the commands
+
+| Command                 | Default keybinding | Description                                          |
+| ----------------------- | ------------------ | ---------------------------------------------------- |
+| codeFlea.jump           | `ctrl+'`           | Opens the jump interface                             |
+| codeFlea.nextBlock      | `alt+.`            | Jumps to the next block in the file                  |
+| codeFlea.prevBlock      | `alt+m`            | Jumps to the previous block in the file              |
+| codeFlea.scrollToCursor | `alt+/`            | Scrolls the editor until the cursor is in the middle |
+
+Once you have developed an intuitive sense of where the cursor can jump to, you can move on to some of the more advanced commands:
+
+| Command                 | Default keybinding | Description                                        |
+| ----------------------- | ------------------ | -------------------------------------------------- |
+| codeFlea.nextOuterBlock | `alt+j`            | Go to the next block with less indentation         |
+| codeFlea.prevOuterBlock | `alt+u`            | Go to the previous block with less indentation     |
+| codeFlea.nextSameBlock  | `alt+k`            | Go to the next block with the same indentation     |
+| codeFlea.prevSameBlock  | `alt+i`            | Go to the previous block with the same indentation |
+| codeFlea.nextInnerBlock | `alt+l`            | Go to the next block with greater indentation      |
+| codeFlea.prevInnerBlock | `alt+o`            | Go to the previous block with greater indentation  |
+
+These commands are laid out on the QWERTY keyboard in the following way:
+
+```
+┌───┐ ┌───┐ ┌───┐       ┌───┐ ┌───┐ ┌───┐
+│ U │ │ I │ │ O │       │ ↖ │ │ ↑ │ │ ↗ │
+└───┘ └───┘ └───┘       └───┘ └───┘ └───┘
+┌───┐ ┌───┐ ┌───┐   =   ┌───┐ ┌───┐ ┌───┐
+│ J │ │ K │ │ L │       │ ↙ │ │ ↓ │ │ ↘ │
+└───┘ └───┘ └───┘       └───┘ └───┘ └───┘
+```
+
+Feel free to change these bindings if they don't suit you or you use another keyboard layout (I use Colemak myself, so mine are bound to `L`,`U`,`Y`,`N`,`E` and `I`).
+
+In addition to moving between blocks you can also select blocks:
+
+| Command                                | Default keybinding | Description                                    |
+| -------------------------------------- | ------------------ | ---------------------------------------------- |
+| codeFlea.extendBlockSelection          | `alt+shift+k`      | Extend selection to include the next block     |
+| codeFlea.extendBlockSelectionBackwards | `alt+shift+i`      | Extend selection to include the previous block |
+
+## Commands for navigating to points
+
+There are commands for jumping to the next/previous block in the file, as well as for jumping to the next/prev block at the same indentation level
 
 _Interesting points_ within a line are defined as:
 
@@ -75,34 +128,26 @@ Example:
 
 ```
 ┌───────┬────┬──────┬──┬──┬──────────────┬───┬─┐
-var x = Some.Method(a, b, AnotherMethod("c", 4))
+let x = some.method(a, b, anotherMethod("c", 4))
+
 ```
 
-There are commands for jumping to the next/prev interesting point in the file.
+| Command                       | Default keybinding | Description                                                |
+| ----------------------------- | ------------------ | ---------------------------------------------------------- |
+| codeFlea.nextInterestingPoint | `alt+h`            | Go to the previous interesting point in the file           |
+| codeFlea.prevInterestingPoint | `alt+;`            | Extend selection to the next interesting point in the file |
 
-There are also commands for jumping around based purely on indentation level. The indentation is almost universal among programming languages, and provides a visual tree-like structure to the code that can be viewed as a useful map to be navigated.
+## Miscellaneous commands
 
-Please note that CodeFlea may be thrown off if you mix spaces and tabs for indentation.
+CodeFlea includes some other commands that are generally useful for keyboard-only use of VS Code:
 
-## Commands
+| Command                 | Default keybinding | Description                                         |
+| ----------------------- | ------------------ | --------------------------------------------------- |
+| codeFlea.nextBlankLine  | none               | Go to the next blank line in the file               |
+| codeFlea.prevBlankLine  | none               | Go to the previous blank line in the file           |
+| codeFlea.scrollToCursor | `alt+/`            | Scroll the editor until the cursor is in the middle |
 
-The commands can be broadly separated into three categories:
+## Building and running
 
-- Navigating up / down through the interesting lines in a file
-- Navigating up / down / left / right based on indentation
-- Navigating left and right through a line based on punctuation
-
-The complete list of commands is:
-
-- nextInterestingLine
-- prevInterestingLine
-- nearestLineOfLesserIndentation
-- nearestLineOfGreaterIndentation
-- prevLineOfLesserIndentation
-- nextLineOfLesserIndentation
-- prevLineOfGreaterIndentation
-- nextLineOfGreaterIndentation
-- prevLineOfSameIndentation
-- nextLineOfSameIndentation
-- prevInterestingPoint
-- nextInterestingPoint
+- Run `npm install` in your terminal to install dependencies
+- Run the `Run Extension` target in the Debug View.

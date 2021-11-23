@@ -1,43 +1,86 @@
 import * as vscode from "vscode";
-import { Change, Direction, DirectionOrNearest, linqish } from "./common";
+import {
+  Change,
+  Direction,
+  Indentation,
+  DirectionOrNearest,
+  linqish,
+  IndentationRequest,
+  opposite,
+  Point,
+} from "./common";
 import {
   getCursorPosition,
   getEditor,
-  moveCursorToBeginningOfLine
+  moveCursorTo,
+  selectTo,
+  tryGetLineAt,
 } from "./editor";
 
-export function lineIsMeaningless(line: vscode.TextLine) {
-  return !/[a-zA-Z0-9]/.test(line.text);
+type Bounds = { start: { line: number }; end: { line: number } };
+
+function getRelativeIndentation(targetLine: vscode.TextLine): Indentation {
+  const editor = getEditor();
+
+  const document = editor.document;
+
+  const cursorPosition = getCursorPosition();
+  const currentLine = document.lineAt(cursorPosition.line);
+
+  if (
+    currentLine.firstNonWhitespaceCharacterIndex >
+    targetLine.firstNonWhitespaceCharacterIndex
+  ) {
+    return "less-indentation";
+  }
+
+  if (
+    currentLine.firstNonWhitespaceCharacterIndex <
+    targetLine.firstNonWhitespaceCharacterIndex
+  ) {
+    return "more-indentation";
+  }
+
+  return "same-indentation";
 }
 
-function lineIsIndentationChange(
-  prevLine: vscode.TextLine,
-  currentLine: vscode.TextLine
+function linesDifferInIndentation(
+  lineA: vscode.TextLine,
+  lineB: vscode.TextLine
 ) {
   return (
-    prevLine.firstNonWhitespaceCharacterIndex !==
-    currentLine.firstNonWhitespaceCharacterIndex
+    lineA.firstNonWhitespaceCharacterIndex !==
+    lineB.firstNonWhitespaceCharacterIndex
   );
 }
 
-function lineIsInteresting(
+function lineIsBlockStart(
   prevLine: vscode.TextLine | undefined,
   currentLine: vscode.TextLine
 ) {
-  if (lineIsMeaningless(currentLine)) return false;
   if (!prevLine) return true;
+  if (lineIsStopLine(currentLine)) return false;
+  if (lineIsStopLine(prevLine)) return true;
+  if (linesDifferInIndentation(prevLine, currentLine)) return true;
 
-  return (
-    lineIsIndentationChange(prevLine, currentLine) ||
-    lineIsMeaningless(prevLine)
-  );
+  return false;
+}
+
+function lineIsBlockEnd(
+  currentLine: vscode.TextLine,
+  nextLine: vscode.TextLine | undefined
+) {
+  if (!nextLine) return true;
+  if (currentLine.isEmptyOrWhitespace) return false;
+  if (lineIsStopLine(nextLine)) return true;
+  if (linesDifferInIndentation(currentLine, nextLine)) return true;
+
+  return false;
 }
 
 function fromDirection(direction: Direction) {
   return direction === "forwards" ? (x: number) => x + 1 : (x: number) => x - 1;
 }
-
-type Bounds = { start: { line: number }; end: { line: number } };
 
 function* iterLinesWithPrevious(
   document: vscode.TextDocument,
@@ -49,7 +92,7 @@ function* iterLinesWithPrevious(
   currentLineNumber = advance(currentLineNumber);
 
   const inBounds = (num: number) => {
-    return num >= bounds.start.line && num <= bounds.end.line;
+    return num >= bounds.start.line && num < bounds.end.line;
   };
 
   while (inBounds(currentLineNumber)) {
@@ -65,25 +108,49 @@ function* iterLinesWithPrevious(
   }
 }
 
-export function* iterLines(
+function* iterLinesWithNext(
   document: vscode.TextDocument,
   currentLineNumber: number,
   direction: Direction,
-  skipCurrent = true
+  options: {
+    bounds?: Bounds;
+    currentLineInclusive?: boolean;
+  }
 ) {
+  const defaultOptions = {
+    bounds: { start: { line: 0 }, end: { line: document.lineCount } },
+    currentLineInclusive: false,
+  };
+
+  options = { ...defaultOptions, ...options };
+
   const advance = fromDirection(direction);
 
-  if (skipCurrent) currentLineNumber = advance(currentLineNumber);
-
-  while (withinBounds()) {
-    yield document.lineAt(currentLineNumber);
-
+  if (options.currentLineInclusive === false) {
     currentLineNumber = advance(currentLineNumber);
   }
 
-  function withinBounds() {
-    return currentLineNumber >= 0 && currentLineNumber < document.lineCount;
+  const inBounds = (num: number) => {
+    return num >= options.bounds!.start.line && num < options.bounds!.end.line;
+  };
+
+  while (inBounds(currentLineNumber)) {
+    const nextLine =
+      currentLineNumber === options.bounds!.end.line - 1
+        ? undefined
+        : document.lineAt(currentLineNumber + 1);
+
+    const currentLine = document.lineAt(currentLineNumber);
+
+    yield { currentLine, nextLine };
+
+    currentLineNumber = advance(currentLineNumber);
   }
+}
+
+function toDiff(change: Change) {
+  if (change === "greaterThan") return (x: number, y: number) => x > y;
+  return (x: number, y: number) => x < y;
 }
 
 function* iterLinesOutwards(
@@ -116,9 +183,25 @@ function* iterLinesOutwards(
   }
 }
 
-function toDiff(change: Change) {
-  if (change === "greaterThan") return (x: number, y: number) => x > y;
-  return (x: number, y: number) => x < y;
+export function* iterLines(
+  document: vscode.TextDocument,
+  currentLineNumber: number,
+  direction: Direction,
+  skipCurrent = true
+) {
+  const advance = fromDirection(direction);
+
+  if (skipCurrent) currentLineNumber = advance(currentLineNumber);
+
+  while (withinBounds()) {
+    yield document.lineAt(currentLineNumber);
+
+    currentLineNumber = advance(currentLineNumber);
+  }
+
+  function withinBounds() {
+    return currentLineNumber >= 0 && currentLineNumber < document.lineCount;
+  }
 }
 
 export function getNearestLineOfChangeOfIndentation(
@@ -175,6 +258,20 @@ export function getNextLineOfChangeOfIndentation(
   }
 }
 
+export function moveCursorToNextBlankLine(advance: (n: number) => number) {
+  const currentPosition = getCursorPosition()!;
+
+  let nextLine = tryGetLineAt(advance(currentPosition.line));
+
+  while (nextLine && !nextLine.isEmptyOrWhitespace) {
+    nextLine = tryGetLineAt(advance(nextLine.lineNumber));
+  }
+
+  if (nextLine) {
+    moveCursorTo(nextLine.range.start);
+  }
+}
+
 export function moveToChangeOfIndentation(
   change: Change,
   direction: DirectionOrNearest
@@ -207,88 +304,224 @@ export function moveToChangeOfIndentation(
       }
     }
 
-    if (line) moveCursorToBeginningOfLine(line);
+    if (line) moveCursorTo(line.range.start);
   }
 }
 
-export function* getNextInterestingLines(direction: Direction) {
+export function selectAllBlocksInCurrentScope() {
   const cursorPosition = getCursorPosition();
-  const document = getEditor()?.document;
 
-  if (cursorPosition && document) {
-    const documentLines = iterLinesWithPrevious(
-      document,
-      cursorPosition.line,
-      direction
-    );
+  let start: Point = cursorPosition;
+  let end: Point = cursorPosition;
 
-    for (const { prevLine, currentLine } of documentLines) {
-      if (lineIsInteresting(prevLine, currentLine)) {
-        yield currentLine;
+  for (const blockStart of iterBlockStarts(cursorPosition, {
+    direction: "backwards",
+    indentationLevel: "same-indentation",
+    restrictToCurrentScope: true,
+  })) {
+    start = blockStart;
+  }
+
+  for (const blockEnd of iterBlockEnds(
+    cursorPosition,
+    "forwards",
+    "same-indentation",
+    true
+  )) {
+    end = blockEnd;
+  }
+
+  getEditor().selection = new vscode.Selection(
+    start.line,
+    start.character,
+    end.line,
+    end.character
+  );
+}
+
+export function* iterBlockStarts(
+  fromPosition: Point,
+  options: {
+    direction?: Direction;
+    indentationLevel?: IndentationRequest;
+    restrictToCurrentScope?: boolean;
+  }
+): Generator<Point> {
+  const finalOptions: Required<typeof options> = {
+    direction: "forwards",
+    indentationLevel: "same-indentation",
+    restrictToCurrentScope: false,
+    ...options,
+  };
+
+  const documentLines = iterLinesWithPrevious(
+    getEditor().document,
+    fromPosition.line,
+    finalOptions.direction
+  );
+
+  for (const { prevLine, currentLine } of documentLines) {
+    if (lineIsBlockStart(prevLine, currentLine)) {
+      const relativeIndentation = getRelativeIndentation(currentLine);
+
+      if (
+        finalOptions.restrictToCurrentScope &&
+        relativeIndentation === "less-indentation"
+      ) {
+        return;
+      }
+
+      if (
+        finalOptions.indentationLevel === "any-indentation" ||
+        relativeIndentation === finalOptions.indentationLevel
+      ) {
+        yield currentLine.range.start.with({
+          character: currentLine.firstNonWhitespaceCharacterIndex,
+        });
       }
     }
   }
 }
 
-export type LineEnumerationPattern = "alternate" | "sequential";
+export function* iterBlockEnds(
+  fromPosition: Point,
+  direction: Direction,
+  indentationLevel: IndentationRequest,
+  restrictToCurrentScope = false
+) {
+  const document = getEditor().document;
 
-export function getInterestingLines(
+  const documentLines = iterLinesWithNext(
+    document,
+    fromPosition.line,
+    direction,
+    { currentLineInclusive: true }
+  );
+
+  for (const { currentLine, nextLine } of documentLines) {
+    if (lineIsBlockEnd(currentLine, nextLine)) {
+      const relativeIndentation = getRelativeIndentation(currentLine);
+
+      if (
+        restrictToCurrentScope &&
+        relativeIndentation === "less-indentation"
+      ) {
+        return;
+      }
+
+      if (
+        indentationLevel === "any-indentation" ||
+        relativeIndentation === indentationLevel
+      ) {
+        yield currentLine.range.end;
+      }
+    }
+  }
+}
+
+export function getBlocks(
   pattern: LineEnumerationPattern,
   direction: Direction,
   bounds: vscode.Range
 ) {
   const cursorPosition = getCursorPosition();
-  const document = getEditor()?.document;
 
-  if (!document || !cursorPosition) return linqish.empty;
+  const primaryDirection = iterBlockStarts(cursorPosition, {
+    direction,
+    indentationLevel: "any-indentation",
+  });
 
-  const linesForwards = iterLinesWithPrevious(
-    document,
-    cursorPosition.line,
-    "forwards",
-    bounds
-  );
-
-  const linesBackwards = iterLinesWithPrevious(
-    document,
-    cursorPosition.line,
-    "backwards",
-    bounds
-  );
-
-  const [a, b] =
-    direction === "forwards"
-      ? [linesForwards, linesBackwards]
-      : [linesBackwards, linesForwards];
+  const secondaryDirection = iterBlockStarts(cursorPosition, {
+    direction: opposite(direction),
+    indentationLevel: "any-indentation",
+  });
 
   switch (pattern) {
     case "alternate":
-      return linqish(a)
-        .alternateWith(b)
-        .filter(({ prevLine, currentLine }) =>
-          lineIsInteresting(prevLine, currentLine)
-        )
-        .map(({ prevLine: _, currentLine }) => currentLine);
+      return linqish(primaryDirection).alternateWith(secondaryDirection);
     case "sequential":
-      return linqish(a)
-        .concat(b)
-        .filter(({ prevLine, currentLine }) =>
-          lineIsInteresting(prevLine, currentLine)
-        )
-        .map(({ prevLine: _, currentLine }) => currentLine);
+      return linqish(primaryDirection).concat(secondaryDirection);
   }
 }
 
-export function moveToNextInterestingLine(direction: Direction) {
-  for (const line of getNextInterestingLines(direction)) {
-    moveCursorToBeginningOfLine(line);
+export function extendBlockSelection(
+  direction: Direction,
+  indentation: Indentation
+) {
+  if (indentation !== "same-indentation") {
+    throw new Error("Only 'same-indentation' is currently supported");
+  }
+
+  const editor = getEditor();
+  const cursorPosition = getCursorPosition();
+
+  const continuationPoint = editor.selection.anchor;
+
+  for (const start of iterBlockStarts(continuationPoint, {
+    direction,
+    indentationLevel: indentation,
+    restrictToCurrentScope: true,
+  })) {
+    selectTo(cursorPosition, start);
+    return;
+  }
+
+  if (direction !== "forwards") return;
+
+  let candidateEndLine = undefined;
+
+  for (const blockEnd of iterBlockEnds(
+    continuationPoint,
+    direction,
+    "same-indentation",
+    true
+  )) {
+    candidateEndLine = blockEnd;
+  }
+
+  if (candidateEndLine) selectTo(cursorPosition, candidateEndLine);
+}
+
+export function nextBlankLine(direction: Direction) {
+  if (direction === "forwards") {
+    moveCursorToNextBlankLine((x) => x + 1);
+  } else {
+    moveCursorToNextBlankLine((x) => x - 1);
+  }
+}
+
+export function nextBlockStart(
+  direction: Direction,
+  indentation: IndentationRequest
+) {
+  for (const blockStart of iterBlockStarts(getCursorPosition(), {
+    direction,
+    indentationLevel: indentation,
+  })) {
+    moveCursorTo(blockStart);
+
     return;
   }
 }
 
-export function moveToLineOfSameIndentation(direction: Direction) {
+export function nextBlockEnd(
+  direction: Direction,
+  indentation: IndentationRequest
+) {
+  for (const blockEnd of iterBlockEnds(
+    getCursorPosition(),
+    direction,
+    indentation
+  )) {
+    moveCursorTo(blockEnd);
+
+    return;
+  }
+}
+
+export function moveToNextLineSameLevel(direction: Direction) {
   const cursorPosition = getCursorPosition();
-  const document = getEditor()?.document;
+  const document = getEditor().document;
 
   if (cursorPosition && document) {
     const documentLines = iterLines(document, cursorPosition.line, direction);
@@ -301,9 +534,17 @@ export function moveToLineOfSameIndentation(direction: Direction) {
           line.firstNonWhitespaceCharacterIndex &&
         !line.isEmptyOrWhitespace
       ) {
-        moveCursorToBeginningOfLine(line);
+        moveCursorTo(line.range.start);
         break;
       }
     }
   }
 }
+
+/** A "stop line" is one that is either blank or
+ *  contains only punctuation */
+export function lineIsStopLine(line: vscode.TextLine) {
+  return !/[a-zA-Z0-9]/.test(line.text);
+}
+
+export type LineEnumerationPattern = "alternate" | "sequential";
