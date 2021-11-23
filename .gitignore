@@ -39,3 +39,5 @@ lib/*.js
 test/*.js
 *.map
 out
+
+*.vsix

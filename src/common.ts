@@ -1,4 +1,5 @@
 import { Config } from "./config";
+import * as vscode from "vscode";
 
 export type DirectionOrNearest = Direction | "nearest";
 
@@ -6,13 +7,25 @@ export type Change = "greaterThan" | "lessThan";
 
 export type Direction = "forwards" | "backwards";
 
+export type Indentation =
+  | "more-indentation"
+  | "less-indentation"
+  | "same-indentation";
+
+export type IndentationRequest = Indentation | "any-indentation";
+
 export type JumpLocations = JumpLocation[];
+
+export type Point = Pick<vscode.Position, "line" | "character">;
 
 export type JumpLocation = {
   jumpCode: string;
-  lineNumber: number;
-  charIndex: number;
+  position: Point;
 };
+
+export function opposite(direction: Direction) {
+  return direction === "forwards" ? "backwards" : "forwards";
+}
 
 export function getJumpCodes(config: Config) {
   return config.jump.characters.split(/[\s,]+/);
@@ -28,9 +41,11 @@ export class Cache<TArgs extends any[], TValue> implements Iterable<TValue> {
 
   get(...args: TArgs): TValue {
     const cacheKey = this.getCacheKey(...args);
+
     if (!(cacheKey in this._cache)) {
       this._cache[cacheKey] = this.generateValue(...args);
     }
+
     return this._cache[cacheKey];
   }
 
@@ -165,13 +180,13 @@ export class Linqish<T> implements Iterable<T> {
     );
   }
 
-  alternateWith<U>(iter2: Iterable<U>): Linqish<T|U> {
+  alternateWith<U>(iter2: Iterable<U>): Linqish<T | U> {
     const i1 = this.iter[Symbol.iterator]();
     const i2 = iter2[Symbol.iterator]();
 
     return new Linqish(
       (function* () {
-        let currentIterator: Iterator<T|U> = i1;
+        let currentIterator: Iterator<T | U> = i1;
 
         const swapIterators = () => {
           if (currentIterator === i1) currentIterator = i2;
@@ -220,6 +235,7 @@ export class Linqish<T> implements Iterable<T> {
     return this.fold(
       (x, state) => {
         (f(x) ? state._true : state._false).push(x);
+
         return state;
       },
       { _true: [] as T[], _false: [] as T[] }

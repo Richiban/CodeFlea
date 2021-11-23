@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  release:
+    types:
+    - created
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        
+      - name: Install Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+          
+      - run: npm install
+
+      - name: Publish
+        if: success() && matrix.os == 'ubuntu-latest'
+        run: npm run deploy
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}

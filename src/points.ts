@@ -1,6 +1,7 @@
-import { Direction, linqish, Linqish } from "./common";
+import { Direction, linqish, Linqish, Point } from "./common";
 import { getEditor, getCursorPosition, moveCursorTo } from "./editor";
-import { iterLines, lineIsMeaningless } from "./lines";
+import { iterLines, lineIsStopLine } from "./lines";
+import * as vscode from "vscode";
 
 const interestingChars = new Set(
   "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -10,47 +11,45 @@ function isInteresting(char: string) {
   return interestingChars.has(char);
 }
 
-function isPunctuation(char: string) {
-  return !/[a-zA-Z0-9\s]/.test(char);
+function widen<T>(val: T) {
+  return val;
 }
 
-function* getInterestingPointsInText(
-  s: string,
+function* getInterestingPointsInLine(
+  line: vscode.TextLine,
   options = {
     startingIndex: 0,
-    backwards: false,
+    direction: widen<Direction>("backwards"),
   }
 ) {
-  const advance = options.backwards
-    ? (x: number) => x - 1
-    : (x: number) => x + 1;
+  const advance =
+    options.direction === "backwards"
+      ? (x: number) => x - 1
+      : (x: number) => x + 1;
 
   let idx = options.startingIndex;
-  let shouldYield = true;
 
   do {
     idx = advance(idx);
 
-    if (idx < 0 || idx > s.length) return;
-    if (idx === 0 || idx === s.length) yield idx;
-
-    if (shouldYield && isInteresting(s[idx])) {
+    if (idx < 0 || idx > line.text.length) return;
+    if (idx === 0 || idx === line.text.length) {
       yield idx;
-      shouldYield = false;
-    } else if (isPunctuation(s[idx])) {
-      shouldYield = true;
+      return;
+    }
+
+    if (!isInteresting(line.text[idx - 1]) && isInteresting(line.text[idx])) {
+      yield idx;
     }
   } while (true);
 }
 
-export async function moveToNextInterestingPoint(direction: Direction = "forwards") {
-  for (const point of getInterestingPoints(direction).skip(2)) {
-    await moveCursorTo(point.lineNumber, point.charIndex);
+export async function nextInterestingPoint(direction: Direction = "forwards") {
+  for (const point of getInterestingPoints(direction)) {
+    await moveCursorTo(point);
     return;
   }
 }
-
-export type Point = { lineNumber: number; charIndex: number };
 
 export function getInterestingPoints(
   direction: Direction = "forwards"
@@ -68,17 +67,17 @@ export function getInterestingPoints(
         direction,
         false
       )) {
-        if (lineIsMeaningless(l)) return;
+        if (lineIsStopLine(l)) return;
 
-        for (const c of getInterestingPointsInText(l.text, {
-          backwards: false,
-          startingIndex: 0,
+        for (const c of getInterestingPointsInLine(l, {
+          direction: direction,
+          startingIndex: cursorPosition.character,
         })) {
           if (
             l.lineNumber !== cursorPosition.line ||
             c !== cursorPosition.character + 1
           )
-            yield { lineNumber: l.lineNumber, charIndex: c };
+            yield { line: l.lineNumber, character: c };
         }
       }
     })()

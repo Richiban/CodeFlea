@@ -26,20 +26,15 @@ export type DecorationConfig = {
 export type Config = {
   decoration: DecorationConfig;
   jump: JumpConfig;
+  scrollStep: number;
 };
 
 export function loadConfig(): Config {
   const config = vscode.workspace.getConfiguration("codeFlea");
 
-  // const newLocal = config.get<Config>("");
-
-  // if (!newLocal) {
-  //   vscode.window.showErrorMessage("Please check your codeFlea config");
-  //   throw new Error("Invalid config");
-  // }
-
   return {
     decoration: config.get<DecorationConfig>("decoration")!,
     jump: config.get<JumpConfig>("jump")!,
+    scrollStep: config.get<number>("scrollStep") || 10,
   };
 }
