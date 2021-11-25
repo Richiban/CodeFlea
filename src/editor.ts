@@ -12,8 +12,8 @@ export function scrollEditor(direction: "up" | "down", lines: number) {
 
   const lineToReveal =
     direction === "up"
-      ? existingRange.start.line - lines
-      : existingRange.end.line + lines;
+      ? Math.max(existingRange.start.line - lines, 0)
+      : Math.min(existingRange.end.line + lines, editor.document.lineCount - 1);
 
   const newRange = new vscode.Range(lineToReveal, 0, lineToReveal, 0);
 

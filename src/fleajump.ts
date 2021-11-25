@@ -59,7 +59,7 @@ export class FleaJumper {
 
         await this.jumpToPointPhase(editor);
       } catch (reason) {
-        if (!reason) reason = "Canceled!";
+        if (!reason) reason = "Cancelled!";
         vscode.window.setStatusBarMessage(`CodeFlea: ${reason}`, 2000);
       } finally {
         if (jumpTimeoutId) clearTimeout(jumpTimeoutId);
@@ -127,14 +127,9 @@ export class FleaJumper {
 
     const blocks = getBlocks("alternate", "forwards", bounds);
 
-    const toJumpLocation = ([l, c]: readonly [
-      Point,
-      string
-    ]): JumpLocation => ({
-      jumpCode: c,
-      position: l,
-    });
-
-    return blocks.zipWith(jumpCodes).map(toJumpLocation).toArray();
+    return blocks
+      .zipWith(jumpCodes)
+      .map(([p, c]) => ({ jumpCode: c, position: p }))
+      .toArray();
   };
 }

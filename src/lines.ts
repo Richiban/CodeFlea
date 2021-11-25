@@ -117,12 +117,11 @@ function* iterLinesWithNext(
     currentLineInclusive?: boolean;
   }
 ) {
-  const defaultOptions = {
+  const finalOptions = {
     bounds: { start: { line: 0 }, end: { line: document.lineCount } },
     currentLineInclusive: false,
+    ...options,
   };
-
-  options = { ...defaultOptions, ...options };
 
   const advance = fromDirection(direction);
 
@@ -131,7 +130,10 @@ function* iterLinesWithNext(
   }
 
   const inBounds = (num: number) => {
-    return num >= options.bounds!.start.line && num < options.bounds!.end.line;
+    return (
+      num >= finalOptions.bounds.start.line &&
+      num < finalOptions.bounds.end.line
+    );
   };
 
   while (inBounds(currentLineNumber)) {
