@@ -23,6 +23,8 @@ jobs:
           node-version: 16.x
           
       - run: npm install
+          
+      - run: npm version ${{ github.event.release.tag_name }}
 
       - name: Publish
         if: success() && matrix.os == 'ubuntu-latest'
