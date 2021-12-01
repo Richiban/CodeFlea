@@ -23,6 +23,8 @@ export type JumpLocation = {
   position: Point;
 };
 
+export type Parameter<T> = T extends (arg: infer U) => any ? U : never;
+
 export function opposite(direction: Direction) {
   return direction === "forwards" ? "backwards" : "forwards";
 }
@@ -244,6 +246,17 @@ export class Linqish<T> implements Iterable<T> {
 
   toArray() {
     return Array.from(this.iter);
+  }
+
+  tryFirst() {
+    let result = undefined;
+
+    for (const x of this.iter) {
+      result = x;
+      break;
+    }
+
+    return result;
   }
 }
 

@@ -29,6 +29,8 @@ function* getInterestingPointsInLine(
 
   let idx = options.startingIndex;
 
+  let hadOperator = false;
+
   do {
     idx = advance(idx);
 
@@ -38,10 +40,22 @@ function* getInterestingPointsInLine(
       return;
     }
 
-    if (!isInteresting(line.text[idx - 1]) && isInteresting(line.text[idx])) {
-      yield idx;
+    if (isInteresting(line.text[idx])) {
+      if (hadOperator) {
+        yield idx;
+      }
+
+      hadOperator = false;
+    } else {
+      if (isOperator(line.text[idx])) {
+        hadOperator = true;
+      }
     }
   } while (true);
+}
+
+function isOperator(char: string) {
+  return '()[]{}=:/\\|^&+;<>!"'.includes(char);
 }
 
 export async function nextInterestingPoint(direction: Direction = "forwards") {
@@ -61,12 +75,7 @@ export function getInterestingPoints(
 
       if (!cursorPosition || !document) return;
 
-      for (const l of iterLines(
-        document,
-        cursorPosition.line,
-        direction,
-        false
-      )) {
+      for (const l of iterLines(document, cursorPosition.line, direction)) {
         if (lineIsStopLine(l)) return;
 
         for (const c of getInterestingPointsInLine(l, {

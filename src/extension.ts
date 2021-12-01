@@ -3,13 +3,13 @@
 import * as vscode from "vscode";
 import { FleaJumper } from "./fleajump";
 import {
-  nextBlockStart,
+  moveToNextBlockStart,
   moveToChangeOfIndentation,
   moveToNextLineSameLevel,
   extendBlockSelection,
-  nextBlankLine,
   nextBlockEnd,
   selectAllBlocksInCurrentScope,
+  moveCursorToNextBlankLine,
 } from "./lines";
 import { nextInterestingPoint } from "./points";
 import { loadConfig } from "./config";
@@ -25,7 +25,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     vscode.commands.registerCommand("codeFlea.nextBlock", () =>
-      nextBlockStart("forwards", "any-indentation")
+      moveToNextBlockStart("forwards", "any-indentation")
     )
   );
 
@@ -37,43 +37,43 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     vscode.commands.registerCommand("codeFlea.nextOuterBlock", () =>
-      nextBlockStart("forwards", "less-indentation")
+      moveToNextBlockStart("forwards", "less-indentation")
     )
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand("codeFlea.prevOuterBlock", () =>
-      nextBlockStart("backwards", "less-indentation")
+      moveToNextBlockStart("backwards", "less-indentation")
     )
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand("codeFlea.nextSameBlock", () =>
-      nextBlockStart("forwards", "same-indentation")
+      moveToNextBlockStart("forwards", "same-indentation")
     )
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand("codeFlea.prevSameBlock", () =>
-      nextBlockStart("backwards", "same-indentation")
+      moveToNextBlockStart("backwards", "same-indentation")
     )
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand("codeFlea.nextInnerBlock", () =>
-      nextBlockStart("forwards", "more-indentation")
+      moveToNextBlockStart("forwards", "more-indentation")
     )
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand("codeFlea.prevInnerBlock", () =>
-      nextBlockStart("backwards", "more-indentation")
+      moveToNextBlockStart("backwards", "more-indentation")
     )
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand("codeFlea.prevBlock", () =>
-      nextBlockStart("backwards", "any-indentation")
+      moveToNextBlockStart("backwards", "any-indentation")
     )
   );
 
@@ -86,13 +86,13 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     vscode.commands.registerCommand("codeFlea.nextBlankLine", () =>
-      nextBlankLine("forwards")
+      moveCursorToNextBlankLine("forwards")
     )
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand("codeFlea.prevBlankLine", () =>
-      nextBlankLine("backwards")
+      moveCursorToNextBlankLine("backwards")
     )
   );
 

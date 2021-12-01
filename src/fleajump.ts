@@ -3,7 +3,7 @@ import { JumpInterface } from "./jump-interface";
 import * as vscode from "vscode";
 import { moveCursorTo } from "./editor";
 import { JumpLocations, JumpLocation, getJumpCodes, Point } from "./common";
-import { getBlocks } from "./lines";
+import { getBlocksAroundCursor } from "./lines";
 import { getInterestingPoints } from "./points";
 
 export class FleaJumper {
@@ -125,7 +125,7 @@ export class FleaJumper {
     const bounds = editor.visibleRanges[0];
     const jumpCodes = getJumpCodes(this.config);
 
-    const blocks = getBlocks("alternate", "forwards", bounds);
+    const blocks = getBlocksAroundCursor("alternate", "forwards", bounds);
 
     return blocks
       .zipWith(jumpCodes)
