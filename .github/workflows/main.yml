@@ -26,6 +26,6 @@ jobs:
 
       - name: Publish
         if: success() && matrix.os == 'ubuntu-latest'
-        run: npm run deploy
+        run: npm run deploy -- ${{ github.event.release.tag_name }}
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
