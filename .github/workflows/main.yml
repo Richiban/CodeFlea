@@ -1,11 +1,9 @@
 name: CI
 
 on:
-  release:
-    types:
-    - created
-
-  workflow_dispatch:
+  push:
+    tags:
+    - 'v*'
 
 jobs:
   build:
@@ -24,7 +22,7 @@ jobs:
           
       - run: npm install
           
-      - run: npm version ${{ github.event.release.tag_name }} --force --no-git-tag-version
+      - run: npm version ${GITHUB_REF#refs/tags/} --force --no-git-tag-version
 
       - name: Publish
         if: success() && matrix.os == 'ubuntu-latest'
