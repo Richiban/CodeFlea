@@ -24,7 +24,7 @@ jobs:
           
       - run: npm install
           
-      - run: npm version ${{ github.event.release.tag_name }} --force
+      - run: npm version ${{ github.event.release.tag_name }} --force --no-git-tag-version
 
       - name: Publish
         if: success() && matrix.os == 'ubuntu-latest'
