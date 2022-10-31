@@ -24,6 +24,11 @@ import {
 
 type Bounds = { start: { line: number }; end: { line: number } };
 
+export type BlockBoundary = Readonly<{
+    kind: "block-end" | "block-start";
+    point: Point;
+}>;
+
 function lineIsBlank(line: number) {
     return getEditor().document.lineAt(line).isEmptyOrWhitespace;
 }
@@ -86,16 +91,16 @@ function* iterLinePairs(
     currentLineNumber: number,
     direction: Direction,
     bounds: Bounds = { start: { line: 0 }, end: { line: document.lineCount } }
-): Generator<[vscode.TextLine, vscode.TextLine]> {
+): Generator<{ prev: vscode.TextLine; current: vscode.TextLine }> {
     for (const [a, b] of iterLines(
         document,
         currentLineNumber,
         direction
     ).pairwise()) {
         if (direction === "forwards") {
-            yield [a, b];
+            yield { prev: a, current: b };
         } else {
-            yield [b, a];
+            yield { prev: b, current: a };
         }
     }
 }
@@ -270,7 +275,6 @@ export function selectAllBlocksInCurrentScope() {
     let end: Point = cursorPosition;
 
     for (const blockStart of iterBlocks({
-        lookFor: "block-start",
         fromPosition: cursorPosition,
         direction: "backwards",
         indentationLevel: "same-indentation",
@@ -280,7 +284,6 @@ export function selectAllBlocksInCurrentScope() {
     }
 
     for (const blockEnd of iterBlocks({
-        lookFor: "block-end",
         fromPosition: cursorPosition,
         direction: "forwards",
         indentationLevel: "same-indentation",
@@ -299,12 +302,11 @@ export function selectAllBlocksInCurrentScope() {
 
 export function* iterBlocks(options: {
     fromPosition: Point;
-    lookFor: "block-end" | "block-start";
     direction?: Direction;
     indentationLevel?: IndentationRequest;
     restrictToCurrentScope?: boolean;
     bounds?: Bounds;
-}): Generator<Point> {
+}): Generator<BlockBoundary> {
     const document = getEditor().document;
 
     const finalOptions: Required<typeof options> = {
@@ -321,16 +323,19 @@ export function* iterBlocks(options: {
         finalOptions.direction
     );
 
-    for (const [a, b] of documentLines) {
-        let candidateLine: undefined | vscode.TextLine;
+    for (const { prev, current } of documentLines) {
+        let candidateLine: vscode.TextLine | undefined;
+        let kind: BlockBoundary["kind"] | undefined;
 
-        if (options.lookFor === "block-start" && lineIsBlockStart(a, b)) {
-            candidateLine = b;
-        } else if (options.lookFor === "block-end" && lineIsBlockEnd(a, b)) {
-            candidateLine = a;
+        if (lineIsBlockStart(prev, current)) {
+            candidateLine = current;
+            kind = "block-start";
+        } else if (lineIsBlockEnd(prev, current)) {
+            candidateLine = prev;
+            kind = "block-end";
         }
 
-        if (candidateLine) {
+        if (candidateLine && kind) {
             const relativeIndentation = getRelativeIndentation(
                 document.lineAt(options.fromPosition.line),
                 candidateLine
@@ -347,22 +352,21 @@ export function* iterBlocks(options: {
                 finalOptions.indentationLevel === "any-indentation" ||
                 relativeIndentation === finalOptions.indentationLevel
             ) {
-                let p: Point;
-
-                switch (options.lookFor) {
+                switch (kind) {
                     case "block-start":
-                        p = {
-                            line: candidateLine.lineNumber,
-                            character:
-                                candidateLine.firstNonWhitespaceCharacterIndex,
+                        yield {
+                            kind: kind,
+                            point: {
+                                line: candidateLine.lineNumber,
+                                character:
+                                    candidateLine.firstNonWhitespaceCharacterIndex,
+                            },
                         };
                         break;
                     case "block-end":
-                        p = candidateLine.range.end;
+                        yield { kind: kind, point: candidateLine.range.end };
                         break;
                 }
-
-                yield p;
             }
         }
     }
@@ -377,7 +381,6 @@ export function getBlocksAroundCursor(
 
     const iterArgs: Parameter<typeof iterBlocks> = {
         fromPosition: cursorPosition,
-        lookFor: "block-start",
         direction,
         bounds,
         indentationLevel: "any-indentation",
@@ -420,18 +423,20 @@ export function extendBlockSelection(
         }
     }
 
-    for (const blockStart of iterBlocks({
+    for (const blockBoundary of iterBlocks({
         fromPosition: continuationPoint,
-        lookFor: "block-start",
         direction,
         indentationLevel: indentation,
         restrictToCurrentScope: true,
     })) {
-        if (areEqual(blockStart, continuationPoint)) {
+        if (
+            blockBoundary.kind != "block-start" ||
+            areEqual(blockBoundary.point, continuationPoint)
+        ) {
             continue;
         }
 
-        select(startPosition, blockStart);
+        select(startPosition, blockBoundary.point);
         return;
     }
 
@@ -439,17 +444,20 @@ export function extendBlockSelection(
 
     let candidateEndLine = undefined;
 
-    for (const blockEnd of iterBlocks({
+    for (const blockBoundary of iterBlocks({
         fromPosition: continuationPoint,
-        lookFor: "block-end",
         direction,
         indentationLevel: "same-indentation",
         restrictToCurrentScope: true,
     })) {
-        candidateEndLine = blockEnd;
+        if (blockBoundary.kind != "block-end") {
+            continue;
+        }
+
+        if (blockBoundary.kind) candidateEndLine = blockBoundary;
     }
 
-    if (candidateEndLine) select(startPosition, candidateEndLine);
+    if (candidateEndLine) select(startPosition, candidateEndLine.point);
 }
 
 export function moveToNextBlockStart(
@@ -462,19 +470,21 @@ export function moveToNextBlockStart(
         ? "any-indentation"
         : indentation;
 
-    for (const blockStart of iterBlocks({
+    for (const blockBoundary of iterBlocks({
         fromPosition: cursorPosition,
-        lookFor: "block-start",
         direction,
         indentationLevel: indent,
     })) {
-        if (areEqual(cursorPosition, blockStart)) {
+        if (
+            blockBoundary.kind != "block-start" ||
+            areEqual(cursorPosition, blockBoundary.point)
+        ) {
             continue;
         }
 
-        scrollToReveal(...getBlockBounds(blockStart));
+        scrollToReveal(...getBlockBounds(blockBoundary.point));
 
-        moveCursorTo(blockStart);
+        moveCursorTo(blockBoundary.point);
 
         return;
     }
@@ -483,24 +493,26 @@ export function moveToNextBlockStart(
 export function getBlockBounds(positionInBlock: Point): [Point, Point] {
     const result = [positionInBlock, positionInBlock];
 
-    for (const blockStart of iterBlocks({
+    for (const blockBoundary of iterBlocks({
         fromPosition: positionInBlock,
-        lookFor: "block-start",
         direction: "backwards",
         indentationLevel: "same-indentation",
     })) {
-        result[0] = blockStart;
-        break;
+        if (blockBoundary.kind == "block-start") {
+            result[0] = blockBoundary.point;
+            break;
+        }
     }
 
-    for (const blockEnd of iterBlocks({
+    for (const blockBoundary of iterBlocks({
         fromPosition: positionInBlock,
-        lookFor: "block-end",
         direction: "forwards",
         indentationLevel: "same-indentation",
     })) {
-        result[1] = blockEnd;
-        break;
+        if (blockBoundary.kind === "block-end") {
+            result[1] = blockBoundary.point;
+            break;
+        }
     }
 
     return result as [Point, Point];
@@ -516,17 +528,19 @@ export function nextBlockEnd(
         ? "any-indentation"
         : indentation;
 
-    for (const blockEnd of iterBlocks({
+    for (const blockBoundary of iterBlocks({
         fromPosition: cursorPosition,
-        lookFor: "block-end",
         direction,
         indentationLevel: indent,
     })) {
-        if (areEqual(cursorPosition, blockEnd)) {
+        if (
+            blockBoundary.kind !== "block-end" ||
+            areEqual(cursorPosition, blockBoundary.point)
+        ) {
             continue;
         }
 
-        moveCursorTo(blockEnd);
+        moveCursorTo(blockBoundary.point);
 
         return;
     }
