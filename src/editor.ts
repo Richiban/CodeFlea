@@ -122,3 +122,157 @@ export function getCursorPosition(): Point {
 
     return editor.selection.active;
 }
+
+export type EditorModeName = "EDIT" | "NAVIGATE" | "EXTEND";
+
+export type SelectionMode = "Word" | "Line" | "Block";
+
+export type EditorMode = {
+    changeTo(newMode: EditorModeName): EditorMode;
+    updateStatusBar(statusBar: vscode.StatusBarItem): void;
+    onCharTyped(char: string): EditorMode;
+};
+
+class NavigateMode implements EditorMode {
+    constructor(
+        private keySequence: string,
+        public selectionMode: SelectionMode
+    ) {}
+
+    changeTo(newMode: EditorModeName): EditorMode {
+        switch (newMode) {
+            case "EDIT":
+                return new EditMode(this.keySequence, this);
+            case "EXTEND":
+                return new ExtendMode(this.keySequence, this);
+            case "NAVIGATE":
+                return this;
+        }
+    }
+
+    onCharTyped(char: string): EditorMode {
+        return this;
+    }
+
+    updateStatusBar(statusBar: vscode.StatusBarItem) {
+        statusBar.text = `Ⓜ️ Navigate (${this.selectionMode})`;
+        statusBar.show();
+    }
+}
+
+class ExtendMode implements EditorMode {
+    constructor(
+        private keySequence: string,
+        private previousNavigateMode: NavigateMode
+    ) {}
+
+    changeTo(newMode: EditorModeName): EditorMode {
+        switch (newMode) {
+            case "EDIT":
+                return new EditMode(
+                    this.keySequence,
+                    this.previousNavigateMode
+                );
+            case "EXTEND":
+                return this;
+            case "NAVIGATE":
+                return this.previousNavigateMode;
+        }
+    }
+
+    onCharTyped(char: string): EditorMode {
+        return this;
+    }
+
+    updateStatusBar(statusBar: vscode.StatusBarItem) {
+        statusBar.text = `Extend (${this.previousNavigateMode.selectionMode})`;
+        statusBar.show();
+    }
+}
+
+class EditMode implements EditorMode {
+    private keySequenceStarted: boolean = false;
+
+    constructor(
+        private navigateKeySequence: string,
+        private previousNavigateMode: NavigateMode
+    ) {}
+
+    changeTo(newMode: EditorModeName): EditorMode {
+        switch (newMode) {
+            case "EDIT":
+                return this;
+            case "EXTEND":
+                return new ExtendMode(
+                    this.navigateKeySequence,
+                    this.previousNavigateMode
+                );
+            case "NAVIGATE":
+                return this.previousNavigateMode;
+        }
+    }
+
+    onCharTyped(char: string): EditorMode {
+        if (this.keySequenceStarted) {
+            if (char === this.navigateKeySequence[1]) {
+                return this.previousNavigateMode;
+            } else {
+                this.keySequenceStarted = false;
+
+                vscode.commands.executeCommand("default:type", {
+                    text: `${this.navigateKeySequence[0]}${char}`,
+                });
+            }
+        } else {
+            if (char === this.navigateKeySequence[0]) {
+                this.keySequenceStarted = true;
+            } else {
+                this.keySequenceStarted = false;
+
+                vscode.commands.executeCommand("default:type", {
+                    text: char,
+                });
+            }
+        }
+
+        return this;
+    }
+
+    updateStatusBar(statusBar: vscode.StatusBarItem) {
+        statusBar.text = `Edit`;
+        statusBar.show();
+    }
+}
+
+export class EditorManager {
+    private mode: EditorMode = new NavigateMode("ne", "Word");
+    private statusbar: vscode.StatusBarItem;
+    private editor: vscode.TextEditor | undefined;
+
+    constructor() {
+        this.statusbar = vscode.window.createStatusBarItem(
+            "codeflea",
+            vscode.StatusBarAlignment.Left,
+            0
+        );
+    }
+
+    setEditor(editor: vscode.TextEditor | undefined) {
+        this.editor = editor;
+    }
+
+    changeMode(newMode: EditorModeName) {
+        this.mode = this.mode.changeTo(newMode);
+        this.mode.updateStatusBar(this.statusbar);
+
+        vscode.commands.executeCommand(
+            "setContext",
+            "codeflea-vscode.state",
+            newMode
+        );
+    }
+
+    onCharTyped(char: string) {
+        this.mode = this.mode.onCharTyped(char);
+    }
+}
