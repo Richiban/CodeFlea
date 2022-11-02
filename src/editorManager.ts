@@ -214,9 +214,11 @@ export class ModeManager {
     changeMode(newMode: EditorModeName): void;
     changeMode(newMode: EditorModeName, subject?: SubjectType) {
         this.mode = this.mode.changeTo(newMode);
+
         if (subject) {
             this.mode.changeSubject(subject);
         }
+
         this.mode.refreshUI(this);
     }
 

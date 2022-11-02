@@ -258,6 +258,26 @@
                 "when": "editorTextFocus && codeFlea.input"
             },
             {
+                "command": "cursorUp",
+                "key": "u",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "command": "cursorDown",
+                "key": "e",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "command": "cursorLeft",
+                "key": "n",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "command": "cursorRight",
+                "key": "i",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
                 "key": "ctrl+'",
                 "command": "codeFlea.jump"
             },
