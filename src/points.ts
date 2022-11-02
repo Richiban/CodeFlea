@@ -2,6 +2,7 @@ import { Direction, linqish, Linqish, Point } from "./common";
 import { getEditor, getCursorPosition, moveCursorTo } from "./editor";
 import { iterLines, lineIsStopLine } from "./lines";
 import * as vscode from "vscode";
+import { registerCommand } from "./commands";
 
 const interestingChars = new Set(
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -97,4 +98,18 @@ export function getInterestingPoints(
 
 export function areEqual(a: Point, b: Point) {
     return a.line === b.line && a.character === b.character;
+}
+
+@registerCommand("codeFlea.prevInterestingPoint")
+class PrevInterestingPointCommand {
+    execute() {
+        nextInterestingPoint("backwards");
+    }
+}
+
+@registerCommand("codeFlea.nextInterestingPoint")
+class NextInterestingPointCommand {
+    execute() {
+        nextInterestingPoint("forwards");
+    }
 }

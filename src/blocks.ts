@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { registerCommand } from "./commands";
 import {
     Direction,
     Indentation,
@@ -68,7 +69,7 @@ export function selectAllBlocksInCurrentScope() {
     let start: Point = cursorPosition;
     let end: Point = cursorPosition;
 
-    for (const { kind, point } of iterBlocks({
+    for (const { kind, point } of iterBlockBoundaries({
         fromPosition: cursorPosition,
         direction: "backwards",
         indentationLevel: "same-indentation",
@@ -79,7 +80,7 @@ export function selectAllBlocksInCurrentScope() {
         }
     }
 
-    for (const { kind, point } of iterBlocks({
+    for (const { kind, point } of iterBlockBoundaries({
         fromPosition: cursorPosition,
         direction: "forwards",
         indentationLevel: "same-indentation",
@@ -98,7 +99,7 @@ export function selectAllBlocksInCurrentScope() {
     );
 }
 
-export function* iterBlocks(options: {
+export function* iterBlockBoundaries(options: {
     fromPosition: Point;
     direction?: Direction;
     indentationLevel?: IndentationRequest;
@@ -170,6 +171,25 @@ export function* iterBlocks(options: {
     }
 }
 
+export function* iterWholeBlocks(options: {
+    fromPosition: Point;
+    direction?: Direction;
+    indentationLevel?: IndentationRequest;
+    restrictToCurrentScope?: boolean;
+    bounds?: Bounds;
+}): Generator<BlockBoundary> {
+    let openBlocksSeen = 0;
+    let blockStartPoint: Point | undefined = undefined;
+
+    for (const blockBoundary of iterBlockBoundaries(options)) {
+        if (blockBoundary.kind === "block-end") {
+            openBlocksSeen = Math.max(0, openBlocksSeen - 1);
+        } else if (blockBoundary.kind === "block-start" && !blockStartPoint) {
+            blockStartPoint = blockBoundary.point;
+        }
+    }
+}
+
 export function getBlocksAroundCursor(
     pattern: LineEnumerationPattern,
     direction: Direction,
@@ -177,16 +197,16 @@ export function getBlocksAroundCursor(
 ) {
     const cursorPosition = getCursorPosition();
 
-    const iterArgs: Parameter<typeof iterBlocks> = {
+    const iterArgs: Parameter<typeof iterBlockBoundaries> = {
         fromPosition: cursorPosition,
         direction,
         bounds,
         indentationLevel: "any-indentation",
     };
 
-    const primaryDirection = iterBlocks(iterArgs);
+    const primaryDirection = iterBlockBoundaries(iterArgs);
 
-    const secondaryDirection = iterBlocks({
+    const secondaryDirection = iterBlockBoundaries({
         ...iterArgs,
         direction: opposite(direction),
     });
@@ -222,7 +242,7 @@ export function extendBlockSelection(
         }
     }
 
-    for (const { kind, point } of iterBlocks({
+    for (const { kind, point } of iterBlockBoundaries({
         fromPosition: continuationPoint,
         direction,
         indentationLevel: indentation,
@@ -240,7 +260,7 @@ export function extendBlockSelection(
 
     let candidateEndLine = undefined;
 
-    for (const { kind, point } of iterBlocks({
+    for (const { kind, point } of iterBlockBoundaries({
         fromPosition: continuationPoint,
         direction,
         indentationLevel: "same-indentation",
@@ -266,7 +286,7 @@ export function moveToNextBlockStart(
         ? "any-indentation"
         : indentation;
 
-    for (const { kind, point } of iterBlocks({
+    for (const { kind, point } of iterBlockBoundaries({
         fromPosition: cursorPosition,
         direction,
         indentationLevel: indent,
@@ -287,7 +307,7 @@ export function moveToNextBlockStart(
 export function getContainingBlock(positionInBlock: Point): Block {
     const result = [positionInBlock, positionInBlock];
 
-    for (const { kind, point } of iterBlocks({
+    for (const { kind, point } of iterBlockBoundaries({
         fromPosition: positionInBlock,
         direction: "backwards",
         indentationLevel: "same-indentation",
@@ -298,7 +318,7 @@ export function getContainingBlock(positionInBlock: Point): Block {
         }
     }
 
-    for (const { kind, point } of iterBlocks({
+    for (const { kind, point } of iterBlockBoundaries({
         fromPosition: positionInBlock,
         direction: "forwards",
         indentationLevel: "same-indentation",
@@ -322,7 +342,7 @@ export function nextBlockEnd(
         ? "any-indentation"
         : indentation;
 
-    for (const { kind, point } of iterBlocks({
+    for (const { kind, point } of iterBlockBoundaries({
         fromPosition: cursorPosition,
         direction,
         indentationLevel: indent,
@@ -334,5 +354,96 @@ export function nextBlockEnd(
         moveCursorTo(point);
 
         return;
+    }
+}
+
+@registerCommand("codeFlea.nextBlockEnd")
+class NextBlockEndCommand {
+    execute() {
+        nextBlockEnd("forwards", "any-indentation");
+    }
+}
+
+@registerCommand("codeFlea.prevBlockEnd")
+class PrevBlockEndCommand {
+    execute() {
+        nextBlockEnd("backwards", "any-indentation");
+    }
+}
+
+@registerCommand("codeFlea.selectAllBlocksInCurrentScope")
+class SelectAllBlocksInCurrentScopeCommand {
+    execute() {
+        selectAllBlocksInCurrentScope();
+    }
+}
+
+@registerCommand("codeFlea.prevBlock")
+class PrevBlockCommand {
+    execute() {
+        moveToNextBlockStart("backwards", "any-indentation");
+    }
+}
+
+@registerCommand("codeFlea.nextBlock")
+class NextBlockCommand {
+    execute() {
+        moveToNextBlockStart("forwards", "any-indentation");
+    }
+}
+
+@registerCommand("codeFlea.extendBlockSelection")
+class ExtendBlockSelectionCommand {
+    execute() {
+        extendBlockSelection("forwards", "same-indentation");
+    }
+}
+
+@registerCommand("codeFlea.nextOuterBlock")
+class NextOuterBlockCommand {
+    execute() {
+        moveToNextBlockStart("forwards", "less-indentation");
+    }
+}
+
+@registerCommand("codeFlea.prevOuterBlock")
+class PrevOuterBlockCommand {
+    execute() {
+        moveToNextBlockStart("backwards", "less-indentation");
+    }
+}
+
+@registerCommand("codeFlea.nextSameBlock")
+class NextSameBlockCommand {
+    execute() {
+        moveToNextBlockStart("forwards", "same-indentation");
+    }
+}
+
+@registerCommand("codeFlea.prevSameBlock")
+class PrevSameBlockCommand {
+    execute() {
+        moveToNextBlockStart("backwards", "same-indentation");
+    }
+}
+
+@registerCommand("codeFlea.nextInnerBlock")
+class NextInnerBlockCommand {
+    execute() {
+        moveToNextBlockStart("forwards", "more-indentation");
+    }
+}
+
+@registerCommand("codeFlea.prevInnerBlock")
+class PrevInnerBlockCommand {
+    execute() {
+        moveToNextBlockStart("backwards", "more-indentation");
+    }
+}
+
+@registerCommand("codeFlea.extendBlockSelectionBackwards")
+class ExtendBlockSelectionBackwardsCommand {
+    execute() {
+        extendBlockSelection("backwards", "same-indentation");
     }
 }

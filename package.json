@@ -30,6 +30,11 @@
             "title": "CodeFlea: ",
             "type": "",
             "properties": {
+                "codeFlea.modes.navigateKeySequence": {
+                    "description": "The key sequence that will trigger navigation mode from edit mode",
+                    "type": "string",
+                    "default": ",."
+                },
                 "codeFlea.scrollStep": {
                     "description": "The number of lines to scroll when scrolling the editor",
                     "type": "number",
@@ -101,6 +106,30 @@
             }
         },
         "commands": [
+            {
+                "command": "codeFlea.changeToEditMode",
+                "title": "CodeFlea: Change to Edit mode"
+            },
+            {
+                "command": "codeFlea.changeToNavigationMode",
+                "title": "CodeFlea: Change to Navigation mode"
+            },
+            {
+                "command": "codeFlea.changeToExtendMode",
+                "title": "CodeFlea: Change to Extend mode"
+            },
+            {
+                "command": "codeFlea.changeToWordSubject",
+                "title": "CodeFlea: Change to Word Subject"
+            },
+            {
+                "command": "codeFlea.changeToLineSubject",
+                "title": "CodeFlea: Change to Line Subject"
+            },
+            {
+                "command": "codeFlea.changeToBlockSubject",
+                "title": "CodeFlea: Change to Block Subject"
+            },
             {
                 "command": "codeFlea.nextBlock",
                 "title": "CodeFlea: Go to next block"
@@ -204,9 +233,29 @@
         ],
         "keybindings": [
             {
+                "key": ",",
+                "command": "codeFlea.changeToEditMode",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "key": "w",
+                "command": "codeFlea.changeToWordSubject",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "key": "x",
+                "command": "codeFlea.changeToLineSubject",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "key": "b",
+                "command": "codeFlea.changeToBlockSubject",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
                 "command": "codeFlea.input.cancel",
                 "key": "escape",
-                "when": "editorTextFocus && codeFleaInput"
+                "when": "editorTextFocus && codeFlea.input"
             },
             {
                 "key": "ctrl+'",

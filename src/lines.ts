@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { registerCommand } from "./commands";
 import {
     Change,
     Direction,
@@ -258,4 +259,60 @@ export function moveToNextLineSameLevel(direction: Direction) {
  *  contains only punctuation */
 export function lineIsStopLine(line: vscode.TextLine) {
     return !/[a-zA-Z0-9]/.test(line.text);
+}
+
+@registerCommand("codeFlea.nearestInnerLine")
+class NearestInnerLineCommand {
+    execute() {
+        moveToChangeOfIndentation("greaterThan", "nearest");
+    }
+}
+
+@registerCommand("codeFlea.nearestOuterLine")
+class NearestOuterLineCommand {
+    execute() {
+        moveToChangeOfIndentation("lessThan", "nearest");
+    }
+}
+
+@registerCommand("codeFlea.nextInnerLine")
+class NextInnerLineCommand {
+    execute() {
+        moveToChangeOfIndentation("greaterThan", "forwards");
+    }
+}
+
+@registerCommand("codeFlea.prevOuterLine")
+class PrevOuterLineCommand {
+    execute() {
+        moveToChangeOfIndentation("lessThan", "backwards");
+    }
+}
+
+@registerCommand("codeFlea.nextSameLine")
+class NextSameLineCommand {
+    execute() {
+        moveToNextLineSameLevel("forwards");
+    }
+}
+
+@registerCommand("codeFlea.prevSameLine")
+class PrevSameLineCommand {
+    execute() {
+        moveToNextLineSameLevel("backwards");
+    }
+}
+
+@registerCommand("codeFlea.nextBlankLine")
+class NextBlankLineCommand {
+    execute() {
+        moveCursorToNextBlankLine("forwards");
+    }
+}
+
+@registerCommand("codeFlea.prevBlankLine")
+class PrevBlankLineCommand {
+    execute() {
+        moveCursorToNextBlankLine("backwards");
+    }
 }
