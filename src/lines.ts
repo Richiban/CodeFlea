@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { registerCommand } from "./commands";
+import { ExtensionCommand, registerCommand } from "./commands";
 import {
     Change,
     Direction,
@@ -261,57 +261,73 @@ export function lineIsStopLine(line: vscode.TextLine) {
     return !/[a-zA-Z0-9]/.test(line.text);
 }
 
-@registerCommand("codeFlea.nearestInnerLine")
-class NearestInnerLineCommand {
+@registerCommand()
+class NearestInnerLineCommand implements ExtensionCommand {
+    id = "codeFlea.nearestInnerLine";
+
     execute() {
         moveToChangeOfIndentation("greaterThan", "nearest");
     }
 }
 
-@registerCommand("codeFlea.nearestOuterLine")
-class NearestOuterLineCommand {
+@registerCommand()
+class NearestOuterLineCommand implements ExtensionCommand {
+    id = "codeFlea.nearestOuterLine";
+
     execute() {
         moveToChangeOfIndentation("lessThan", "nearest");
     }
 }
 
-@registerCommand("codeFlea.nextInnerLine")
-class NextInnerLineCommand {
+@registerCommand()
+class NextInnerLineCommand implements ExtensionCommand {
+    id = "codeFlea.nextInnerLine";
+
     execute() {
         moveToChangeOfIndentation("greaterThan", "forwards");
     }
 }
 
-@registerCommand("codeFlea.prevOuterLine")
-class PrevOuterLineCommand {
+@registerCommand()
+class PrevOuterLineCommand implements ExtensionCommand {
+    id = "codeFlea.prevOuterLine";
+
     execute() {
         moveToChangeOfIndentation("lessThan", "backwards");
     }
 }
 
-@registerCommand("codeFlea.nextSameLine")
-class NextSameLineCommand {
+@registerCommand()
+class NextSameLineCommand implements ExtensionCommand {
+    id = "codeFlea.nextSameLine";
+
     execute() {
         moveToNextLineSameLevel("forwards");
     }
 }
 
-@registerCommand("codeFlea.prevSameLine")
-class PrevSameLineCommand {
+@registerCommand()
+class PrevSameLineCommand implements ExtensionCommand {
+    id = "codeFlea.prevSameLine";
+
     execute() {
         moveToNextLineSameLevel("backwards");
     }
 }
 
-@registerCommand("codeFlea.nextBlankLine")
-class NextBlankLineCommand {
+@registerCommand()
+class NextBlankLineCommand implements ExtensionCommand {
+    id = "codeFlea.nextBlankLine";
+
     execute() {
         moveCursorToNextBlankLine("forwards");
     }
 }
 
-@registerCommand("codeFlea.prevBlankLine")
-class PrevBlankLineCommand {
+@registerCommand()
+class PrevBlankLineCommand implements ExtensionCommand {
+    id = "codeFlea.prevBlankLine";
+
     execute() {
         moveCursorToNextBlankLine("backwards");
     }

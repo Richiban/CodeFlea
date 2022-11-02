@@ -1,11 +1,13 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
-import { FleaJumper } from "./fleajump";
+import { FleaJumper } from "./jump/fleajump";
 import { loadConfig } from "./config";
 import { scrollEditor } from "./editor";
-import { registerCommand, registeredCommands } from "./commands";
-import { ModeManager } from "./editorManager";
+import {
+    ExtensionCommand,
+    registerCommand,
+    registeredCommands,
+} from "./commands";
+import { ModeManager } from "./modes";
 
 export function activate(context: vscode.ExtensionContext) {
     const config = loadConfig();
@@ -15,22 +17,28 @@ export function activate(context: vscode.ExtensionContext) {
         fleaJumper.updateConfig(loadConfig());
     });
 
-    @registerCommand("codeFlea.scrollEditorUp")
+    @registerCommand()
     class ScrollEditorUpCommand {
+        id = "codeFlea.scrollEditorUp";
+
         execute() {
             scrollEditor("up", config.scrollStep);
         }
     }
 
-    @registerCommand("codeFlea.scrollEditorDown")
+    @registerCommand()
     class ScrollEditorDownCommand {
+        id = "codeFlea.scrollEditorDown";
+
         execute() {
             scrollEditor("down", config.scrollStep);
         }
     }
 
-    @registerCommand("codeFlea.jump")
+    @registerCommand()
     class JumpCommand {
+        id = "codeFlea.jump";
+
         execute() {
             fleaJumper.jump();
         }
@@ -44,59 +52,75 @@ export function activate(context: vscode.ExtensionContext) {
 
     modeManager.changeMode("NAVIGATE");
 
-    @registerCommand("type")
-    class TypeCommand {
+    @registerCommand()
+    class TypeCommand implements ExtensionCommand {
+        id = "type";
+
         execute(typed: { text: string }) {
             modeManager.onCharTyped(typed);
         }
     }
 
-    @registerCommand("codeFlea.changeToEditMode")
-    class EditModeCommand {
+    @registerCommand()
+    class EditModeCommand implements ExtensionCommand {
+        id = "codeFlea.changeToEditMode";
+
         execute() {
             modeManager.changeMode("EDIT");
         }
     }
 
-    @registerCommand("codeFlea.changeToNavigationMode")
-    class NavigateModeCommand {
+    @registerCommand()
+    class NavigateModeCommand implements ExtensionCommand {
+        id = "codeFlea.changeToNavigationMode";
+
         execute(): void {
             modeManager.changeMode("NAVIGATE");
         }
     }
 
-    @registerCommand("codeFlea.changeToWordSubject")
-    class WordSubjectCommand {
+    @registerCommand()
+    class WordSubjectCommand implements ExtensionCommand {
+        id = "codeFlea.changeToWordSubject";
+
         execute(): void {
             modeManager.changeMode("NAVIGATE", "WORD");
         }
     }
 
-    @registerCommand("codeFlea.changeToLineSubject")
-    class LineSubjectCommand {
+    @registerCommand()
+    class LineSubjectCommand implements ExtensionCommand {
+        id = "codeFlea.changeToLineSubject";
+
         execute(): void {
             modeManager.changeMode("NAVIGATE", "LINE");
         }
     }
 
-    @registerCommand("codeFlea.changeToBlockSubject")
-    class BlockSubjectCommand {
+    @registerCommand()
+    class BlockSubjectCommand implements ExtensionCommand {
+        id = "codeFlea.changeToBlockSubject";
+
         execute(): void {
             modeManager.changeMode("NAVIGATE", "BLOCK");
         }
     }
 
-    @registerCommand("codeFlea.changeToExtendMode")
-    class ExtendModeCommand {
+    @registerCommand()
+    class ExtendModeCommand implements ExtensionCommand {
+        id = "codeFlea.changeToExtendMode";
+
         execute(): void {
             modeManager.changeMode("EXTEND");
         }
     }
 
-    for (const [name, constructor] of registeredCommands) {
+    for (const constructor of registeredCommands) {
+        const command = new constructor();
+
         context.subscriptions.push(
-            vscode.commands.registerCommand(name, (...args) =>
-                new constructor().execute(...args)
+            vscode.commands.registerCommand(command.id, (...args) =>
+                command.execute(...args)
             )
         );
     }

@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import { JumpLocations, JumpLocation, linqish, Cache } from "./common";
-import { readKey } from "./inline-input";
-import { Config } from "./config";
+import { JumpLocations, JumpLocation, linqish, Cache } from "../common";
+import { readKey } from "../inline-input";
+import { Config } from "../config";
 
 export type InterfaceType = "primary" | "secondary";
 

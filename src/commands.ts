@@ -1,27 +1,22 @@
-import {
-    moveToChangeOfIndentation,
-    moveToNextLineSameLevel,
-    moveCursorToNextBlankLine,
-} from "./lines";
-import { nextInterestingPoint } from "./points";
-import {
-    extendBlockSelection,
-    moveToNextBlockStart,
-    nextBlockEnd,
-    selectAllBlocksInCurrentScope,
-} from "./blocks";
+export const registeredCommands: ExtensionConstructor[] = [];
 
-export const registeredCommands: Map<string, DefaultConstructor> = new Map();
-
-export function registerCommand(name: string) {
-    return function <T extends DefaultConstructor>(constructor: T) {
-        registeredCommands.set(name, constructor);
+export function registerCommand() {
+    return function <T extends ExtensionConstructor>(constructor: T) {
+        registeredCommands.push(constructor);
         return constructor;
     };
 }
 
-type DefaultConstructor = {
-    new (...args: any[]): {
-        execute: Function;
+export type ExtensionCommand = {
+    id: string;
+    description?: string;
+    defaultKeyBinding?: {
+        key: string;
+        when?: string;
     };
+    execute: Function;
+};
+
+type ExtensionConstructor = {
+    new (...args: any[]): ExtensionCommand;
 };

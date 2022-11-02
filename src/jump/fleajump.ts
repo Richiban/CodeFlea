@@ -1,10 +1,10 @@
-import { Config } from "./config";
+import { Config } from "../config";
 import { JumpInterface } from "./jump-interface";
 import * as vscode from "vscode";
-import { moveCursorTo } from "./editor";
-import { JumpLocations, JumpLocation, getJumpCodes, Point } from "./common";
-import { getInterestingPoints } from "./points";
-import { getBlocksAroundCursor } from "./blocks";
+import { moveCursorTo } from "../editor";
+import { JumpLocations, JumpLocation, getJumpCodes, Point } from "../common";
+import { getInterestingPoints } from "../points";
+import { getBlocksAroundCursor } from "../blocks";
 
 export class FleaJumper {
     private config: Config;

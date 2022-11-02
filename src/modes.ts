@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { Config, ModesConfig } from "./config";
+import { selectWordUnderCursor } from "./words";
 
 export type EditorModeName = "EDIT" | "NAVIGATE" | "EXTEND";
 
@@ -44,6 +45,7 @@ class NavigateMode implements EditorMode {
                 vscode.TextEditorCursorStyle.Block;
             editorManager.editor.options.lineNumbers =
                 vscode.TextEditorLineNumbersStyle.Relative;
+            selectWordUnderCursor(editorManager.editor);
         }
 
         vscode.commands.executeCommand(
@@ -213,13 +215,16 @@ export class ModeManager {
     changeMode(newMode: "NAVIGATE", subject: SubjectType): void;
     changeMode(newMode: EditorModeName): void;
     changeMode(newMode: EditorModeName, subject?: SubjectType) {
+        const previousMode = this.mode;
         this.mode = this.mode.changeTo(newMode);
 
         if (subject) {
             this.mode.changeSubject(subject);
         }
 
-        this.mode.refreshUI(this);
+        if (this.mode !== previousMode) {
+            this.mode.refreshUI(this);
+        }
     }
 
     onCharTyped(typed: { text: string }) {
