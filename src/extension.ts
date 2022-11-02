@@ -17,192 +17,247 @@ import {
     selectAllBlocksInCurrentScope,
 } from "./blocks";
 
+const commands: Map<string, DefaultConstructor> = new Map();
+
 export function activate(context: vscode.ExtensionContext) {
     const config = loadConfig();
     const fleaJumper = new FleaJumper(context, config);
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand("codeFlea.jump", () =>
-            fleaJumper.jump()
-        )
-    );
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand("codeFlea.nextBlock", () =>
-            moveToNextBlockStart("forwards", "any-indentation")
-        )
-    );
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand("codeFlea.extendBlockSelection", () =>
-            extendBlockSelection("forwards", "same-indentation")
-        )
-    );
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand("codeFlea.nextOuterBlock", () =>
-            moveToNextBlockStart("forwards", "less-indentation")
-        )
-    );
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand("codeFlea.prevOuterBlock", () =>
-            moveToNextBlockStart("backwards", "less-indentation")
-        )
-    );
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand("codeFlea.nextSameBlock", () =>
-            moveToNextBlockStart("forwards", "same-indentation")
-        )
-    );
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand("codeFlea.prevSameBlock", () =>
-            moveToNextBlockStart("backwards", "same-indentation")
-        )
-    );
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand("codeFlea.nextInnerBlock", () =>
-            moveToNextBlockStart("forwards", "more-indentation")
-        )
-    );
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand("codeFlea.prevInnerBlock", () =>
-            moveToNextBlockStart("backwards", "more-indentation")
-        )
-    );
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand("codeFlea.prevBlock", () =>
-            moveToNextBlockStart("backwards", "any-indentation")
-        )
-    );
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand(
-            "codeFlea.extendBlockSelectionBackwards",
-            () => extendBlockSelection("backwards", "same-indentation")
-        )
-    );
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand("codeFlea.nextBlankLine", () =>
-            moveCursorToNextBlankLine("forwards")
-        )
-    );
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand("codeFlea.prevBlankLine", () =>
-            moveCursorToNextBlankLine("backwards")
-        )
-    );
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand("codeFlea.nearestInnerLine", () =>
-            moveToChangeOfIndentation("greaterThan", "nearest")
-        )
-    );
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand("codeFlea.nearestOuterLine", () =>
-            moveToChangeOfIndentation("lessThan", "nearest")
-        )
-    );
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand("codeFlea.nextInnerLine", () =>
-            moveToChangeOfIndentation("greaterThan", "forwards")
-        )
-    );
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand("codeFlea.prevOuterLine", () =>
-            moveToChangeOfIndentation("lessThan", "backwards")
-        )
-    );
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand("codeFlea.nextSameLine", () =>
-            moveToNextLineSameLevel("forwards")
-        )
-    );
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand("codeFlea.prevSameLine", () =>
-            moveToNextLineSameLevel("backwards")
-        )
-    );
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand("codeFlea.prevInterestingPoint", () =>
-            nextInterestingPoint("backwards")
-        )
-    );
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand("codeFlea.nextInterestingPoint", () =>
-            nextInterestingPoint("forwards")
-        )
-    );
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand("codeFlea.scrollToCursor", () =>
-            scrollToCursorAtCenter()
-        )
-    );
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand("codeFlea.nextBlockEnd", () =>
-            nextBlockEnd("forwards", "any-indentation")
-        )
-    );
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand("codeFlea.prevBlockEnd", () =>
-            nextBlockEnd("backwards", "any-indentation")
-        )
-    );
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand("codeFlea.scrollEditorUp", () =>
-            scrollEditor("up", config.scrollStep)
-        )
-    );
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand("codeFlea.scrollEditorDown", () =>
-            scrollEditor("down", config.scrollStep)
-        )
-    );
-
-    context.subscriptions.push(
-        vscode.commands.registerCommand(
-            "codeFlea.selectAllBlocksInCurrentScope",
-            () => selectAllBlocksInCurrentScope()
-        )
-    );
 
     vscode.workspace.onDidChangeConfiguration((_) => {
         fleaJumper.updateConfig(loadConfig());
     });
 
-    const editorManager = new EditorManager();
+    @registerCommand("codeFlea.scrollEditorUp")
+    class ScrollEditorUpCommand {
+        execute() {
+            scrollEditor("up", config.scrollStep);
+        }
+    }
+
+    @registerCommand("codeFlea.scrollEditorDown")
+    class ScrollEditorDownCommand {
+        execute() {
+            scrollEditor("down", config.scrollStep);
+        }
+    }
+
+    @registerCommand("codeFlea.jump")
+    class JumpCommand {
+        execute() {
+            fleaJumper.jump();
+        }
+    }
+
+    const editorManager = new EditorManager(vscode.window.activeTextEditor);
 
     vscode.window.onDidChangeActiveTextEditor((editor) => {
         editorManager.setEditor(editor);
+    });
 
+    @registerCommand("type")
+    class TypeCommand implements ExtensionCommand {
+        execute(typed: { text: string }) {
+            editorManager.onCharTyped(typed);
+        }
+    }
+
+    for (const [name, constructor] of commands) {
         context.subscriptions.push(
-            vscode.commands.registerCommand(
-                "type",
-                (textChange: { text: string }) => {
-                    editorManager.onCharTyped(textChange.text);
-                }
+            vscode.commands.registerCommand(name, (...args) =>
+                new constructor().execute(...args)
             )
         );
-    });
+    }
+}
+
+function registerCommand(name: string) {
+    return function <T extends DefaultConstructor>(constructor: T) {
+        commands.set(name, constructor);
+        return constructor;
+    };
+}
+
+type ExtensionCommand = {
+    execute: Function;
+};
+
+type DefaultConstructor = {
+    new (...args: any[]): ExtensionCommand;
+};
+
+@registerCommand("codeFlea.enterNavigationMode")
+class NavigateModeCommand implements ExtensionCommand {
+    execute(): void {
+        console.log("Command triggered: enter navigation mode");
+    }
+}
+
+@registerCommand("codeFlea.prevBlock")
+class PrevBlockCommand {
+    execute() {
+        moveToNextBlockStart("backwards", "any-indentation");
+    }
+}
+
+@registerCommand("codeFlea.nextBlock")
+class NextBlockCommand {
+    execute() {
+        moveToNextBlockStart("forwards", "any-indentation");
+    }
+}
+
+@registerCommand("codeFlea.extendBlockSelection")
+class ExtendBlockSelectionCommand {
+    execute() {
+        extendBlockSelection("forwards", "same-indentation");
+    }
+}
+
+@registerCommand("codeFlea.nextOuterBlock")
+class NextOuterBlockCommand {
+    execute() {
+        moveToNextBlockStart("forwards", "less-indentation");
+    }
+}
+
+@registerCommand("codeFlea.prevOuterBlock")
+class PrevOuterBlockCommand {
+    execute() {
+        moveToNextBlockStart("backwards", "less-indentation");
+    }
+}
+
+@registerCommand("codeFlea.nextSameBlock")
+class NextSameBlockCommand {
+    execute() {
+        moveToNextBlockStart("forwards", "same-indentation");
+    }
+}
+
+@registerCommand("codeFlea.prevSameBlock")
+class PrevSameBlockCommand {
+    execute() {
+        moveToNextBlockStart("backwards", "same-indentation");
+    }
+}
+
+@registerCommand("codeFlea.nextInnerBlock")
+class NextInnerBlockCommand {
+    execute() {
+        moveToNextBlockStart("forwards", "more-indentation");
+    }
+}
+
+@registerCommand("codeFlea.prevInnerBlock")
+class PrevInnerBlockCommand {
+    execute() {
+        moveToNextBlockStart("backwards", "more-indentation");
+    }
+}
+
+@registerCommand("codeFlea.extendBlockSelectionBackwards")
+class ExtendBlockSelectionBackwardsCommand {
+    execute() {
+        extendBlockSelection("backwards", "same-indentation");
+    }
+}
+
+@registerCommand("codeFlea.nextBlankLine")
+class NextBlankLineCommand {
+    execute() {
+        moveCursorToNextBlankLine("forwards");
+    }
+}
+
+@registerCommand("codeFlea.prevBlankLine")
+class PrevBlankLineCommand {
+    execute() {
+        moveCursorToNextBlankLine("backwards");
+    }
+}
+
+@registerCommand("codeFlea.nearestInnerLine")
+class NearestInnerLineCommand {
+    execute() {
+        moveToChangeOfIndentation("greaterThan", "nearest");
+    }
+}
+
+@registerCommand("codeFlea.nearestOuterLine")
+class NearestOuterLineCommand {
+    execute() {
+        moveToChangeOfIndentation("lessThan", "nearest");
+    }
+}
+
+@registerCommand("codeFlea.nextInnerLine")
+class NextInnerLineCommand {
+    execute() {
+        moveToChangeOfIndentation("greaterThan", "forwards");
+    }
+}
+
+@registerCommand("codeFlea.prevOuterLine")
+class PrevOuterLineCommand {
+    execute() {
+        moveToChangeOfIndentation("lessThan", "backwards");
+    }
+}
+
+@registerCommand("codeFlea.nextSameLine")
+class NextSameLineCommand {
+    execute() {
+        moveToNextLineSameLevel("forwards");
+    }
+}
+
+@registerCommand("codeFlea.prevSameLine")
+class PrevSameLineCommand {
+    execute() {
+        moveToNextLineSameLevel("backwards");
+    }
+}
+
+@registerCommand("codeFlea.prevInterestingPoint")
+class PrevInterestingPointCommand {
+    execute() {
+        nextInterestingPoint("backwards");
+    }
+}
+
+@registerCommand("codeFlea.nextInterestingPoint")
+class NextInterestingPointCommand {
+    execute() {
+        nextInterestingPoint("forwards");
+    }
+}
+
+@registerCommand("codeFlea.scrollToCursor")
+class ScrollToCursorCommand {
+    execute() {
+        scrollToCursorAtCenter();
+    }
+}
+
+@registerCommand("codeFlea.nextBlockEnd")
+class NextBlockEndCommand {
+    execute() {
+        nextBlockEnd("forwards", "any-indentation");
+    }
+}
+
+@registerCommand("codeFlea.prevBlockEnd")
+class PrevBlockEndCommand {
+    execute() {
+        nextBlockEnd("backwards", "any-indentation");
+    }
+}
+
+@registerCommand("codeFlea.selectAllBlocksInCurrentScope")
+class SelectAllBlocksInCurrentScopeCommand {
+    execute() {
+        selectAllBlocksInCurrentScope();
+    }
 }
 
 export function deactivate() {}

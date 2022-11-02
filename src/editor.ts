@@ -129,8 +129,8 @@ export type SelectionMode = "Word" | "Line" | "Block";
 
 export type EditorMode = {
     changeTo(newMode: EditorModeName): EditorMode;
-    updateStatusBar(statusBar: vscode.StatusBarItem): void;
-    onCharTyped(char: string): EditorMode;
+    refreshUI(editorManager: EditorManager): void;
+    onCharTyped(typed: { text: string }): EditorMode;
 };
 
 class NavigateMode implements EditorMode {
@@ -150,13 +150,20 @@ class NavigateMode implements EditorMode {
         }
     }
 
-    onCharTyped(char: string): EditorMode {
+    onCharTyped(typed: { text: string }): EditorMode {
+        console.log(`Navigate mode: char typed => ${typed.text}`);
         return this;
     }
 
-    updateStatusBar(statusBar: vscode.StatusBarItem) {
-        statusBar.text = `Ⓜ️ Navigate (${this.selectionMode})`;
-        statusBar.show();
+    refreshUI(editorManager: EditorManager) {
+        editorManager.statusBar.text = `Navigate (${this.selectionMode})`;
+
+        if (editorManager.editor) {
+            editorManager.editor.options.cursorStyle =
+                vscode.TextEditorCursorStyle.Line;
+            editorManager.editor.options.lineNumbers =
+                vscode.TextEditorLineNumbersStyle.Relative;
+        }
     }
 }
 
@@ -180,13 +187,20 @@ class ExtendMode implements EditorMode {
         }
     }
 
-    onCharTyped(char: string): EditorMode {
+    onCharTyped(typed: { text: string }): EditorMode {
+        console.log(`Extend mode: char typed => ${typed.text}`);
         return this;
     }
 
-    updateStatusBar(statusBar: vscode.StatusBarItem) {
-        statusBar.text = `Extend (${this.previousNavigateMode.selectionMode})`;
-        statusBar.show();
+    refreshUI(editorManager: EditorManager) {
+        editorManager.statusBar.text = `Extend (${this.previousNavigateMode.selectionMode})`;
+
+        if (editorManager.editor) {
+            editorManager.editor.options.cursorStyle =
+                vscode.TextEditorCursorStyle.Block;
+            editorManager.editor.options.lineNumbers =
+                vscode.TextEditorLineNumbersStyle.Relative;
+        }
     }
 }
 
@@ -212,58 +226,73 @@ class EditMode implements EditorMode {
         }
     }
 
-    onCharTyped(char: string): EditorMode {
+    onCharTyped(typed: { text: string }): EditorMode {
+        console.log(`Edit mode: char typed => ${typed.text}`);
+
         if (this.keySequenceStarted) {
-            if (char === this.navigateKeySequence[1]) {
+            if (typed.text === this.navigateKeySequence[1]) {
+                console.log(`Magic combo pressed; changing to nav mode`);
                 return this.previousNavigateMode;
             } else {
                 this.keySequenceStarted = false;
 
                 vscode.commands.executeCommand("default:type", {
-                    text: `${this.navigateKeySequence[0]}${char}`,
+                    text: `${this.navigateKeySequence[0]}${typed.text}`,
                 });
             }
         } else {
-            if (char === this.navigateKeySequence[0]) {
+            if (typed.text === this.navigateKeySequence[0]) {
                 this.keySequenceStarted = true;
             } else {
                 this.keySequenceStarted = false;
 
-                vscode.commands.executeCommand("default:type", {
-                    text: char,
-                });
+                vscode.commands.executeCommand("default:type", typed);
             }
         }
 
         return this;
     }
 
-    updateStatusBar(statusBar: vscode.StatusBarItem) {
-        statusBar.text = `Edit`;
-        statusBar.show();
+    refreshUI(editorManager: EditorManager) {
+        editorManager.statusBar.text = `Edit`;
+
+        if (editorManager.editor) {
+            editorManager.editor.options.cursorStyle =
+                vscode.TextEditorCursorStyle.Block;
+            editorManager.editor.options.lineNumbers =
+                vscode.TextEditorLineNumbersStyle.Relative;
+        }
     }
 }
 
 export class EditorManager {
-    private mode: EditorMode = new NavigateMode("ne", "Word");
-    private statusbar: vscode.StatusBarItem;
-    private editor: vscode.TextEditor | undefined;
+    private mode: EditorMode = new EditMode(
+        ",.",
+        new NavigateMode(",.", "Word")
+    );
+    public statusBar: vscode.StatusBarItem;
+    public editor: vscode.TextEditor | undefined;
 
-    constructor() {
-        this.statusbar = vscode.window.createStatusBarItem(
+    constructor(editor: vscode.TextEditor | undefined) {
+        this.statusBar = vscode.window.createStatusBarItem(
             "codeflea",
             vscode.StatusBarAlignment.Left,
             0
         );
+
+        this.editor = editor;
+        this.statusBar.show();
     }
 
     setEditor(editor: vscode.TextEditor | undefined) {
         this.editor = editor;
+
+        this.mode.refreshUI(this);
     }
 
     changeMode(newMode: EditorModeName) {
         this.mode = this.mode.changeTo(newMode);
-        this.mode.updateStatusBar(this.statusbar);
+        this.mode.refreshUI(this);
 
         vscode.commands.executeCommand(
             "setContext",
@@ -272,7 +301,9 @@ export class EditorManager {
         );
     }
 
-    onCharTyped(char: string) {
-        this.mode = this.mode.onCharTyped(char);
+    onCharTyped(typed: { text: string }) {
+        this.mode = this.mode.onCharTyped(typed);
+
+        this.mode.refreshUI(this);
     }
 }
