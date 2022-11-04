@@ -268,13 +268,23 @@
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
             },
             {
-                "command": "cursorLeft",
+                "command": "codeFlea.nextSubjectLeft",
                 "key": "n",
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
             },
             {
-                "command": "cursorRight",
+                "command": "codeFlea.nextSubjectRight",
                 "key": "i",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "command": "codeFlea.delete",
+                "key": "d",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "command": "codeFlea.change",
+                "key": "c",
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
             },
             {

@@ -2,12 +2,8 @@ import * as vscode from "vscode";
 import { FleaJumper } from "./jump/fleajump";
 import { loadConfig } from "./config";
 import { scrollEditor } from "./editor";
-import {
-    ExtensionCommand,
-    registerCommand,
-    registeredCommands,
-} from "./commands";
-import { ModeManager } from "./modes";
+import * as commands from "./commands";
+import ModeManager from "./modes/ModeManager";
 
 export function activate(context: vscode.ExtensionContext) {
     const config = loadConfig();
@@ -17,7 +13,7 @@ export function activate(context: vscode.ExtensionContext) {
         fleaJumper.updateConfig(loadConfig());
     });
 
-    @registerCommand()
+    @commands.registerCommand()
     class ScrollEditorUpCommand {
         id = "codeFlea.scrollEditorUp";
 
@@ -26,7 +22,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     }
 
-    @registerCommand()
+    @commands.registerCommand()
     class ScrollEditorDownCommand {
         id = "codeFlea.scrollEditorDown";
 
@@ -35,7 +31,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     }
 
-    @registerCommand()
+    @commands.registerCommand()
     class JumpCommand {
         id = "codeFlea.jump";
 
@@ -52,8 +48,8 @@ export function activate(context: vscode.ExtensionContext) {
 
     modeManager.changeMode("NAVIGATE");
 
-    @registerCommand()
-    class TypeCommand implements ExtensionCommand {
+    @commands.registerCommand()
+    class TypeCommand implements commands.ExtensionCommand {
         id = "type";
 
         execute(typed: { text: string }) {
@@ -61,8 +57,8 @@ export function activate(context: vscode.ExtensionContext) {
         }
     }
 
-    @registerCommand()
-    class EditModeCommand implements ExtensionCommand {
+    @commands.registerCommand()
+    class EditModeCommand implements commands.ExtensionCommand {
         id = "codeFlea.changeToEditMode";
 
         execute() {
@@ -70,8 +66,8 @@ export function activate(context: vscode.ExtensionContext) {
         }
     }
 
-    @registerCommand()
-    class NavigateModeCommand implements ExtensionCommand {
+    @commands.registerCommand()
+    class NavigateModeCommand implements commands.ExtensionCommand {
         id = "codeFlea.changeToNavigationMode";
 
         execute(): void {
@@ -79,8 +75,8 @@ export function activate(context: vscode.ExtensionContext) {
         }
     }
 
-    @registerCommand()
-    class WordSubjectCommand implements ExtensionCommand {
+    @commands.registerCommand()
+    class WordSubjectCommand implements commands.ExtensionCommand {
         id = "codeFlea.changeToWordSubject";
 
         execute(): void {
@@ -88,26 +84,26 @@ export function activate(context: vscode.ExtensionContext) {
         }
     }
 
-    @registerCommand()
-    class LineSubjectCommand implements ExtensionCommand {
+    @commands.registerCommand()
+    class LineSubjectCommand implements commands.ExtensionCommand {
         id = "codeFlea.changeToLineSubject";
 
         execute(): void {
-            modeManager.changeMode("NAVIGATE", "LINE");
+            //modeManager.changeMode("NAVIGATE", "LINE");
         }
     }
 
-    @registerCommand()
-    class BlockSubjectCommand implements ExtensionCommand {
+    @commands.registerCommand()
+    class BlockSubjectCommand implements commands.ExtensionCommand {
         id = "codeFlea.changeToBlockSubject";
 
         execute(): void {
-            modeManager.changeMode("NAVIGATE", "BLOCK");
+            //modeManager.changeMode("NAVIGATE", "BLOCK");
         }
     }
 
-    @registerCommand()
-    class ExtendModeCommand implements ExtensionCommand {
+    @commands.registerCommand()
+    class ExtendModeCommand implements commands.ExtensionCommand {
         id = "codeFlea.changeToExtendMode";
 
         execute(): void {
@@ -115,7 +111,40 @@ export function activate(context: vscode.ExtensionContext) {
         }
     }
 
-    for (const constructor of registeredCommands) {
+    @commands.registerCommand()
+    class NextSubjectRightCommand implements commands.ExtensionCommand {
+        id = "codeFlea.nextSubjectRight";
+        execute() {
+            modeManager.executeCommand("nextSubjectRight");
+        }
+    }
+
+    @commands.registerCommand()
+    class NextSubjectLeftCommand implements commands.ExtensionCommand {
+        id = "codeFlea.nextSubjectLeft";
+        execute() {
+            modeManager.executeCommand("nextSubjectLeft");
+        }
+    }
+
+    @commands.registerCommand()
+    class DeleteCommand implements commands.ExtensionCommand {
+        id = "codeFlea.delete";
+        execute() {
+            modeManager.executeCommand("delete");
+        }
+    }
+
+    @commands.registerCommand()
+    class ChangeCommand implements commands.ExtensionCommand {
+        id = "codeFlea.change";
+        execute() {
+            modeManager.executeCommand("delete");
+            modeManager.changeMode("EDIT");
+        }
+    }
+
+    for (const constructor of commands.registeredCommands) {
         const command = new constructor();
 
         context.subscriptions.push(
