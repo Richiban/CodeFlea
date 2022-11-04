@@ -10,7 +10,7 @@ export default class WordSubject implements Subject {
 
     constructor(private manager: ModeManager) {}
 
-    fixSelection(direction: "left" | "right") {
+    fixSelection() {
         const editor = this.manager.editor;
 
         if (!editor) {
@@ -36,9 +36,6 @@ export default class WordSubject implements Subject {
                 newEnd = rightWord.end;
             }
 
-            if (direction === "left") {
-                return new vscode.Selection(newEnd, newStart);
-            }
             return new vscode.Selection(newStart, newEnd);
         });
     }
@@ -50,12 +47,40 @@ export default class WordSubject implements Subject {
         throw new Error("Method not implemented.");
     }
     async nextSubjectLeft(): Promise<void> {
+        if (!this.manager.editor) {
+            return;
+        }
+
+        this.manager.editor.selections = this.manager.editor.selections.map(
+            (selection) => {
+                if (!selection.isReversed) {
+                    return new vscode.Selection(selection.end, selection.start);
+                }
+
+                return selection;
+            }
+        );
+
         await vscode.commands.executeCommand("cursorWordLeft");
-        this.fixSelection("left");
+        this.fixSelection();
     }
     async nextSubjectRight(): Promise<void> {
+        if (!this.manager.editor) {
+            return;
+        }
+
+        this.manager.editor.selections = this.manager.editor.selections.map(
+            (selection) => {
+                if (selection.isReversed) {
+                    return new vscode.Selection(selection.end, selection.start);
+                }
+
+                return selection;
+            }
+        );
+
         await vscode.commands.executeCommand("cursorWordRight");
-        this.fixSelection("right");
+        this.fixSelection();
     }
 
     async addSubjectDown() {
@@ -100,7 +125,7 @@ export default class WordSubject implements Subject {
     }
 
     async delete() {
-        await this.fixSelection("right");
+        await this.fixSelection();
         await vscode.commands.executeCommand("deleteRight");
     }
 }

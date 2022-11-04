@@ -31,6 +31,8 @@ export default class EditMode implements EditorMode {
             if (
                 typed.text === this.manager.config.modes.navigateKeySequence[1]
             ) {
+                this.keySequenceStarted = false;
+
                 return this.previousNavigateMode;
             } else {
                 this.keySequenceStarted = false;
@@ -44,6 +46,14 @@ export default class EditMode implements EditorMode {
                 typed.text === this.manager.config.modes.navigateKeySequence[0]
             ) {
                 this.keySequenceStarted = true;
+                setTimeout(() => {
+                    if (this.keySequenceStarted === false) {
+                        return;
+                    }
+
+                    this.keySequenceStarted = false;
+                    vscode.commands.executeCommand("default:type", typed);
+                }, 500);
             } else {
                 this.keySequenceStarted = false;
 

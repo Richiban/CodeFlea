@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import { selectWordUnderCursor } from "../words";
 import * as modes from "./modes";
 import * as subjects from "../subjects/subjects";
 import ModeManager from "./ModeManager";
@@ -42,10 +41,10 @@ export default class NavigateMode implements modes.EditorMode {
 
         if (editorManager.editor) {
             editorManager.editor.options.cursorStyle =
-                vscode.TextEditorCursorStyle.Block;
+                vscode.TextEditorCursorStyle.UnderlineThin;
+
             editorManager.editor.options.lineNumbers =
                 vscode.TextEditorLineNumbersStyle.Relative;
-            selectWordUnderCursor(editorManager.editor);
         }
 
         vscode.commands.executeCommand(
