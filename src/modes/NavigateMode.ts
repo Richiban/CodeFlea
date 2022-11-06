@@ -1,17 +1,16 @@
 import * as vscode from "vscode";
 import * as subjects from "../subjects/subjects";
 import EditMode from "./EditMode";
+import ExtendMode from "./ExtendMode";
 import ModeManager from "./ModeManager";
 import * as modes from "./modes";
 
-export default class NavigateMode implements modes.EditorMode {
-    subject: subjects.Subject;
-
+export default class NavigateMode extends modes.EditorMode {
     constructor(
         private manager: ModeManager,
-        subjectType: subjects.SubjectType
+        public readonly subject: subjects.Subject
     ) {
-        this.subject = subjects.createFrom(manager, subjectType);
+        super();
     }
 
     equals(previousMode: modes.EditorMode): boolean {
@@ -26,32 +25,44 @@ export default class NavigateMode implements modes.EditorMode {
             case "EDIT":
                 return new EditMode(this.manager, this);
 
+            case "EXTEND":
+                return new ExtendMode(this.manager, this.subject, this);
+
             case "NAVIGATE":
                 if (newMode.subjectName !== this.subject.name) {
                     await vscode.commands.executeCommand("cancelSelection");
 
-                    return new NavigateMode(this.manager, newMode.subjectName);
+                    return new NavigateMode(
+                        this.manager,
+                        subjects.createFrom(this.manager, newMode.subjectName)
+                    );
                 }
 
                 switch (newMode.subjectName) {
                     case "LINE":
-                        return new NavigateMode(this.manager, "ALL_LINES");
+                        return new NavigateMode(
+                            this.manager,
+                            subjects.createFrom(this.manager, "ALL_LINES")
+                        );
                     case "WORD":
-                        return new NavigateMode(this.manager, "SMALL_WORD");
+                        return new NavigateMode(
+                            this.manager,
+                            subjects.createFrom(this.manager, "SMALL_WORD")
+                        );
                     case "SMALL_WORD":
-                        return new NavigateMode(this.manager, "WORD");
+                        return new NavigateMode(
+                            this.manager,
+                            subjects.createFrom(this.manager, "WORD")
+                        );
                     case "ALL_LINES":
-                        return new NavigateMode(this.manager, "LINE");
+                        return new NavigateMode(
+                            this.manager,
+                            subjects.createFrom(this.manager, "LINE")
+                        );
                 }
 
                 return this;
         }
-    }
-
-    onCharTyped(typed: { text: string }): modes.EditorMode {
-        vscode.commands.executeCommand("default:type", typed);
-
-        return this;
     }
 
     refreshUI(editorManager: ModeManager) {
@@ -75,6 +86,6 @@ export default class NavigateMode implements modes.EditorMode {
     }
 
     async executeSubjectCommand(command: keyof subjects.SubjectActions) {
-        this.subject[command]();
+        await this.subject[command]();
     }
 }

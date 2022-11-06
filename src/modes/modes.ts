@@ -1,14 +1,24 @@
+import * as vscode from "vscode";
 import * as subjects from "../subjects/subjects";
 import ModeManager from "./ModeManager";
 
 export type EditorModeType =
     | { kind: "EDIT" }
-    | { kind: "NAVIGATE"; subjectName: subjects.SubjectType };
+    | { kind: "NAVIGATE" | "EXTEND"; subjectName: subjects.SubjectType };
 
-export type EditorMode = {
-    equals(previousMode: EditorMode): boolean;
-    changeTo(newMode: EditorModeType): Promise<EditorMode>;
-    refreshUI(editorManager: ModeManager): void;
-    onCharTyped(typed: { text: string }): EditorMode;
-    executeSubjectCommand(command: keyof subjects.Subject): Promise<void>;
-};
+export abstract class EditorMode {
+    abstract equals(previousMode: EditorMode): boolean;
+    abstract changeTo(newMode: EditorModeType): Promise<EditorMode>;
+    abstract refreshUI(editorManager: ModeManager): void;
+    async end(): Promise<void> {}
+
+    onCharTyped(typed: { text: string }): EditorMode {
+        vscode.commands.executeCommand("default:type", typed);
+
+        return this;
+    }
+
+    abstract executeSubjectCommand(
+        command: keyof subjects.SubjectActions
+    ): Promise<void>;
+}

@@ -1,16 +1,19 @@
 import * as vscode from "vscode";
 import { SubjectActions } from "../subjects/subjects";
+import ExtendMode from "./ExtendMode";
 import ModeManager from "./ModeManager";
 import { EditorMode, EditorModeType } from "./modes";
 import NavigateMode from "./NavigateMode";
 
-export default class EditMode implements EditorMode {
+export default class EditMode extends EditorMode {
     private keySequenceStarted: boolean = false;
 
     constructor(
         private manager: ModeManager,
         private previousNavigateMode: NavigateMode
-    ) {}
+    ) {
+        super();
+    }
 
     equals(previousMode: EditorMode): boolean {
         return (
@@ -23,6 +26,13 @@ export default class EditMode implements EditorMode {
         switch (newMode.kind) {
             case "EDIT":
                 return this;
+            case "EXTEND":
+                return new ExtendMode(
+                    this.manager,
+                    this.previousNavigateMode.subject,
+                    this.previousNavigateMode
+                );
+
             case "NAVIGATE":
                 return this.previousNavigateMode;
         }

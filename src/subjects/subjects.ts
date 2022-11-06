@@ -1,6 +1,7 @@
 import ModeManager from "../modes/ModeManager";
 import * as blocks from "../blocks";
 import * as vscode from "vscode";
+import { lineIsStopLine } from "../lines";
 
 export type SubjectType =
     | "WORD"
@@ -31,8 +32,10 @@ export type SubjectActions = {
     swapSubjectRight(): Promise<void>;
 
     deleteSubject(): Promise<void>;
-
     changeSubject(): Promise<void>;
+
+    append(): Promise<void>;
+    prepend(): Promise<void>;
 };
 
 export abstract class Subject implements SubjectActions {
@@ -42,24 +45,44 @@ export abstract class Subject implements SubjectActions {
         return this.manager.editor;
     }
 
-    async nextSubjectDown(): Promise<void> {}
-    async nextSubjectUp(): Promise<void> {}
-    async nextSubjectLeft(): Promise<void> {}
-    async nextSubjectRight(): Promise<void> {}
-    async addSubjectDown(): Promise<void> {}
-    async addSubjectUp(): Promise<void> {}
-    async addSubjectLeft(): Promise<void> {}
-    async addSubjectRight(): Promise<void> {}
-    async extendSubjectDown(): Promise<void> {}
-    async extendSubjectUp(): Promise<void> {}
-    async extendSubjectLeft(): Promise<void> {}
-    async extendSubjectRight(): Promise<void> {}
-    async swapSubjectDown(): Promise<void> {}
-    async swapSubjectUp(): Promise<void> {}
-    async swapSubjectLeft(): Promise<void> {}
-    async swapSubjectRight(): Promise<void> {}
-    async deleteSubject(): Promise<void> {}
-    async changeSubject(): Promise<void> {}
+    async nextSubjectDown() {}
+    async nextSubjectUp() {}
+    async nextSubjectLeft() {}
+    async nextSubjectRight() {}
+    async addSubjectDown() {}
+    async addSubjectUp() {}
+    async addSubjectLeft() {}
+    async addSubjectRight() {}
+    async extendSubjectDown() {}
+    async extendSubjectUp() {}
+    async extendSubjectLeft() {}
+    async extendSubjectRight() {}
+    async swapSubjectDown() {}
+    async swapSubjectUp() {}
+    async swapSubjectLeft() {}
+    async swapSubjectRight() {}
+    async deleteSubject() {}
+    async changeSubject() {}
+
+    async append() {
+        if (!this.editor) {
+            return;
+        }
+
+        this.editor.selections = this.editor.selections.map((selection) => {
+            return new vscode.Selection(selection.end, selection.end);
+        });
+    }
+
+    async prepend() {
+        if (!this.editor) {
+            return;
+        }
+
+        this.editor.selections = this.editor.selections.map((selection) => {
+            return new vscode.Selection(selection.start, selection.start);
+        });
+    }
 
     abstract name: SubjectType;
     abstract fixSelection(): void;
@@ -90,9 +113,46 @@ export class AllLinesSubject extends Subject {
     readonly name = "ALL_LINES";
 
     fixSelection(): void {
-        throw new Error("Method not implemented.");
+        const editor = this.manager.editor;
+
+        if (!editor) {
+            return;
+        }
+
+        editor.selections = editor.selections.map((selection) => {
+            const startLine = editor.document.lineAt(selection.start.line);
+            const endLine = editor.document.lineAt(selection.end.line);
+
+            return new vscode.Selection(
+                new vscode.Position(
+                    startLine.lineNumber,
+                    startLine.firstNonWhitespaceCharacterIndex
+                ),
+                endLine.range.end
+            );
+        });
+    }
+
+    async nextSubjectUp() {
+        await vscode.commands.executeCommand("cursorUp");
+        this.fixSelection();
+    }
+
+    async nextSubjectDown() {
+        await vscode.commands.executeCommand("cursorDown");
+        this.fixSelection();
+    }
+
+    async changeSubject() {
+        await vscode.commands.executeCommand("deleteLeft");
+    }
+
+    async deleteSubject() {
+        await vscode.commands.executeCommand("editor.action.deleteLines");
+        this.fixSelection();
     }
 }
+
 export class BlockSubject extends Subject {
     readonly name = "BLOCK";
 
@@ -160,6 +220,7 @@ export class LineSubject extends Subject {
 
     async deleteSubject() {
         await vscode.commands.executeCommand("editor.action.deleteLines");
+        this.fixSelection();
     }
 
     fixSelection() {
@@ -197,8 +258,10 @@ export class LineSubject extends Subject {
                 (state, selection) =>
                     state &&
                     selection.isSingleLine &&
-                    editor.document.lineAt(selection.active)
-                        .isEmptyOrWhitespace,
+                    selection.start.line < editor.document.lineCount - 1 &&
+                    lineIsStopLine(
+                        editor.document.lineAt(selection.start.line)
+                    ),
                 true
             )
         ) {
@@ -221,8 +284,10 @@ export class LineSubject extends Subject {
                 (state, selection) =>
                     state &&
                     selection.isSingleLine &&
-                    editor.document.lineAt(selection.active)
-                        .isEmptyOrWhitespace,
+                    selection.start.line > 0 &&
+                    lineIsStopLine(
+                        editor.document.lineAt(selection.start.line)
+                    ),
                 true
             )
         ) {
@@ -250,23 +315,30 @@ export class LineSubject extends Subject {
 export class SmallWordSubject extends Subject {
     readonly name = "SMALL_WORD";
 
-    fixSelection(): void {
-        throw new Error("Method not implemented.");
+    fixSelection(): void {}
+
+    async nextSubjectDown() {
+        await vscode.commands.executeCommand("cursorDown");
     }
-    equals(other: Subject): boolean {
-        throw new Error("Method not implemented.");
+
+    async nextSubjectUp() {
+        await vscode.commands.executeCommand("cursorUp");
+    }
+
+    async nextSubjectLeft() {
+        await vscode.commands.executeCommand("cursorWordPartLeft");
+    }
+
+    async nextSubjectRight() {
+        await vscode.commands.executeCommand("cursorWordPartRight");
     }
 }
 
 export class WordSubject extends Subject {
     readonly name = "WORD";
 
-    changeSubject() {
-        return this.deleteSubject();
-    }
-
-    equals(other: Subject) {
-        return this.name === other.name;
+    async changeSubject() {
+        await vscode.commands.executeCommand("deleteLeft");
     }
 
     fixSelection() {
@@ -303,6 +375,7 @@ export class WordSubject extends Subject {
         await vscode.commands.executeCommand("cursorDown");
         this.fixSelection();
     }
+
     async nextSubjectUp() {
         await vscode.commands.executeCommand("cursorUp");
         this.fixSelection();
@@ -324,6 +397,7 @@ export class WordSubject extends Subject {
         await vscode.commands.executeCommand("cursorWordLeft");
         this.fixSelection();
     }
+
     async nextSubjectRight() {
         if (!this.editor) {
             return;
@@ -354,8 +428,14 @@ export class WordSubject extends Subject {
                 selection.active.translate(undefined, 1)
             );
 
-            if (this.editor.document.getText(s) === "  ") {
-                await vscode.commands.executeCommand("deleteRight");
+            if (
+                this.editor.document.lineAt(selection.active.line)
+                    .isEmptyOrWhitespace
+            ) {
+                // TODO delete empty line
+            } else if (this.editor.document.getText(s) === "  ") {
+                // TODO collapse selection first
+                await vscode.commands.executeCommand("deleteInsideWord");
             }
         }
 

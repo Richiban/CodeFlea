@@ -1,10 +1,10 @@
-import { Config } from "./config";
-import { FleaJumper } from "./jump/fleajump";
 import * as blocks from "./blocks";
+import { Config } from "./config";
 import * as editor from "./editor";
+import { FleaJumper } from "./jump/fleajump";
 import * as lines from "./lines";
-import * as points from "./points";
 import type ModeManager from "./modes/ModeManager";
+import * as points from "./points";
 
 export abstract class ExtensionCommand {
     abstract id: string;
@@ -221,7 +221,10 @@ class ExtendModeCommand extends ExtensionCommand {
     id = "codeFlea.changeToExtendMode";
 
     execute(): void {
-        //modeManager.changeMode("EXTEND");
+        this.container.manager.changeMode({
+            kind: "EXTEND",
+            subjectName: "WORD",
+        });
     }
 }
 
@@ -447,5 +450,25 @@ class NextInterestingPointCommand extends ExtensionCommand {
 
     execute() {
         points.nextInterestingPoint("forwards");
+    }
+}
+
+@registerCommand()
+class AppendCommand extends ExtensionCommand {
+    id = "codeFlea.changeToEditModeAppend";
+
+    async execute() {
+        await this.container.manager.executeCommand("append");
+        this.container.manager.changeMode({ kind: "EDIT" });
+    }
+}
+
+@registerCommand()
+class PrependCommand extends ExtensionCommand {
+    id = "codeFlea.changeToEditModePrepend";
+
+    async execute() {
+        await this.container.manager.executeCommand("prepend");
+        this.container.manager.changeMode({ kind: "EDIT" });
     }
 }

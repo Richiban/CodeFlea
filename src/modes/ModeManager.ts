@@ -33,6 +33,7 @@ export default class ModeManager {
         this.mode = await this.mode.changeTo(newMode);
 
         if (!this.mode.equals(previousMode)) {
+            previousMode.end();
             this.mode.refreshUI(this);
         }
     }

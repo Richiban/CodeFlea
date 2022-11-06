@@ -238,6 +238,11 @@
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
             },
             {
+                "key": "v",
+                "command": "codeFlea.changeToExtendMode",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
                 "key": "w",
                 "command": "codeFlea.changeToWordSubject",
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
@@ -250,6 +255,16 @@
             {
                 "key": "b",
                 "command": "codeFlea.changeToBlockSubject",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "key": "a",
+                "command": "codeFlea.changeToEditModeAppend",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "key": "p",
+                "command": "codeFlea.changeToEditModePrepend",
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
             },
             {
