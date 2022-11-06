@@ -11,7 +11,7 @@ export class FleaJumper {
     private isJumping: boolean = false;
     private jumpInterface: JumpInterface;
 
-    constructor(context: vscode.ExtensionContext, config: Config) {
+    constructor(config: Config) {
         this.config = config;
         this.jumpInterface = new JumpInterface(config);
         this.jumpInterface.update(this.config);
@@ -59,10 +59,15 @@ export class FleaJumper {
 
                 await this.jumpToPointPhase(editor);
             } catch (reason) {
-                if (!reason) reason = "Cancelled!";
+                if (!reason) {
+                    reason = "Cancelled!";
+                }
                 vscode.window.setStatusBarMessage(`CodeFlea: ${reason}`, 2000);
             } finally {
-                if (jumpTimeoutId) clearTimeout(jumpTimeoutId);
+                if (jumpTimeoutId) {
+                    clearTimeout(jumpTimeoutId);
+                }
+
                 messageDisposable.dispose();
             }
 
@@ -83,7 +88,9 @@ export class FleaJumper {
             "primary"
         );
 
-        if (chosenLine.tag === "Cancelled") return;
+        if (chosenLine.tag === "Cancelled") {
+            return;
+        }
 
         if (chosenLine.tag === "Ok") {
             moveCursorTo(chosenLine.userSelection.position);

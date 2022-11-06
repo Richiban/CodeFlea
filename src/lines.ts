@@ -1,10 +1,9 @@
 import * as vscode from "vscode";
-import { ExtensionCommand, registerCommand } from "./commands";
 import {
     Change,
     Direction,
-    Indentation,
     DirectionOrNearest,
+    Indentation,
     Linqish,
 } from "./common";
 import { getCursorPosition, getEditor, moveCursorTo } from "./editor";
@@ -259,76 +258,4 @@ export function moveToNextLineSameLevel(direction: Direction) {
  *  contains only punctuation */
 export function lineIsStopLine(line: vscode.TextLine) {
     return !/[a-zA-Z0-9]/.test(line.text);
-}
-
-@registerCommand()
-class NearestInnerLineCommand implements ExtensionCommand {
-    id = "codeFlea.nearestInnerLine";
-
-    execute() {
-        moveToChangeOfIndentation("greaterThan", "nearest");
-    }
-}
-
-@registerCommand()
-class NearestOuterLineCommand implements ExtensionCommand {
-    id = "codeFlea.nearestOuterLine";
-
-    execute() {
-        moveToChangeOfIndentation("lessThan", "nearest");
-    }
-}
-
-@registerCommand()
-class NextInnerLineCommand implements ExtensionCommand {
-    id = "codeFlea.nextInnerLine";
-
-    execute() {
-        moveToChangeOfIndentation("greaterThan", "forwards");
-    }
-}
-
-@registerCommand()
-class PrevOuterLineCommand implements ExtensionCommand {
-    id = "codeFlea.prevOuterLine";
-
-    execute() {
-        moveToChangeOfIndentation("lessThan", "backwards");
-    }
-}
-
-@registerCommand()
-class NextSameLineCommand implements ExtensionCommand {
-    id = "codeFlea.nextSameLine";
-
-    execute() {
-        moveToNextLineSameLevel("forwards");
-    }
-}
-
-@registerCommand()
-class PrevSameLineCommand implements ExtensionCommand {
-    id = "codeFlea.prevSameLine";
-
-    execute() {
-        moveToNextLineSameLevel("backwards");
-    }
-}
-
-@registerCommand()
-class NextBlankLineCommand implements ExtensionCommand {
-    id = "codeFlea.nextBlankLine";
-
-    execute() {
-        moveCursorToNextBlankLine("forwards");
-    }
-}
-
-@registerCommand()
-class PrevBlankLineCommand implements ExtensionCommand {
-    id = "codeFlea.prevBlankLine";
-
-    execute() {
-        moveCursorToNextBlankLine("backwards");
-    }
 }

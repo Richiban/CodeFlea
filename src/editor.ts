@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import { ExtensionCommand, registerCommand } from "./commands";
 import { Point } from "./common";
 
 export function scrollEditor(direction: "up" | "down", lines: number) {
@@ -122,13 +121,4 @@ export function getCursorPosition(): Point {
     const editor = getEditor();
 
     return editor.selection.active;
-}
-
-@registerCommand()
-class ScrollToCursorCommand implements ExtensionCommand {
-    id = "codeFlea.scrollToCursor";
-
-    execute() {
-        scrollToCursorAtCenter();
-    }
 }

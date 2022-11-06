@@ -9,11 +9,13 @@
     // Turn off tsc task auto detection since we have the necessary tasks as npm scripts
     "typescript.tsc.autoDetect": "off",
     "cSpell.words": [
-        "Consolas",
-        "Linqish",
-        "Richibansoft",
+        "acejump",
         "codeflea",
-        "fleajump"
+        "Consolas",
+        "fleajump",
+        "lightskyblue",
+        "Linqish",
+        "Richibansoft"
     ],
     "terminal.integrated.commandsToSkipShell": [
         "workbench.action.focusNextGroup"

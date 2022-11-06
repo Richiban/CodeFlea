@@ -1,31 +1,49 @@
 import * as vscode from "vscode";
-import * as modes from "./modes";
 import * as subjects from "../subjects/subjects";
-import ModeManager from "./ModeManager";
 import EditMode from "./EditMode";
-import ExtendMode from "./ExtendMode";
+import ModeManager from "./ModeManager";
+import * as modes from "./modes";
 
 export default class NavigateMode implements modes.EditorMode {
-    subject: subjects.Subject = undefined!;
+    subject: subjects.Subject;
 
     constructor(
         private manager: ModeManager,
-        subjectType: subjects.SubjectName
+        subjectType: subjects.SubjectType
     ) {
-        this.changeSubject(subjectType);
+        this.subject = subjects.createFrom(manager, subjectType);
     }
 
-    changeSubject(subjectName: subjects.SubjectName): void {
-        this.subject = subjects.createFrom(this.manager, subjectName);
+    equals(previousMode: modes.EditorMode): boolean {
+        return (
+            previousMode instanceof NavigateMode &&
+            previousMode.subject === this.subject
+        );
     }
 
-    changeTo(newMode: modes.EditorModeName): modes.EditorMode {
-        switch (newMode) {
+    async changeTo(newMode: modes.EditorModeType): Promise<modes.EditorMode> {
+        switch (newMode.kind) {
             case "EDIT":
                 return new EditMode(this.manager, this);
-            case "EXTEND":
-                return new ExtendMode(this.manager, this);
+
             case "NAVIGATE":
+                if (newMode.subjectName !== this.subject.name) {
+                    await vscode.commands.executeCommand("cancelSelection");
+
+                    return new NavigateMode(this.manager, newMode.subjectName);
+                }
+
+                switch (newMode.subjectName) {
+                    case "LINE":
+                        return new NavigateMode(this.manager, "ALL_LINES");
+                    case "WORD":
+                        return new NavigateMode(this.manager, "SMALL_WORD");
+                    case "SMALL_WORD":
+                        return new NavigateMode(this.manager, "WORD");
+                    case "ALL_LINES":
+                        return new NavigateMode(this.manager, "LINE");
+                }
+
                 return this;
         }
     }
@@ -37,7 +55,7 @@ export default class NavigateMode implements modes.EditorMode {
     }
 
     refreshUI(editorManager: ModeManager) {
-        editorManager.statusBar.text = `Navigate (${this.subject.name})`;
+        editorManager.statusBar.text = `Navigate (${this.subject?.name})`;
 
         if (editorManager.editor) {
             editorManager.editor.options.cursorStyle =
@@ -52,9 +70,11 @@ export default class NavigateMode implements modes.EditorMode {
             "codeFlea.mode",
             "NAVIGATE"
         );
+
+        this.subject?.fixSelection();
     }
 
-    async executeSubjectCommand(command: keyof subjects.SubjectAction) {
+    async executeSubjectCommand(command: keyof subjects.SubjectActions) {
         this.subject[command]();
     }
 }

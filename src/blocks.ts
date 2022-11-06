@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import { ExtensionCommand, registerCommand } from "./commands";
 import {
     Direction,
     Indentation,
@@ -278,20 +277,19 @@ export function extendBlockSelection(
 
 export function moveToNextBlockStart(
     direction: Direction,
-    indentation: IndentationRequest
+    indentation: IndentationRequest,
+    from?: Point
 ) {
-    const cursorPosition = getCursorPosition();
+    from = from ?? getCursorPosition();
 
-    const indent = lineIsBlank(cursorPosition.line)
-        ? "any-indentation"
-        : indentation;
+    const indent = lineIsBlank(from.line) ? "any-indentation" : indentation;
 
     for (const { kind, point } of iterBlockBoundaries({
-        fromPosition: cursorPosition,
+        fromPosition: from,
         direction,
         indentationLevel: indent,
     })) {
-        if (kind != "block-start" || areEqual(cursorPosition, point)) {
+        if (kind != "block-start" || areEqual(from, point)) {
             continue;
         }
 
@@ -354,122 +352,5 @@ export function nextBlockEnd(
         moveCursorTo(point);
 
         return;
-    }
-}
-
-@registerCommand()
-class NextBlockEndCommand implements ExtensionCommand {
-    id = "codeFlea.nextBlockEnd";
-
-    execute() {
-        nextBlockEnd("forwards", "any-indentation");
-    }
-}
-
-@registerCommand()
-class PrevBlockEndCommand implements ExtensionCommand {
-    id = "codeFlea.prevBlockEnd";
-
-    execute() {
-        nextBlockEnd("backwards", "any-indentation");
-    }
-}
-
-@registerCommand()
-class SelectAllBlocksInCurrentScopeCommand implements ExtensionCommand {
-    id = "codeFlea.selectAllBlocksInCurrentScope";
-
-    execute() {
-        selectAllBlocksInCurrentScope();
-    }
-}
-
-@registerCommand()
-class PrevBlockCommand implements ExtensionCommand {
-    id = "codeFlea.prevBlock";
-
-    execute() {
-        moveToNextBlockStart("backwards", "any-indentation");
-    }
-}
-
-@registerCommand()
-class NextBlockCommand implements ExtensionCommand {
-    id = "codeFlea.nextBlock";
-
-    execute() {
-        moveToNextBlockStart("forwards", "any-indentation");
-    }
-}
-
-@registerCommand()
-class ExtendBlockSelectionCommand implements ExtensionCommand {
-    id = "codeFlea.extendBlockSelection";
-
-    execute() {
-        extendBlockSelection("forwards", "same-indentation");
-    }
-}
-
-@registerCommand()
-class NextOuterBlockCommand implements ExtensionCommand {
-    id = "codeFlea.nextOuterBlock";
-
-    execute() {
-        moveToNextBlockStart("forwards", "less-indentation");
-    }
-}
-
-@registerCommand()
-class PrevOuterBlockCommand implements ExtensionCommand {
-    id = "codeFlea.prevOuterBlock";
-
-    execute() {
-        moveToNextBlockStart("backwards", "less-indentation");
-    }
-}
-
-@registerCommand()
-class NextSameBlockCommand implements ExtensionCommand {
-    id = "codeFlea.nextSameBlock";
-
-    execute() {
-        moveToNextBlockStart("forwards", "same-indentation");
-    }
-}
-
-@registerCommand()
-class PrevSameBlockCommand implements ExtensionCommand {
-    id = "codeFlea.prevSameBlock";
-
-    execute() {
-        moveToNextBlockStart("backwards", "same-indentation");
-    }
-}
-
-@registerCommand()
-class NextInnerBlockCommand implements ExtensionCommand {
-    id = "codeFlea.nextInnerBlock";
-
-    execute() {
-        moveToNextBlockStart("forwards", "more-indentation");
-    }
-}
-
-@registerCommand()
-class PrevInnerBlockCommand implements ExtensionCommand {
-    id = "codeFlea.prevInnerBlock";
-
-    execute() {
-        moveToNextBlockStart("backwards", "more-indentation");
-    }
-}
-
-@registerCommand()
-class ExtendBlockSelectionBackwardsCommand implements ExtensionCommand {
-    id = "codeFlea.extendBlockSelectionBackwards";
-
-    execute() {
-        extendBlockSelection("backwards", "same-indentation");
     }
 }

@@ -258,12 +258,12 @@
                 "when": "editorTextFocus && codeFlea.input"
             },
             {
-                "command": "cursorUp",
+                "command": "codeFlea.nextSubjectUp",
                 "key": "u",
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
             },
             {
-                "command": "cursorDown",
+                "command": "codeFlea.nextSubjectDown",
                 "key": "e",
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
             },
@@ -278,7 +278,47 @@
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
             },
             {
-                "command": "codeFlea.delete",
+                "command": "codeFlea.swapSubjectUp",
+                "key": "alt+u",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "command": "codeFlea.swapSubjectDown",
+                "key": "alt+e",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "command": "codeFlea.swapSubjectLeft",
+                "key": "alt+n",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "command": "codeFlea.swapSubjectRight",
+                "key": "alt+i",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "command": "codeFlea.extendSubjectUp",
+                "key": "alt+u",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "command": "codeFlea.extendSubjectDown",
+                "key": "alt+e",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "command": "codeFlea.extendSubjectLeft",
+                "key": "alt+n",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "command": "codeFlea.extendSubjectRight",
+                "key": "alt+i",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "command": "codeFlea.deleteSubject",
                 "key": "d",
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
             },
@@ -288,72 +328,19 @@
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
             },
             {
-                "key": "ctrl+'",
-                "command": "codeFlea.jump"
+                "command": "codeFlea.newLineBelow",
+                "key": "o",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
             },
             {
-                "key": "alt+n",
-                "command": "codeFlea.nextOuterBlock"
+                "command": "codeFlea.newLineAbove",
+                "key": "shift+o",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
             },
             {
-                "key": "alt+l",
-                "command": "codeFlea.prevOuterBlock"
-            },
-            {
-                "key": "alt+e",
-                "command": "codeFlea.nextSameBlock"
-            },
-            {
-                "key": "alt+u",
-                "command": "codeFlea.prevSameBlock"
-            },
-            {
-                "key": "alt+shift+e",
-                "command": "codeFlea.extendBlockSelection"
-            },
-            {
-                "key": "alt+shift+u",
-                "command": "codeFlea.extendBlockSelectionBackwards"
-            },
-            {
-                "key": "alt+i",
-                "command": "codeFlea.nextInnerBlock"
-            },
-            {
-                "key": "alt+y",
-                "command": "codeFlea.prevInnerBlock"
-            },
-            {
-                "key": "alt+.",
-                "command": "codeFlea.nextBlock"
-            },
-            {
-                "key": "alt+m",
-                "command": "codeFlea.prevBlock"
-            },
-            {
-                "key": "alt+o",
-                "command": "codeFlea.nextInterestingPoint"
-            },
-            {
-                "key": "alt+h",
-                "command": "codeFlea.prevInterestingPoint"
-            },
-            {
-                "key": "alt+/",
-                "command": "codeFlea.scrollToCursor"
-            },
-            {
-                "key": "alt+shift+,",
-                "command": "codeFlea.selectAllBlocksInCurrentScope"
-            },
-            {
-                "key": "ctrl+up",
-                "command": "codeFlea.scrollEditorUp"
-            },
-            {
-                "key": "ctrl+down",
-                "command": "codeFlea.scrollEditorDown"
+                "key": "'",
+                "command": "codeFlea.jump",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
             }
         ]
     },

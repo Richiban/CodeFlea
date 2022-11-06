@@ -1,24 +1,24 @@
 import * as vscode from "vscode";
+import { SubjectActions } from "../subjects/subjects";
 import EditMode from "./EditMode";
-import ExtendMode from "./ExtendMode";
-import NavigateMode from "./NavigateMode";
-import { EditorMode, EditorModeName } from "./modes";
 import ModeManager from "./ModeManager";
-import { SubjectAction } from "../subjects/subjects";
+import { EditorMode, EditorModeType } from "./modes";
+import NavigateMode from "./NavigateMode";
 
 export class NullMode implements EditorMode {
     constructor(private manager: ModeManager) {}
 
-    changeSubject(): void {}
+    equals(previousMode: EditorMode): boolean {
+        return previousMode instanceof NullMode;
+    }
 
-    changeTo(newMode: EditorModeName): EditorMode {
+    async changeTo(newMode: EditorModeType): Promise<EditorMode> {
         const navigateMode = new NavigateMode(this.manager, "WORD");
 
-        switch (newMode) {
+        switch (newMode.kind) {
             case "EDIT":
                 return new EditMode(this.manager, navigateMode);
-            case "EXTEND":
-                return new ExtendMode(this.manager, navigateMode);
+
             case "NAVIGATE":
                 return navigateMode;
         }
@@ -34,5 +34,5 @@ export class NullMode implements EditorMode {
         return this;
     }
 
-    async executeSubjectCommand(command: keyof SubjectAction | "name") {}
+    async executeSubjectCommand(command: keyof SubjectActions | "name") {}
 }

@@ -1,9 +1,8 @@
 import * as vscode from "vscode";
-import ExtendMode from "./ExtendMode";
-import NavigateMode from "./NavigateMode";
-import { EditorMode, EditorModeName } from "./modes";
+import { SubjectActions } from "../subjects/subjects";
 import ModeManager from "./ModeManager";
-import { Subject, SubjectAction } from "../subjects/subjects";
+import { EditorMode, EditorModeType } from "./modes";
+import NavigateMode from "./NavigateMode";
 
 export default class EditMode implements EditorMode {
     private keySequenceStarted: boolean = false;
@@ -13,14 +12,17 @@ export default class EditMode implements EditorMode {
         private previousNavigateMode: NavigateMode
     ) {}
 
-    changeSubject(): void {}
+    equals(previousMode: EditorMode): boolean {
+        return (
+            previousMode instanceof EditMode &&
+            previousMode.keySequenceStarted === this.keySequenceStarted
+        );
+    }
 
-    changeTo(newMode: EditorModeName): EditorMode {
-        switch (newMode) {
+    async changeTo(newMode: EditorModeType): Promise<EditorMode> {
+        switch (newMode.kind) {
             case "EDIT":
                 return this;
-            case "EXTEND":
-                return new ExtendMode(this.manager, this.previousNavigateMode);
             case "NAVIGATE":
                 return this.previousNavigateMode;
         }
@@ -53,7 +55,7 @@ export default class EditMode implements EditorMode {
 
                     this.keySequenceStarted = false;
                     vscode.commands.executeCommand("default:type", typed);
-                }, 500);
+                }, 100);
             } else {
                 this.keySequenceStarted = false;
 
@@ -77,5 +79,5 @@ export default class EditMode implements EditorMode {
         vscode.commands.executeCommand("setContext", "codeFlea.mode", "EDIT");
     }
 
-    async executeSubjectCommand(command: keyof SubjectAction) {}
+    async executeSubjectCommand(command: keyof SubjectActions) {}
 }

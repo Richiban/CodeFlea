@@ -1,12 +1,14 @@
 import * as subjects from "../subjects/subjects";
 import ModeManager from "./ModeManager";
 
-export type EditorModeName = "EDIT" | "NAVIGATE" | "EXTEND";
+export type EditorModeType =
+    | { kind: "EDIT" }
+    | { kind: "NAVIGATE"; subjectName: subjects.SubjectType };
 
 export type EditorMode = {
-    changeTo(newMode: EditorModeName): EditorMode;
+    equals(previousMode: EditorMode): boolean;
+    changeTo(newMode: EditorModeType): Promise<EditorMode>;
     refreshUI(editorManager: ModeManager): void;
     onCharTyped(typed: { text: string }): EditorMode;
-    changeSubject(subject: subjects.SubjectName): void;
     executeSubjectCommand(command: keyof subjects.Subject): Promise<void>;
 };

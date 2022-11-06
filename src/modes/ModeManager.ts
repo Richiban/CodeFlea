@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
 import { Config } from "../config";
 import { NullMode } from "./NullMode";
-import { EditorMode, EditorModeName } from "./modes";
-import { Subject, SubjectAction, SubjectName } from "../subjects/subjects";
+import { EditorMode, EditorModeType } from "./modes";
+import { SubjectActions } from "../subjects/subjects";
 
 export default class ModeManager {
     private mode: EditorMode;
@@ -28,22 +28,16 @@ export default class ModeManager {
         this.mode.refreshUI(this);
     }
 
-    changeMode(newMode: "NAVIGATE", subject: SubjectName): void;
-    changeMode(newMode: EditorModeName): void;
-    changeMode(newMode: EditorModeName, subject?: SubjectName) {
+    async changeMode(newMode: EditorModeType) {
         const previousMode = this.mode;
-        this.mode = this.mode.changeTo(newMode);
+        this.mode = await this.mode.changeTo(newMode);
 
-        if (subject) {
-            this.mode.changeSubject(subject);
-        }
-
-        if (this.mode !== previousMode) {
+        if (!this.mode.equals(previousMode)) {
             this.mode.refreshUI(this);
         }
     }
 
-    async executeCommand(command: keyof SubjectAction) {
+    async executeCommand(command: keyof SubjectActions) {
         this.mode.executeSubjectCommand(command);
     }
 

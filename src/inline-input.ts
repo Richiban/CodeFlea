@@ -3,37 +3,43 @@ import * as vscode from "vscode";
 const disposables: vscode.Disposable[] = [];
 
 function beginInputContext() {
-  vscode.commands.executeCommand("setContext", "codeFleaInput", true);
+    vscode.commands.executeCommand("setContext", "codeFleaInput", true);
 }
 
 function endInputContext() {
-  vscode.commands.executeCommand("setContext", "codeFleaInput", false);
+    vscode.commands.executeCommand("setContext", "codeFleaInput", false);
 }
 
 function endInput() {
-  for (const d of disposables) {
-    d.dispose();
-  }
+    for (const d of disposables) {
+        d.dispose();
+    }
 
-  endInputContext();
+    endInputContext();
 }
 
 export async function readKey() {
-  return new Promise<string | undefined>(resolve => {
-    beginInputContext();
+    return new Promise<string | undefined>((resolve) => {
+        beginInputContext();
 
-    disposables.push(
-      vscode.commands.registerCommand("type", (event: { text: string }) => {
-        resolve(event.text);
-        endInput();
-      })
-    );
+        disposables.push(
+            vscode.commands.registerCommand(
+                "type",
+                (event: { text: string }) => {
+                    resolve(event.text);
+                    endInput();
+                }
+            )
+        );
 
-    disposables.push(
-      vscode.commands.registerTextEditorCommand("codeFlea.input.cancel", () => {
-        resolve();
-        endInput();
-      })
-    );
-  });
+        disposables.push(
+            vscode.commands.registerTextEditorCommand(
+                "codeFlea.input.cancel",
+                () => {
+                    resolve(undefined);
+                    endInput();
+                }
+            )
+        );
+    });
 }
