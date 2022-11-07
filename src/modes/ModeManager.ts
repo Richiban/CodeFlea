@@ -42,6 +42,10 @@ export default class ModeManager {
         this.mode.executeSubjectCommand(command);
     }
 
+    async repeatCommand() {
+        await this.mode.repeatSubjectCommand();
+    }
+
     onCharTyped(typed: { text: string }) {
         this.mode = this.mode.onCharTyped(typed);
 

@@ -86,6 +86,12 @@ export default class NavigateMode extends modes.EditorMode {
     }
 
     async executeSubjectCommand(command: keyof subjects.SubjectActions) {
-        await this.subject[command]();
+        const repeatable = async () => {
+            await this.subject[command]();
+        };
+
+        this.lastCommand = repeatable;
+
+        await repeatable();
     }
 }

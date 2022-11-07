@@ -472,3 +472,12 @@ class PrependCommand extends ExtensionCommand {
         this.container.manager.changeMode({ kind: "EDIT" });
     }
 }
+
+@registerCommand()
+class RepeatCommand extends ExtensionCommand {
+    id = "codeFlea.repeatCommand";
+
+    async execute() {
+        await this.container.manager.repeatCommand();
+    }
+}
