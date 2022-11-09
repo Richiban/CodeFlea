@@ -31,11 +31,16 @@ export type SubjectActions = {
     swapSubjectLeft(): Promise<void>;
     swapSubjectRight(): Promise<void>;
 
+    firstSubjectInLine(): Promise<void>;
+    lastSubjectInLine(): Promise<void>;
+
     deleteSubject(): Promise<void>;
     changeSubject(): Promise<void>;
 
     append(): Promise<void>;
     prepend(): Promise<void>;
+
+    search(target: string): Promise<void>;
 };
 
 export abstract class Subject implements SubjectActions {
@@ -63,6 +68,9 @@ export abstract class Subject implements SubjectActions {
     async swapSubjectRight() {}
     async deleteSubject() {}
     async changeSubject() {}
+    async firstSubjectInLine() {}
+    async lastSubjectInLine() {}
+    async search(target: string) {}
 
     async append() {
         if (!this.editor) {
@@ -415,6 +423,24 @@ export class WordSubject extends Subject {
         this.fixSelection();
     }
 
+    async firstSubjectInLine() {
+        if (!this.editor) {
+            return;
+        }
+
+        await vscode.commands.executeCommand("cursorHome");
+        this.fixSelection();
+    }
+
+    async lastSubjectInLine(): Promise<void> {
+        if (!this.editor) {
+            return;
+        }
+
+        await vscode.commands.executeCommand("cursorEnd");
+        this.fixSelection();
+    }
+
     async deleteSubject() {
         await vscode.commands.executeCommand("deleteRight");
 
@@ -440,5 +466,9 @@ export class WordSubject extends Subject {
         }
 
         await this.fixSelection();
+    }
+
+    async search(target: string) {
+        await vscode.window.showInformationMessage("Searching for: " + target);
     }
 }

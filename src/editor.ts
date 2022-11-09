@@ -1,6 +1,63 @@
 import * as vscode from "vscode";
 import { Point } from "./common";
 
+export function quickPicker<Command>(
+    options: { quickKey: string; label: string; command: Command }[]
+): Promise<Command | undefined> {
+    return new Promise((resolve, reject) => {
+        const quickPick = vscode.window.createQuickPick();
+
+        quickPick.items = options.map((e) => {
+            return { label: `(${e.quickKey}) ${e.label}` };
+        });
+
+        quickPick.onDidHide(() => {
+            resolve(undefined);
+            quickPick.dispose();
+        });
+
+        quickPick.onDidChangeValue((e) => {
+            for (const option of options) {
+                if (option.quickKey === e) {
+                    resolve(option.command);
+                    quickPick.dispose();
+                    return;
+                }
+            }
+
+            quickPick.value = "";
+        });
+
+        quickPick.onDidAccept(() => {
+            reject();
+
+            quickPick.dispose();
+        });
+
+        quickPick.show();
+    });
+}
+
+export function inputBoxChar(placeholder?: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const inputBox = vscode.window.createInputBox();
+
+        inputBox.placeholder = placeholder;
+
+        inputBox.onDidChangeValue((ch) => {
+            resolve(ch);
+            inputBox.dispose();
+        });
+
+        inputBox.onDidHide(() => {
+            reject();
+            inputBox.dispose();
+        });
+
+        inputBox.show();
+    });
+}
+
 export function scrollEditor(direction: "up" | "down", lines: number) {
     const editor = vscode.window.activeTextEditor;
 

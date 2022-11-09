@@ -90,8 +90,10 @@ export default class ExtendMode extends EditorMode {
     async executeSubjectCommand(
         command: keyof subjects.SubjectActions
     ): Promise<void> {
-        await this.subject[command]();
+        //await this.subject[command]();
     }
+
+    async repeatSubjectCommand() {}
 
     equals(previousMode: EditorMode): boolean {
         return (

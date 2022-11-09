@@ -90,4 +90,6 @@ export default class EditMode extends EditorMode {
     }
 
     async executeSubjectCommand(command: keyof SubjectActions) {}
+
+    async repeatSubjectCommand() {}
 }

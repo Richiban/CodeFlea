@@ -7,7 +7,9 @@ export type EditorModeType =
     | { kind: "NAVIGATE" | "EXTEND"; subjectName: subjects.SubjectType };
 
 export abstract class EditorMode {
-    protected lastCommand: (() => Promise<void>) | undefined;
+    protected lastCommand:
+        | { commandName: keyof subjects.SubjectActions; args: string[] }
+        | undefined;
 
     abstract equals(previousMode: EditorMode): boolean;
     abstract changeTo(newMode: EditorModeType): Promise<EditorMode>;
@@ -24,9 +26,5 @@ export abstract class EditorMode {
         command: keyof subjects.SubjectActions
     ): Promise<void>;
 
-    async repeatSubjectCommand() {
-        if (this.lastCommand) {
-            await this.lastCommand();
-        }
-    }
+    abstract repeatSubjectCommand(): Promise<void>;
 }

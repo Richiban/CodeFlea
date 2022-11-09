@@ -273,6 +273,56 @@
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
             },
             {
+                "key": "space",
+                "command": "codeFlea.openSpaceMenu",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "key": "g",
+                "command": "codeFlea.openGoToMenu",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "key": "q",
+                "command": "codeFlea.changeToCharacterSubject",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "key": "s",
+                "command": "codeFlea.search",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "key": "f",
+                "command": "codeFlea.searchBackwards",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "key": "/",
+                "command": "editor.action.commentLine",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "key": "l",
+                "command": "codeFlea.goToFirstSubjectInLine",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "key": "y",
+                "command": "codeFlea.goToLastSubjectInLine",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "key": "j",
+                "command": "codeFlea.goToPrevOccurrence",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "key": "h",
+                "command": "codeFlea.goToNextOccurrence",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
                 "command": "codeFlea.input.cancel",
                 "key": "escape",
                 "when": "editorTextFocus && codeFlea.input"
@@ -320,6 +370,11 @@
             {
                 "command": "codeFlea.extendSubjectUp",
                 "key": "alt+u",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "command": "editor.action.quickFix",
+                "key": "r",
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
             },
             {

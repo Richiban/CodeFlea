@@ -4,6 +4,7 @@ import EditMode from "./EditMode";
 import ExtendMode from "./ExtendMode";
 import ModeManager from "./ModeManager";
 import * as modes from "./modes";
+import * as editor from "../editor";
 
 export default class NavigateMode extends modes.EditorMode {
     constructor(
@@ -86,12 +87,38 @@ export default class NavigateMode extends modes.EditorMode {
     }
 
     async executeSubjectCommand(command: keyof subjects.SubjectActions) {
-        const repeatable = async () => {
-            await this.subject[command]();
-        };
+        if (this.subject[command].length > 1) {
+            throw new Error(
+                "Functions with multiple arguments are not supported"
+            );
+        }
 
-        this.lastCommand = repeatable;
+        const args: [] | [string] = [];
 
-        await repeatable();
+        if (this.subject[command].length === 1) {
+            const input = await editor.inputBoxChar(command);
+
+            (args as string[]).push(input);
+        }
+
+        this.lastCommand = { commandName: command, args: args };
+
+        await (this.subject[command] as any)(...args);
+    }
+
+    async repeatSubjectCommand() {
+        if (!this.lastCommand) {
+            return;
+        }
+
+        const cf = this.subject[this.lastCommand.commandName];
+
+        if (cf.length > 1) {
+            throw new Error(
+                "Functions with multiple arguments are not supported"
+            );
+        }
+
+        await (cf as any)(...this.lastCommand.args);
     }
 }

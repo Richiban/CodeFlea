@@ -40,4 +40,6 @@ export class NullMode extends EditorMode {
     }
 
     async executeSubjectCommand(command: keyof SubjectActions | "name") {}
+
+    async repeatSubjectCommand() {}
 }

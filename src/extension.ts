@@ -47,7 +47,7 @@ class ChangeCommand extends ExtensionCommand {
     id = "codeFlea.change";
 
     execute() {
-        this.container.manager.executeCommand("changeSubject");
+        this.container.manager.executeSubjectCommand("changeSubject");
         this.container.manager.changeMode({ kind: "EDIT" });
     }
 }

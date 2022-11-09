@@ -1,3 +1,4 @@
+import * as vscode from "vscode";
 import * as blocks from "./blocks";
 import { Config } from "./config";
 import * as editor from "./editor";
@@ -47,7 +48,7 @@ class SwapSubjectUp extends ExtensionCommand {
     id = "codeFlea.swapSubjectUp";
 
     async execute() {
-        this.container.manager.executeCommand("swapSubjectUp");
+        await this.container.manager.executeSubjectCommand("swapSubjectUp");
     }
 }
 
@@ -56,7 +57,7 @@ class SwapSubjectDown extends ExtensionCommand {
     id = "codeFlea.swapSubjectDown";
 
     async execute() {
-        this.container.manager.executeCommand("swapSubjectDown");
+        await this.container.manager.executeSubjectCommand("swapSubjectDown");
     }
 }
 
@@ -65,7 +66,7 @@ class SwapSubjectLeft extends ExtensionCommand {
     id = "codeFlea.swapSubjectLeft";
 
     async execute() {
-        this.container.manager.executeCommand("swapSubjectLeft");
+        await this.container.manager.executeSubjectCommand("swapSubjectLeft");
     }
 }
 
@@ -74,7 +75,7 @@ class SwapSubjectRight extends ExtensionCommand {
     id = "codeFlea.swapSubjectRight";
 
     async execute() {
-        this.container.manager.executeCommand("swapSubjectRight");
+        await this.container.manager.executeSubjectCommand("swapSubjectRight");
     }
 }
 
@@ -83,7 +84,7 @@ class ExtendSubjectUp extends ExtensionCommand {
     id = "codeFlea.extendSubjectUp";
 
     async execute() {
-        this.container.manager.executeCommand("extendSubjectUp");
+        await this.container.manager.executeSubjectCommand("extendSubjectUp");
     }
 }
 
@@ -92,7 +93,7 @@ class ExtendSubjectDown extends ExtensionCommand {
     id = "codeFlea.extendSubjectDown";
 
     async execute() {
-        this.container.manager.executeCommand("extendSubjectDown");
+        await this.container.manager.executeSubjectCommand("extendSubjectDown");
     }
 }
 
@@ -101,7 +102,7 @@ class ExtendSubjectLeft extends ExtensionCommand {
     id = "codeFlea.extendSubjectLeft";
 
     async execute() {
-        this.container.manager.executeCommand("extendSubjectLeft");
+        await this.container.manager.executeSubjectCommand("extendSubjectLeft");
     }
 }
 
@@ -110,7 +111,9 @@ class ExtendSubjectRight extends ExtensionCommand {
     id = "codeFlea.extendSubjectRight";
 
     async execute() {
-        this.container.manager.executeCommand("extendSubjectRight");
+        await this.container.manager.executeSubjectCommand(
+            "extendSubjectRight"
+        );
     }
 }
 
@@ -118,8 +121,8 @@ class ExtendSubjectRight extends ExtensionCommand {
 class NextSubjectRightCommand extends ExtensionCommand {
     id = "codeFlea.nextSubjectRight";
 
-    execute() {
-        this.container.manager.executeCommand("nextSubjectRight");
+    async execute() {
+        await this.container.manager.executeSubjectCommand("nextSubjectRight");
     }
 }
 
@@ -127,8 +130,8 @@ class NextSubjectRightCommand extends ExtensionCommand {
 class NextSubjectLeftCommand extends ExtensionCommand {
     id = "codeFlea.nextSubjectLeft";
 
-    execute() {
-        this.container.manager.executeCommand("nextSubjectLeft");
+    async execute() {
+        await this.container.manager.executeSubjectCommand("nextSubjectLeft");
     }
 }
 
@@ -136,8 +139,8 @@ class NextSubjectLeftCommand extends ExtensionCommand {
 class NextSubjectUpCommand extends ExtensionCommand {
     id = "codeFlea.nextSubjectUp";
 
-    execute() {
-        this.container.manager.executeCommand("nextSubjectUp");
+    async execute() {
+        await this.container.manager.executeSubjectCommand("nextSubjectUp");
     }
 }
 
@@ -145,8 +148,8 @@ class NextSubjectUpCommand extends ExtensionCommand {
 class NextSubjectDownCommand extends ExtensionCommand {
     id = "codeFlea.nextSubjectDown";
 
-    execute() {
-        this.container.manager.executeCommand("nextSubjectDown");
+    async execute() {
+        await this.container.manager.executeSubjectCommand("nextSubjectDown");
     }
 }
 
@@ -154,8 +157,8 @@ class NextSubjectDownCommand extends ExtensionCommand {
 class DeleteCommand extends ExtensionCommand {
     id = "codeFlea.deleteSubject";
 
-    execute() {
-        this.container.manager.executeCommand("deleteSubject");
+    async execute() {
+        await this.container.manager.executeSubjectCommand("deleteSubject");
     }
 }
 
@@ -458,7 +461,7 @@ class AppendCommand extends ExtensionCommand {
     id = "codeFlea.changeToEditModeAppend";
 
     async execute() {
-        await this.container.manager.executeCommand("append");
+        await await this.container.manager.executeSubjectCommand("append");
         this.container.manager.changeMode({ kind: "EDIT" });
     }
 }
@@ -468,7 +471,7 @@ class PrependCommand extends ExtensionCommand {
     id = "codeFlea.changeToEditModePrepend";
 
     async execute() {
-        await this.container.manager.executeCommand("prepend");
+        await await this.container.manager.executeSubjectCommand("prepend");
         this.container.manager.changeMode({ kind: "EDIT" });
     }
 }
@@ -478,6 +481,53 @@ class RepeatCommand extends ExtensionCommand {
     id = "codeFlea.repeatCommand";
 
     async execute() {
-        await this.container.manager.repeatCommand();
+        await this.container.manager.repeatSubjectCommand();
+    }
+}
+
+@registerCommand()
+class SearchCommand extends ExtensionCommand {
+    id = "codeFlea.search";
+
+    async execute() {
+        await this.container.manager.executeSubjectCommand("search");
+    }
+}
+
+@registerCommand()
+class OpenSpaceMenuCommand extends ExtensionCommand {
+    id = "codeFlea.openSpaceMenu";
+
+    async execute() {
+        await this.container.manager.openSpaceMenu();
+    }
+}
+
+@registerCommand()
+class OpenGoToMenuCommand extends ExtensionCommand {
+    id = "codeFlea.openGoToMenu";
+
+    async execute() {
+        await this.container.manager.openGoToMenu();
+    }
+}
+
+@registerCommand()
+class FirstInLineCommand extends ExtensionCommand {
+    id = "codeFlea.goToFirstSubjectInLine";
+
+    async execute() {
+        await this.container.manager.executeSubjectCommand(
+            "firstSubjectInLine"
+        );
+    }
+}
+
+@registerCommand()
+class LastInLineCommand extends ExtensionCommand {
+    id = "codeFlea.goToLastSubjectInLine";
+
+    async execute() {
+        await this.container.manager.executeSubjectCommand("lastSubjectInLine");
     }
 }
