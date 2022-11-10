@@ -4,7 +4,7 @@ import EditMode from "./EditMode";
 import ExtendMode from "./ExtendMode";
 import ModeManager from "./ModeManager";
 import * as modes from "./modes";
-import * as editor from "../editor";
+import * as editor from "../utils/editor";
 
 export default class NavigateMode extends modes.EditorMode {
     constructor(
@@ -120,5 +120,9 @@ export default class NavigateMode extends modes.EditorMode {
         }
 
         await (cf as any)(...this.lastCommand.args);
+    }
+
+    async fixSelection() {
+        await this.subject.fixSelection();
     }
 }

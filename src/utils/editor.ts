@@ -1,9 +1,10 @@
 import * as vscode from "vscode";
-import { Point } from "./common";
+import { Point } from "../common";
+import { QuickCommand } from "./quickMenus";
 
-export function quickPicker<Command>(
-    options: { quickKey: string; label: string; command: Command }[]
-): Promise<Command | undefined> {
+export function quickCommandPicker(
+    options: QuickCommand[]
+): Promise<QuickCommand | undefined> {
     return new Promise((resolve, reject) => {
         const quickPick = vscode.window.createQuickPick();
 
@@ -19,7 +20,7 @@ export function quickPicker<Command>(
         quickPick.onDidChangeValue((e) => {
             for (const option of options) {
                 if (option.quickKey === e) {
-                    resolve(option.command);
+                    resolve(option);
                     quickPick.dispose();
                     return;
                 }
@@ -169,7 +170,9 @@ export function getNonActiveSelectionPoint() {
 export function tryGetLineAt(lineNumber: number) {
     const editor = getEditor();
 
-    if (lineNumber >= editor.document.lineCount) return;
+    if (lineNumber >= editor.document.lineCount) {
+        return;
+    }
 
     return editor.document.lineAt(lineNumber);
 }

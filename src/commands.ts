@@ -1,11 +1,11 @@
 import * as vscode from "vscode";
-import * as blocks from "./blocks";
+import * as blocks from "./utils/blocks";
 import { Config } from "./config";
-import * as editor from "./editor";
+import * as editor from "./utils/editor";
 import { FleaJumper } from "./jump/fleajump";
-import * as lines from "./lines";
+import * as lines from "./utils/lines";
 import type ModeManager from "./modes/ModeManager";
-import * as points from "./points";
+import * as points from "./utils/points";
 
 export abstract class ExtensionCommand {
     abstract id: string;
@@ -529,5 +529,14 @@ class LastInLineCommand extends ExtensionCommand {
 
     async execute() {
         await this.container.manager.executeSubjectCommand("lastSubjectInLine");
+    }
+}
+
+@registerCommand()
+class CustomVsCodeCommand extends ExtensionCommand {
+    id = "codeFlea.customVsCodeCommand";
+
+    async execute() {
+        await this.container.manager.customVsCodeCommand();
     }
 }

@@ -1,4 +1,4 @@
-import { Direction, linqish, Linqish, Point } from "./common";
+import { Direction, linqish, Linqish, Point } from "../common";
 import { getEditor, getCursorPosition, moveCursorTo } from "./editor";
 import { iterLines, lineIsStopLine } from "./lines";
 import * as vscode from "vscode";

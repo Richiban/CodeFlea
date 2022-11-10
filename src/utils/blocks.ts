@@ -7,7 +7,7 @@ import {
     opposite,
     Point,
     Parameter,
-} from "./common";
+} from "../common";
 import {
     getCursorPosition,
     getEditor,

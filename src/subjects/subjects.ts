@@ -1,7 +1,8 @@
 import ModeManager from "../modes/ModeManager";
-import * as blocks from "../blocks";
+import * as blocks from "../utils/blocks";
 import * as vscode from "vscode";
-import { lineIsStopLine } from "../lines";
+import { lineIsStopLine } from "../utils/lines";
+import * as words from "../utils/words";
 
 export type SubjectType =
     | "WORD"
@@ -93,7 +94,7 @@ export abstract class Subject implements SubjectActions {
     }
 
     abstract name: SubjectType;
-    abstract fixSelection(): void;
+    abstract fixSelection(): Promise<void>;
 
     equals(other: Subject) {
         return this.name === other.name;
@@ -120,7 +121,7 @@ export function createFrom(
 export class AllLinesSubject extends Subject {
     readonly name = "ALL_LINES";
 
-    fixSelection(): void {
+    async fixSelection() {
         const editor = this.manager.editor;
 
         if (!editor) {
@@ -164,7 +165,7 @@ export class AllLinesSubject extends Subject {
 export class BlockSubject extends Subject {
     readonly name = "BLOCK";
 
-    fixSelection() {
+    async fixSelection() {
         if (!this.editor) {
             return;
         }
@@ -231,7 +232,7 @@ export class LineSubject extends Subject {
         this.fixSelection();
     }
 
-    fixSelection() {
+    async fixSelection() {
         const editor = this.manager.editor;
 
         if (!editor) {
@@ -323,8 +324,6 @@ export class LineSubject extends Subject {
 export class SmallWordSubject extends Subject {
     readonly name = "SMALL_WORD";
 
-    fixSelection(): void {}
-
     async nextSubjectDown() {
         await vscode.commands.executeCommand("cursorDown");
     }
@@ -335,10 +334,17 @@ export class SmallWordSubject extends Subject {
 
     async nextSubjectLeft() {
         await vscode.commands.executeCommand("cursorWordPartLeft");
+        await vscode.commands.executeCommand("cursorLeft");
     }
 
     async nextSubjectRight() {
         await vscode.commands.executeCommand("cursorWordPartRight");
+    }
+
+    async fixSelection() {
+        await vscode.commands.executeCommand(
+            "editor.action.smartSelect.expand"
+        );
     }
 }
 
@@ -349,7 +355,7 @@ export class WordSubject extends Subject {
         await vscode.commands.executeCommand("deleteLeft");
     }
 
-    fixSelection() {
+    async fixSelection() {
         const editor = this.editor;
 
         if (!editor) {
@@ -375,12 +381,47 @@ export class WordSubject extends Subject {
                 newEnd = rightWord.end;
             }
 
-            return new vscode.Selection(newStart, newEnd);
+            const newSelection = new vscode.Selection(newStart, newEnd);
+
+            if (newSelection.isEmpty) {
+                const wordRange = words.nextWord(
+                    editor.document,
+                    selection.end
+                );
+
+                if (wordRange) {
+                    return new vscode.Selection(wordRange.start, wordRange.end);
+                }
+            }
+
+            return newSelection;
         });
     }
 
     async nextSubjectDown() {
+        const editor = this.editor;
+
+        if (!this.editor) {
+            return;
+        }
+
         await vscode.commands.executeCommand("cursorDown");
+
+        while (
+            editor!.selections.reduce(
+                (state, selection) =>
+                    state &&
+                    selection.isSingleLine &&
+                    selection.start.line < editor!.document.lineCount - 1 &&
+                    lineIsStopLine(
+                        editor!.document.lineAt(selection.start.line)
+                    ),
+                true
+            )
+        ) {
+            await vscode.commands.executeCommand("cursorDown");
+        }
+
         this.fixSelection();
     }
 
@@ -394,15 +435,18 @@ export class WordSubject extends Subject {
             return;
         }
 
+        const editor = this.editor;
+
         this.editor.selections = this.editor.selections.map((selection) => {
-            if (!selection.isReversed) {
-                return new vscode.Selection(selection.end, selection.start);
+            const wordRange = words.prevWord(editor.document, selection.start);
+
+            if (wordRange) {
+                return new vscode.Selection(wordRange.start, wordRange.end);
             }
 
             return selection;
         });
 
-        await vscode.commands.executeCommand("cursorWordLeft");
         this.fixSelection();
     }
 
@@ -411,15 +455,18 @@ export class WordSubject extends Subject {
             return;
         }
 
+        const editor = this.editor;
+
         this.editor.selections = this.editor.selections.map((selection) => {
-            if (selection.isReversed) {
-                return new vscode.Selection(selection.end, selection.start);
+            const wordRange = words.nextWord(editor.document, selection.end);
+
+            if (wordRange) {
+                return new vscode.Selection(wordRange.start, wordRange.end);
             }
 
             return selection;
         });
 
-        await vscode.commands.executeCommand("cursorWordRight");
         this.fixSelection();
     }
 

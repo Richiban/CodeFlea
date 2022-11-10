@@ -6,7 +6,7 @@ import {
     registeredCommands,
 } from "./commands";
 import { loadConfig } from "./config";
-import { scrollEditor } from "./editor";
+import { scrollEditor } from "./utils/editor";
 import { FleaJumper } from "./jump/fleajump";
 import ModeManager from "./modes/ModeManager";
 
@@ -27,6 +27,14 @@ export function activate(context: vscode.ExtensionContext) {
 
     vscode.window.onDidChangeActiveTextEditor((editor) => {
         modeManager.setEditor(editor);
+    });
+
+    vscode.window.onDidChangeTextEditorSelection((e) => {
+        if (e.kind === vscode.TextEditorSelectionChangeKind.Command) {
+            return;
+        }
+
+        modeManager.fixSelection();
     });
 
     modeManager.changeMode({ kind: "NAVIGATE", subjectName: "WORD" });

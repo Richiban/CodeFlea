@@ -5,7 +5,7 @@ import {
     DirectionOrNearest,
     Indentation,
     Linqish,
-} from "./common";
+} from "../common";
 import { getCursorPosition, getEditor, moveCursorTo } from "./editor";
 
 export type LineEnumerationPattern = "alternate" | "sequential";

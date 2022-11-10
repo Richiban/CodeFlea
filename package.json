@@ -10,6 +10,9 @@
     "engines": {
         "vscode": "^1.41.0"
     },
+    "extensionKind": [
+        "ui"
+    ],
     "categories": [
         "Other"
     ],
@@ -238,6 +241,21 @@
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
             },
             {
+                "key": ".",
+                "command": "codeFlea.customVsCodeCommand",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "key": "z",
+                "command": "undo",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "key": "shift+z",
+                "command": "redo",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
                 "key": "v",
                 "command": "codeFlea.changeToExtendMode",
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
@@ -349,27 +367,27 @@
             },
             {
                 "command": "codeFlea.swapSubjectUp",
-                "key": "alt+u",
+                "key": "ctrl+u",
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
             },
             {
                 "command": "codeFlea.swapSubjectDown",
-                "key": "alt+e",
+                "key": "ctrl+e",
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
             },
             {
                 "command": "codeFlea.swapSubjectLeft",
-                "key": "alt+n",
+                "key": "ctrl+n",
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
             },
             {
                 "command": "codeFlea.swapSubjectRight",
-                "key": "alt+i",
+                "key": "ctrl+i",
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
             },
             {
                 "command": "codeFlea.extendSubjectUp",
-                "key": "alt+u",
+                "key": "shift+u",
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
             },
             {

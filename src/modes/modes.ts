@@ -15,6 +15,7 @@ export abstract class EditorMode {
     abstract changeTo(newMode: EditorModeType): Promise<EditorMode>;
     abstract refreshUI(editorManager: ModeManager): void;
     async end(): Promise<void> {}
+    async fixSelection() {}
 
     onCharTyped(typed: { text: string }): EditorMode {
         vscode.commands.executeCommand("default:type", typed);
