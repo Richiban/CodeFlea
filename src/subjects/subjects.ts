@@ -291,13 +291,37 @@ export class BlockSubject extends Subject {
             });
         });
     }
+
+    async deleteSubject() {
+        for (const selection of this.editor.selections) {
+            const line = this.editor.document.lineAt(selection.start.line);
+
+            const prevBlock = blocks.getPrevBlock(selection.start);
+
+            if (prevBlock) {
+                this.editor.edit((e) => {
+                    e.delete(new vscode.Range(prevBlock.end, selection.end));
+                });
+            } else {
+                const nextBlock = blocks.getNextBlock(selection.end);
+
+                if (nextBlock) {
+                    this.editor.edit((e) => {
+                        e.delete(
+                            new vscode.Range(selection.start, nextBlock.start)
+                        );
+                    });
+                }
+            }
+        }
+    }
 }
 
 export class LineSubject extends Subject {
     readonly name = "LINE";
 
     public decorationType = vscode.window.createTextEditorDecorationType({
-        border: "1px solid #4d8a96;",
+        border: "#8feb34;",
         fontWeight: "bold",
     });
 
@@ -674,7 +698,7 @@ export class WordSubject extends Subject {
 
     async deleteSubject() {
         const editor = this.editor;
-        const charsToRemove = [" ", ",", ":"];
+        const charsToRemove = [" ", ",", ":", "."];
 
         for (const selection of this.editor.selections) {
             await this.editor.edit((e) => {

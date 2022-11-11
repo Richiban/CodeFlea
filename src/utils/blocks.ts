@@ -1,20 +1,7 @@
 import * as vscode from "vscode";
-import {
-    Direction,
-    Indentation,
-    linqish,
-    IndentationRequest,
-    opposite,
-    Parameter,
-} from "../common";
+import * as common from "../common";
 import { getEditor, moveCursorTo, scrollToReveal, select } from "./editor";
-import {
-    getRelativeIndentation,
-    iterLinePairs,
-    LineEnumerationPattern,
-    lineIsBlank,
-    lineIsStopLine,
-} from "./lines";
+import * as lines from "./lines";
 
 type Bounds = { start: { line: number }; end: { line: number } };
 
@@ -30,13 +17,16 @@ function lineIsBlockStart(
     if (!prevLine) {
         return true;
     }
-    if (lineIsStopLine(currentLine)) {
+    if (lines.lineIsStopLine(currentLine)) {
         return false;
     }
-    if (lineIsStopLine(prevLine)) {
+    if (lines.lineIsStopLine(prevLine)) {
         return true;
     }
-    if (getRelativeIndentation(prevLine, currentLine) === "more-indentation") {
+    if (
+        lines.getRelativeIndentation(prevLine, currentLine) ===
+        "more-indentation"
+    ) {
         return true;
     }
 
@@ -53,10 +43,13 @@ function lineIsBlockEnd(
     if (currentLine.isEmptyOrWhitespace) {
         return false;
     }
-    if (lineIsStopLine(nextLine)) {
+    if (lines.lineIsStopLine(nextLine)) {
         return true;
     }
-    if (getRelativeIndentation(currentLine, nextLine) === "less-indentation") {
+    if (
+        lines.getRelativeIndentation(currentLine, nextLine) ===
+        "less-indentation"
+    ) {
         return true;
     }
 
@@ -99,8 +92,8 @@ export function selectAllBlocksInCurrentScope(cursorPosition: vscode.Position) {
 
 export function* iterBlockBoundaries(options: {
     fromPosition: vscode.Position;
-    direction?: Direction;
-    indentationLevel?: IndentationRequest;
+    direction?: common.Direction;
+    indentationLevel?: common.IndentationRequest;
     restrictToCurrentScope?: boolean;
     bounds?: Bounds;
 }): Generator<BlockBoundary> {
@@ -114,7 +107,7 @@ export function* iterBlockBoundaries(options: {
         ...options,
     };
 
-    const documentLines = iterLinePairs(
+    const documentLines = lines.iterLinePairs(
         document,
         options.fromPosition.line,
         finalOptions.direction
@@ -133,7 +126,7 @@ export function* iterBlockBoundaries(options: {
         }
 
         if (candidateLine && kind) {
-            const relativeIndentation = getRelativeIndentation(
+            const relativeIndentation = lines.getRelativeIndentation(
                 document.lineAt(options.fromPosition.line),
                 candidateLine
             );
@@ -169,8 +162,8 @@ export function* iterBlockBoundaries(options: {
 
 export function* iterBlocksInCurrentScope(options: {
     fromPosition: vscode.Position;
-    direction?: Direction;
-    indentationLevel?: IndentationRequest;
+    direction?: common.Direction;
+    indentationLevel?: common.IndentationRequest;
     bounds?: Bounds;
 }): Generator<vscode.Range> {
     const boundaries = iterBlockBoundaries(options);
@@ -201,11 +194,11 @@ export function* iterBlocksInCurrentScope(options: {
 
 export function getBlocksAround(
     startingPosition: vscode.Position,
-    pattern: LineEnumerationPattern,
-    direction: Direction,
+    pattern: lines.LineEnumerationPattern,
+    direction: common.Direction,
     bounds: vscode.Range
 ) {
-    const iterArgs: Parameter<typeof iterBlockBoundaries> = {
+    const iterArgs: common.Parameter<typeof iterBlockBoundaries> = {
         fromPosition: startingPosition,
         direction,
         bounds,
@@ -216,20 +209,22 @@ export function getBlocksAround(
 
     const secondaryDirection = iterBlockBoundaries({
         ...iterArgs,
-        direction: opposite(direction),
+        direction: common.opposite(direction),
     });
 
     switch (pattern) {
         case "alternate":
-            return linqish(primaryDirection).alternateWith(secondaryDirection);
+            return common
+                .linqish(primaryDirection)
+                .alternateWith(secondaryDirection);
         case "sequential":
-            return linqish(primaryDirection).concat(secondaryDirection);
+            return common.linqish(primaryDirection).concat(secondaryDirection);
     }
 }
 
 export function extendBlockSelection(
-    direction: Direction,
-    indentation: Indentation
+    direction: common.Direction,
+    indentation: common.Indentation
 ) {
     if (indentation !== "same-indentation") {
         throw new Error("Only 'same-indentation' is currently supported");
@@ -291,11 +286,13 @@ export function extendBlockSelection(
 }
 
 export function moveToNextBlockStart(
-    direction: Direction,
-    indentation: IndentationRequest,
+    direction: common.Direction,
+    indentation: common.IndentationRequest,
     from: vscode.Position
 ) {
-    const indent = lineIsBlank(from.line) ? "any-indentation" : indentation;
+    const indent = lines.lineIsBlank(from.line)
+        ? "any-indentation"
+        : indentation;
 
     for (const { kind, point } of iterBlockBoundaries({
         fromPosition: from,
@@ -347,10 +344,10 @@ export function getContainingBlock(
 
 export function nextBlockEnd(
     startingPosition: vscode.Position,
-    direction: Direction,
-    indentation: IndentationRequest
+    direction: common.Direction,
+    indentation: common.IndentationRequest
 ) {
-    const indent = lineIsBlank(startingPosition.line)
+    const indent = lines.lineIsBlank(startingPosition.line)
         ? "any-indentation"
         : indentation;
 
@@ -385,30 +382,4 @@ export function getPrevBlock(startPosition: vscode.Position) {
     })) {
         return block;
     }
-}
-
-export function swapBlocksWithNeighbours(
-    editor: vscode.TextEditor,
-    direction: Direction
-) {
-    // const getTargetWord =
-    //     direction === "forwards" ? getNextBlock : getPrevBlock;
-    // const getEnd: keyof vscode.Range =
-    //     direction === "forwards" ? "end" : "start";
-    // await editor.edit((e) => {
-    //     selections.map(editor, (selection) => {
-    //         const targetWordRange = getTargetWord(
-    //             editor.document,
-    //             selection[getEnd]
-    //         );
-    //         if (targetWordRange) {
-    //             swapWords(editor.document, e, selection, targetWordRange);
-    //             return new vscode.Selection(
-    //                 targetWordRange?.end,
-    //                 targetWordRange?.start
-    //             );
-    //         }
-    //         return selection;
-    //     });
-    // });
 }
