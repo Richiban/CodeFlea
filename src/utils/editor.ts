@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import { Point } from "../common";
 import { QuickCommand } from "./quickMenus";
 
 export function quickCommandPicker(
@@ -96,9 +95,12 @@ export function scrollEditor(direction: "up" | "down", lines: number) {
     editor.revealRange(newRange);
 }
 
-export function moveCursorTo(newPosition: Point, scrollEditor = false) {
+export function moveCursorTo(
+    newPosition: vscode.Position,
+    scrollEditor = false
+) {
     const editor = getEditor();
-    const currentPosition = getCursorPosition();
+    const currentPosition = editor.selection.active;
 
     editor.selection = new vscode.Selection(
         newPosition.line,
@@ -112,13 +114,31 @@ export function moveCursorTo(newPosition: Point, scrollEditor = false) {
     }
 }
 
+export function swap(
+    document: vscode.TextDocument,
+    edit: vscode.TextEditorEdit,
+    origin: vscode.Range,
+    target: vscode.Range
+) {
+    const originalText = document.getText(origin);
+    const targetText = document.getText(target);
+
+    edit.replace(target, originalText);
+    edit.replace(origin, targetText);
+
+    return target;
+}
+
 export function goToLine(lineNumber: number) {
     const editor = getEditor();
 
     editor.selection = new vscode.Selection(lineNumber, 0, lineNumber, 0);
 }
 
-export function scrollToReveal(startPosition: Point, endPosition: Point) {
+export function scrollToReveal(
+    startPosition: vscode.Position,
+    endPosition: vscode.Position
+) {
     const editor = getEditor();
 
     editor.revealRange(
@@ -141,7 +161,7 @@ export function getEditor() {
     return editor;
 }
 
-export function select(fromPosition: Point, to: Point) {
+export function select(fromPosition: vscode.Position, to: vscode.Position) {
     const editor = getEditor();
 
     editor.selection = new vscode.Selection(
@@ -163,8 +183,7 @@ export function select(fromPosition: Point, to: Point) {
 
 export function scrollToCursorAtCenter() {
     const editor = getEditor();
-
-    const cursorPosition = getCursorPosition();
+    const cursorPosition = editor.selection.active;
 
     const viewportHeight =
         editor.visibleRanges[0].end.line - editor.visibleRanges[0].start.line;
@@ -196,10 +215,4 @@ export function tryGetLineAt(lineNumber: number) {
     }
 
     return editor.document.lineAt(lineNumber);
-}
-
-export function getCursorPosition(): Point {
-    const editor = getEditor();
-
-    return editor.selection.active;
 }

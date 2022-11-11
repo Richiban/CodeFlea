@@ -236,7 +236,7 @@ class NextBlockEndCommand extends ExtensionCommand {
     id = "codeFlea.nextBlockEnd";
 
     execute() {
-        blocks.nextBlockEnd("forwards", "any-indentation");
+        // blocks.nextBlockEnd("forwards", "any-indentation");
     }
 }
 
@@ -245,7 +245,7 @@ class PrevBlockEndCommand extends ExtensionCommand {
     id = "codeFlea.prevBlockEnd";
 
     execute() {
-        blocks.nextBlockEnd("backwards", "any-indentation");
+        // blocks.nextBlockEnd("backwards", "any-indentation");
     }
 }
 
@@ -254,7 +254,7 @@ class SelectAllBlocksInCurrentScopeCommand extends ExtensionCommand {
     id = "codeFlea.selectAllBlocksInCurrentScope";
 
     execute() {
-        blocks.selectAllBlocksInCurrentScope();
+        //blocks.selectAllBlocksInCurrentScope();
     }
 }
 
@@ -263,7 +263,7 @@ class PrevBlockCommand extends ExtensionCommand {
     id = "codeFlea.prevBlock";
 
     execute() {
-        blocks.moveToNextBlockStart("backwards", "any-indentation");
+        //blocks.moveToNextBlockStart("backwards", "any-indentation");
     }
 }
 
@@ -272,7 +272,7 @@ class NextBlockCommand extends ExtensionCommand {
     id = "codeFlea.nextBlock";
 
     execute() {
-        blocks.moveToNextBlockStart("forwards", "any-indentation");
+        //blocks.moveToNextBlockStart("forwards", "any-indentation");
     }
 }
 
@@ -290,7 +290,7 @@ class NextOuterBlockCommand extends ExtensionCommand {
     id = "codeFlea.nextOuterBlock";
 
     execute() {
-        blocks.moveToNextBlockStart("forwards", "less-indentation");
+        //blocks.moveToNextBlockStart("forwards", "less-indentation");
     }
 }
 
@@ -299,7 +299,7 @@ class PrevOuterBlockCommand extends ExtensionCommand {
     id = "codeFlea.prevOuterBlock";
 
     execute() {
-        blocks.moveToNextBlockStart("backwards", "less-indentation");
+        // blocks.moveToNextBlockStart("backwards", "less-indentation");
     }
 }
 
@@ -308,7 +308,7 @@ class NextSameBlockCommand extends ExtensionCommand {
     id = "codeFlea.nextSameBlock";
 
     execute() {
-        blocks.moveToNextBlockStart("forwards", "same-indentation");
+        // blocks.moveToNextBlockStart("forwards", "same-indentation");
     }
 }
 
@@ -317,7 +317,7 @@ class PrevSameBlockCommand extends ExtensionCommand {
     id = "codeFlea.prevSameBlock";
 
     execute() {
-        blocks.moveToNextBlockStart("backwards", "same-indentation");
+        // blocks.moveToNextBlockStart("backwards", "same-indentation");
     }
 }
 
@@ -326,7 +326,7 @@ class NextInnerBlockCommand extends ExtensionCommand {
     id = "codeFlea.nextInnerBlock";
 
     execute() {
-        blocks.moveToNextBlockStart("forwards", "more-indentation");
+        // blocks.moveToNextBlockStart("forwards", "more-indentation");
     }
 }
 
@@ -335,7 +335,7 @@ class PrevInnerBlockCommand extends ExtensionCommand {
     id = "codeFlea.prevInnerBlock";
 
     execute() {
-        blocks.moveToNextBlockStart("backwards", "more-indentation");
+        // blocks.moveToNextBlockStart("backwards", "more-indentation");
     }
 }
 
@@ -371,7 +371,7 @@ class NearestInnerLineCommand extends ExtensionCommand {
     id = "codeFlea.nearestInnerLine";
 
     execute() {
-        lines.moveToChangeOfIndentation("greaterThan", "nearest");
+        // lines.moveToChangeOfIndentation("greaterThan", "nearest");
     }
 }
 
@@ -380,7 +380,7 @@ class NearestOuterLineCommand extends ExtensionCommand {
     id = "codeFlea.nearestOuterLine";
 
     execute() {
-        lines.moveToChangeOfIndentation("lessThan", "nearest");
+        // lines.moveToChangeOfIndentation("lessThan", "nearest");
     }
 }
 
@@ -389,7 +389,7 @@ class NextInnerLineCommand extends ExtensionCommand {
     id = "codeFlea.nextInnerLine";
 
     execute() {
-        lines.moveToChangeOfIndentation("greaterThan", "forwards");
+        // lines.moveToChangeOfIndentation("greaterThan", "forwards");
     }
 }
 
@@ -398,7 +398,7 @@ class PrevOuterLineCommand extends ExtensionCommand {
     id = "codeFlea.prevOuterLine";
 
     execute() {
-        lines.moveToChangeOfIndentation("lessThan", "backwards");
+        // lines.moveToChangeOfIndentation("lessThan", "backwards");
     }
 }
 
@@ -407,7 +407,7 @@ class NextSameLineCommand extends ExtensionCommand {
     id = "codeFlea.nextSameLine";
 
     execute() {
-        lines.moveToNextLineSameLevel("forwards");
+        // lines.moveToNextLineSameLevel("forwards");
     }
 }
 
@@ -416,7 +416,7 @@ class PrevSameLineCommand extends ExtensionCommand {
     id = "codeFlea.prevSameLine";
 
     execute() {
-        lines.moveToNextLineSameLevel("backwards");
+        // lines.moveToNextLineSameLevel("backwards");
     }
 }
 
@@ -425,7 +425,7 @@ class NextBlankLineCommand extends ExtensionCommand {
     id = "codeFlea.nextBlankLine";
 
     execute() {
-        lines.moveCursorToNextBlankLine("forwards");
+        // lines.moveCursorToNextBlankLine("forwards");
     }
 }
 
@@ -434,7 +434,7 @@ class PrevBlankLineCommand extends ExtensionCommand {
     id = "codeFlea.prevBlankLine";
 
     execute() {
-        lines.moveCursorToNextBlankLine("backwards");
+        // lines.moveCursorToNextBlankLine("backwards");
     }
 }
 
@@ -443,7 +443,7 @@ class PrevInterestingPointCommand extends ExtensionCommand {
     id = "codeFlea.prevInterestingPoint";
 
     execute() {
-        points.nextInterestingPoint("backwards");
+        //points.nextInterestingPoint("backwards");
     }
 }
 
@@ -452,7 +452,7 @@ class NextInterestingPointCommand extends ExtensionCommand {
     id = "codeFlea.nextInterestingPoint";
 
     execute() {
-        points.nextInterestingPoint("forwards");
+        // points.nextInterestingPoint("forwards");
     }
 }
 
@@ -491,6 +491,15 @@ class SearchCommand extends ExtensionCommand {
 
     async execute() {
         await this.container.manager.executeSubjectCommand("search");
+    }
+}
+
+@registerCommand()
+class SearchBackWardsCommand extends ExtensionCommand {
+    id = "codeFlea.searchBackwards";
+
+    async execute() {
+        await this.container.manager.executeSubjectCommand("searchBackwards");
     }
 }
 
@@ -649,5 +658,23 @@ class UndoLastCommand extends ExtensionCommand {
 
     async execute() {
         await this.container.manager.undoLastCommand();
+    }
+}
+
+@registerCommand()
+class NextOccurrenceOfCharCommand extends ExtensionCommand {
+    id = "codeFlea.nextOccurrenceOfChar";
+
+    async execute() {
+        //await this.container.manager.nextOccurrenceOfChar();
+    }
+}
+
+@registerCommand()
+class PrevOccurrenceOfCharCommand extends ExtensionCommand {
+    id = "codeFlea.prevOccurrenceOfChar";
+
+    async execute() {
+        //await this.container.manager.prevOccurrenceOfChar();
     }
 }

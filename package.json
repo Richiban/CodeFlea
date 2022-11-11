@@ -251,6 +251,11 @@
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
             },
             {
+                "key": "shift+/",
+                "command": "codeFlea.prevOccurrenceOfChar",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
                 "key": "z",
                 "command": "cursorUndo",
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
@@ -323,11 +328,6 @@
             {
                 "key": "f",
                 "command": "codeFlea.searchBackwards",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
-            },
-            {
-                "key": "/",
-                "command": "editor.action.commentLine",
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
             },
             {

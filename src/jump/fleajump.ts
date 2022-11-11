@@ -2,9 +2,9 @@ import { Config } from "../config";
 import { JumpInterface } from "./jump-interface";
 import * as vscode from "vscode";
 import { moveCursorTo } from "../utils/editor";
-import { JumpLocations, JumpLocation, getJumpCodes, Point } from "../common";
+import { JumpLocations, JumpLocation, getJumpCodes } from "../common";
 import { getInterestingPoints } from "../utils/points";
-import { getBlocksAroundCursor } from "../utils/blocks";
+import { getBlocksAround } from "../utils/blocks";
 
 export class FleaJumper {
     private config: Config;
@@ -112,7 +112,7 @@ export class FleaJumper {
     };
 
     private findJumpPoints = (editor: vscode.TextEditor): JumpLocations => {
-        const interestingPoints = getInterestingPoints();
+        const interestingPoints = getInterestingPoints(editor.selection.active);
         const jumpCodes = getJumpCodes(this.config);
 
         const { start: viewportStart, end: viewportEnd } =
@@ -132,8 +132,14 @@ export class FleaJumper {
     private findJumpLines = (editor: vscode.TextEditor): JumpLocations => {
         const bounds = editor.visibleRanges[0];
         const jumpCodes = getJumpCodes(this.config);
+        const cursorPosition = editor.selection.active;
 
-        const blocks = getBlocksAroundCursor("alternate", "forwards", bounds);
+        const blocks = getBlocksAround(
+            cursorPosition,
+            "alternate",
+            "forwards",
+            bounds
+        );
 
         return blocks
             .zipWith(jumpCodes)

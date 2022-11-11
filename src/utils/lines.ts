@@ -6,7 +6,7 @@ import {
     Indentation,
     Linqish,
 } from "../common";
-import { getCursorPosition, getEditor, moveCursorTo } from "./editor";
+import { getEditor, moveCursorTo } from "./editor";
 
 export type LineEnumerationPattern = "alternate" | "sequential";
 
@@ -176,9 +176,10 @@ export function getNextLineOfChangeOfIndentation(
     }
 }
 
-export function moveCursorToNextBlankLine(direction: Direction) {
-    const currentPosition = getCursorPosition();
-
+export function moveCursorToNextBlankLine(
+    currentPosition: vscode.Position,
+    direction: Direction
+) {
     const nextLine = iterLines(
         getEditor().document,
         currentPosition.line,
@@ -194,10 +195,10 @@ export function moveCursorToNextBlankLine(direction: Direction) {
 }
 
 export function moveToChangeOfIndentation(
+    cursorPosition: vscode.Position,
     change: Change,
     direction: DirectionOrNearest
 ) {
-    const cursorPosition = getCursorPosition();
     const document = getEditor()?.document;
 
     if (cursorPosition && document) {
@@ -229,8 +230,10 @@ export function moveToChangeOfIndentation(
     }
 }
 
-export function moveToNextLineSameLevel(direction: Direction) {
-    const cursorPosition = getCursorPosition();
+export function moveToNextLineSameLevel(
+    cursorPosition: vscode.Position,
+    direction: Direction
+) {
     const document = getEditor().document;
 
     if (cursorPosition && document) {

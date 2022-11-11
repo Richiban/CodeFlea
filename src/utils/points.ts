@@ -1,5 +1,5 @@
-import { Direction, linqish, Linqish, Point } from "../common";
-import { getEditor, getCursorPosition, moveCursorTo } from "./editor";
+import { Direction, linqish, Linqish } from "../common";
+import { getEditor, moveCursorTo } from "./editor";
 import { iterLines, lineIsStopLine } from "./lines";
 import * as vscode from "vscode";
 
@@ -34,7 +34,10 @@ function* getInterestingPointsInLine(
     do {
         idx = advance(idx);
 
-        if (idx < 0 || idx > line.text.length) return;
+        if (idx < 0 || idx > line.text.length) {
+            return;
+        }
+
         if (idx === 0 || idx === line.text.length) {
             yield idx;
             return;
@@ -56,45 +59,49 @@ function* getInterestingPointsInLine(
 
 const isOperator = '()[]{}=:/\\|^&+;<>!"'.includes;
 
-export async function nextInterestingPoint(direction: Direction = "forwards") {
-    for (const point of getInterestingPoints(direction)) {
+export async function nextInterestingPoint(
+    startPosition: vscode.Position,
+    direction: Direction = "forwards"
+) {
+    for (const point of getInterestingPoints(startPosition, direction)) {
         await moveCursorTo(point);
         return;
     }
 }
 
 export function getInterestingPoints(
+    startPosition: vscode.Position,
     direction: Direction = "forwards"
-): Linqish<Point> {
+): Linqish<vscode.Position> {
     return linqish(
         (function* () {
-            const cursorPosition = getCursorPosition();
             const document = getEditor()?.document;
 
-            if (!cursorPosition || !document) return;
+            if (!startPosition || !document) {
+                return;
+            }
 
             for (const l of iterLines(
                 document,
-                cursorPosition.line,
+                startPosition.line,
                 direction
             )) {
-                if (lineIsStopLine(l)) return;
+                if (lineIsStopLine(l)) {
+                    return;
+                }
 
                 for (const c of getInterestingPointsInLine(l, {
                     direction: direction,
-                    startingIndex: cursorPosition.character,
+                    startingIndex: startPosition.character,
                 })) {
                     if (
-                        l.lineNumber !== cursorPosition.line ||
-                        c !== cursorPosition.character + 1
-                    )
-                        yield { line: l.lineNumber, character: c };
+                        l.lineNumber !== startPosition.line ||
+                        c !== startPosition.character + 1
+                    ) {
+                        yield new vscode.Position(l.lineNumber, c);
+                    }
                 }
             }
         })()
     );
-}
-
-export function areEqual(a: Point, b: Point) {
-    return a.line === b.line && a.character === b.character;
 }

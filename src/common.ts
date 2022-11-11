@@ -16,14 +16,14 @@ export type IndentationRequest = Indentation | "any-indentation";
 
 export type JumpLocations = JumpLocation[];
 
-export type Point = Pick<vscode.Position, "line" | "character">;
-
 export type JumpLocation = {
     jumpCode: string;
-    position: Point;
+    position: vscode.Position;
 };
 
 export type Parameter<T> = T extends (arg: infer U) => any ? U : never;
+
+export type Char = string & { length: 1 };
 
 export function opposite(direction: Direction) {
     return direction === "forwards" ? "backwards" : "forwards";

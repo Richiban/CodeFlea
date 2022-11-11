@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
-import { Direction, Linqish } from "../common";
+import { Char, Direction, Linqish } from "../common";
+import { swap } from "./editor";
 import * as positions from "./positions";
 import * as selections from "./selections";
 
@@ -119,21 +120,6 @@ function findWordClosestTo(
     return wordRange;
 }
 
-export function swapWords(
-    document: vscode.TextDocument,
-    edit: vscode.TextEditorEdit,
-    origin: vscode.Range,
-    target: vscode.Range
-) {
-    const originalText = document.getText(origin);
-    const targetText = document.getText(target);
-
-    edit.replace(target, originalText);
-    edit.replace(origin, targetText);
-
-    return target;
-}
-
 export async function swapWordsWithNeighbours(
     editor: vscode.TextEditor,
     direction: Direction
@@ -150,7 +136,7 @@ export async function swapWordsWithNeighbours(
             );
 
             if (targetWordRange) {
-                swapWords(editor.document, e, selection, targetWordRange);
+                swap(editor.document, e, selection, targetWordRange);
 
                 return new vscode.Selection(
                     targetWordRange?.end,
@@ -161,4 +147,28 @@ export async function swapWordsWithNeighbours(
             return selection;
         });
     });
+}
+
+export function search(
+    editor: vscode.TextEditor,
+    startingPosition: vscode.Position,
+    targetChar: Char,
+    direction: Direction
+): vscode.Range | undefined {
+    for (const wordRange of iterWords(
+        editor.document,
+        startingPosition,
+        direction
+    )) {
+        const charRange = new vscode.Range(
+            wordRange.start,
+            wordRange.start.translate(undefined, 1)
+        );
+
+        if (editor.document.getText(charRange) === targetChar) {
+            return wordRange;
+        }
+    }
+
+    return undefined;
 }
