@@ -6,6 +6,7 @@ import * as words from "../utils/words";
 import * as selections from "../utils/selections";
 import * as positions from "../utils/positions";
 import { Char } from "../common";
+import { swap } from "../utils/editor";
 
 export type SubjectType =
     | "WORD"
@@ -253,6 +254,42 @@ export class BlockSubject extends Subject {
         blocks.moveToNextBlockStart("forwards", "more-indentation", from);
 
         this.fixSelection();
+    }
+
+    async swapSubjectDown() {
+        this.editor.edit((e) => {
+            selections.map(this.editor, (selection) => {
+                const thisBlock = blocks.getContainingBlock(selection.start);
+
+                const nextBlock = blocks.getNextBlock(selection.end);
+
+                if (!nextBlock) {
+                    return selection;
+                }
+
+                swap(this.editor.document, e, thisBlock, nextBlock);
+
+                return new vscode.Selection(nextBlock.end, nextBlock.start);
+            });
+        });
+    }
+
+    async swapSubjectUp() {
+        this.editor.edit((e) => {
+            selections.map(this.editor, (selection) => {
+                const thisBlock = blocks.getContainingBlock(selection.start);
+
+                const nextBlock = blocks.getPrevBlock(selection.start);
+
+                if (!nextBlock) {
+                    return selection;
+                }
+
+                swap(this.editor.document, e, thisBlock, nextBlock);
+
+                return new vscode.Selection(nextBlock.end, nextBlock.start);
+            });
+        });
     }
 }
 

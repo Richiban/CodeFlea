@@ -66,7 +66,9 @@ export function* iterLinePairs(
 }
 
 function changeToDiff(change: Change) {
-    if (change === "greaterThan") return (x: number, y: number) => x > y;
+    if (change === "greaterThan") {
+        return (x: number, y: number) => x > y;
+    }
     return (x: number, y: number) => x < y;
 }
 

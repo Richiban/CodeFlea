@@ -177,8 +177,15 @@ export function* iterBlocksInCurrentScope(options: {
     let currentlyOpenBlock: BlockBoundary | undefined = undefined;
 
     for (const boundary of boundaries) {
+        if (boundary.point.isEqual(options.fromPosition)) {
+            continue;
+        }
+
         if (!currentlyOpenBlock) {
-            if (boundary.kind === "block-start") {
+            if (
+                boundary.kind ===
+                (options.direction === "forwards" ? "block-start" : "block-end")
+            ) {
                 currentlyOpenBlock = boundary;
                 continue;
             } else {
