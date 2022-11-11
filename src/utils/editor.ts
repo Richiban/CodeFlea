@@ -3,12 +3,21 @@ import { Point } from "../common";
 import { QuickCommand } from "./quickMenus";
 
 export function quickCommandPicker(
-    options: QuickCommand[]
-): Promise<QuickCommand | undefined> {
+    commands: QuickCommand[],
+    options: { allowFreeEntry: true }
+): Promise<QuickCommand | string | undefined>;
+export function quickCommandPicker(
+    commands: QuickCommand[],
+    options: { allowFreeEntry: false }
+): Promise<QuickCommand | undefined>;
+export function quickCommandPicker(
+    commands: QuickCommand[],
+    options: { allowFreeEntry: boolean }
+): Promise<QuickCommand | string | undefined> {
     return new Promise((resolve, reject) => {
         const quickPick = vscode.window.createQuickPick();
 
-        quickPick.items = options.map((e) => {
+        quickPick.items = commands.map((e) => {
             return { label: `(${e.quickKey}) ${e.label}` };
         });
 
@@ -18,7 +27,7 @@ export function quickCommandPicker(
         });
 
         quickPick.onDidChangeValue((e) => {
-            for (const option of options) {
+            for (const option of commands) {
                 if (option.quickKey === e) {
                     resolve(option);
                     quickPick.dispose();
@@ -26,11 +35,17 @@ export function quickCommandPicker(
                 }
             }
 
-            quickPick.value = "";
+            if (!options.allowFreeEntry) {
+                quickPick.value = "";
+            }
         });
 
         quickPick.onDidAccept(() => {
-            reject();
+            if (options.allowFreeEntry) {
+                resolve(quickPick.value);
+            } else {
+                reject();
+            }
 
             quickPick.dispose();
         });
@@ -95,6 +110,12 @@ export function moveCursorTo(newPosition: Point, scrollEditor = false) {
     if (scrollEditor) {
         scrollToReveal(newPosition, currentPosition);
     }
+}
+
+export function goToLine(lineNumber: number) {
+    const editor = getEditor();
+
+    editor.selection = new vscode.Selection(lineNumber, 0, lineNumber, 0);
 }
 
 export function scrollToReveal(startPosition: Point, endPosition: Point) {

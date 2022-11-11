@@ -7,6 +7,54 @@ export type QuickCommand = {
     execute: () => Promise<void>;
 };
 
+export const ModifyCommands: QuickCommand[] = [
+    {
+        quickKey: "k",
+        label: "Transform to kebab case",
+        async execute() {
+            await vscode.commands.executeCommand(
+                "editor.action.transformToKebabcase"
+            );
+        },
+    },
+    {
+        quickKey: "l",
+        label: "Transform to lower case",
+        async execute() {
+            await vscode.commands.executeCommand(
+                "editor.action.transformToLowercase"
+            );
+        },
+    },
+    {
+        quickKey: "s",
+        label: "Transform to snake case",
+        async execute() {
+            await vscode.commands.executeCommand(
+                "editor.action.transformToSnakecase"
+            );
+        },
+    },
+    {
+        quickKey: "t",
+        label: "Transform to title case",
+        async execute() {
+            await vscode.commands.executeCommand(
+                "editor.action.transformToTitlecase"
+            );
+        },
+    },
+    {
+        quickKey: "u",
+        label: "Transform to upper case",
+        async execute() {
+            await vscode.commands.executeCommand(
+                "editor.action.transformToUppercase"
+            );
+        },
+    },
+];
+
 export const GoToCommands: QuickCommand[] = [
     {
         quickKey: "u",

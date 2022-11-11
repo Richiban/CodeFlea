@@ -6,7 +6,7 @@ export type EditorModeType =
     | { kind: "EDIT" }
     | { kind: "NAVIGATE" | "EXTEND"; subjectName: subjects.SubjectType };
 
-export abstract class EditorMode {
+export abstract class EditorMode implements vscode.Disposable {
     protected lastCommand:
         | { commandName: keyof subjects.SubjectActions; args: string[] }
         | undefined;
@@ -14,7 +14,7 @@ export abstract class EditorMode {
     abstract equals(previousMode: EditorMode): boolean;
     abstract changeTo(newMode: EditorModeType): Promise<EditorMode>;
     abstract refreshUI(editorManager: ModeManager): void;
-    async end(): Promise<void> {}
+    async dispose(): Promise<void> {}
     async fixSelection() {}
 
     onCharTyped(typed: { text: string }): EditorMode {

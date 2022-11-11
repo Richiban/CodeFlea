@@ -91,10 +91,10 @@ export function selectAllBlocksInCurrentScope() {
     }
 
     getEditor().selection = new vscode.Selection(
-        start.line,
-        start.character,
         end.line,
-        end.character
+        end.character,
+        start.line,
+        start.character
     );
 }
 

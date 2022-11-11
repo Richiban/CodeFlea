@@ -8,6 +8,8 @@ import NavigateMode from "./NavigateMode";
 export default class EditMode extends EditorMode {
     private keySequenceStarted: boolean = false;
 
+    public decorationType = vscode.window.createTextEditorDecorationType({});
+
     constructor(
         private manager: ModeManager,
         private previousNavigateMode: NavigateMode
@@ -76,17 +78,21 @@ export default class EditMode extends EditorMode {
         return this;
     }
 
-    refreshUI(editorManager: ModeManager) {
-        editorManager.statusBar.text = `Edit`;
+    async refreshUI() {
+        this.manager.statusBar.text = `Edit`;
 
-        if (editorManager.editor) {
-            editorManager.editor.options.cursorStyle =
+        if (this.manager.editor) {
+            this.manager.editor.options.cursorStyle =
                 vscode.TextEditorCursorStyle.Line;
-            editorManager.editor.options.lineNumbers =
+            this.manager.editor.options.lineNumbers =
                 vscode.TextEditorLineNumbersStyle.On;
         }
 
-        vscode.commands.executeCommand("setContext", "codeFlea.mode", "EDIT");
+        await vscode.commands.executeCommand(
+            "setContext",
+            "codeFlea.mode",
+            "EDIT"
+        );
     }
 
     async executeSubjectCommand(command: keyof SubjectActions) {}

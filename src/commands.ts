@@ -540,3 +540,114 @@ class CustomVsCodeCommand extends ExtensionCommand {
         await this.container.manager.customVsCodeCommand();
     }
 }
+
+@registerCommand()
+class ChangeCommand extends ExtensionCommand {
+    id = "codeFlea.change";
+
+    execute() {
+        this.container.manager.executeSubjectCommand("changeSubject");
+        this.container.manager.changeMode({ kind: "EDIT" });
+    }
+}
+
+@registerCommand()
+class ScrollEditorUpCommand extends ExtensionCommand {
+    id = "codeFlea.scrollEditorUp";
+
+    execute() {
+        editor.scrollEditor("up", this.container.config.scrollStep);
+    }
+}
+
+@registerCommand()
+class ScrollEditorDownCommand extends ExtensionCommand {
+    id = "codeFlea.scrollEditorDown";
+
+    execute() {
+        editor.scrollEditor("down", this.container.config.scrollStep);
+    }
+}
+
+@registerCommand()
+class NewLineBelow extends ExtensionCommand {
+    id = "codeFlea.newLineBelow";
+
+    async execute() {
+        await this.container.manager.executeSubjectCommand("newLineBelow");
+        this.container.manager.changeMode({ kind: "EDIT" });
+    }
+}
+
+@registerCommand()
+class NewLineAbove extends ExtensionCommand {
+    id = "codeFlea.newLineAbove";
+
+    async execute() {
+        await this.container.manager.executeSubjectCommand("newLineAbove");
+        this.container.manager.changeMode({ kind: "EDIT" });
+    }
+}
+
+@registerCommand()
+class TypeCommand extends ExtensionCommand {
+    id = "type";
+
+    execute(typed: { text: string }) {
+        this.container.manager.onCharTyped(typed);
+    }
+}
+
+@registerCommand()
+class GoToPrevOccurrenceCommand extends ExtensionCommand {
+    id = "codeFlea.goToPrevOccurrence";
+
+    execute() {
+        this.container.manager.executeSubjectCommand("prevSubjectMatch");
+    }
+}
+
+@registerCommand()
+class GoToNextOccurrenceCommand extends ExtensionCommand {
+    id = "codeFlea.goToNextOccurrence";
+
+    execute() {
+        this.container.manager.executeSubjectCommand("nextSubjectMatch");
+    }
+}
+
+@registerCommand()
+class ExtendToPrevOccurrenceCommand extends ExtensionCommand {
+    id = "codeFlea.extendToPrevOccurrence";
+
+    execute() {
+        this.container.manager.executeSubjectCommand("extendPrevSubjectMatch");
+    }
+}
+
+@registerCommand()
+class ExtendToNextOccurrenceCommand extends ExtensionCommand {
+    id = "codeFlea.extendToNextOccurrence";
+
+    execute() {
+        this.container.manager.executeSubjectCommand("extendNextSubjectMatch");
+    }
+}
+
+@registerCommand()
+class OpenModifyMenuCommand extends ExtensionCommand {
+    id = "codeFlea.openModifyMenu";
+
+    async execute() {
+        await this.container.manager.openModifyMenu();
+    }
+}
+
+@registerCommand()
+class UndoLastCommand extends ExtensionCommand {
+    id = "codeFlea.undoCommand";
+
+    async execute() {
+        await this.container.manager.undoLastCommand();
+    }
+}

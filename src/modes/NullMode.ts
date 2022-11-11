@@ -7,6 +7,8 @@ import { EditorMode, EditorModeType } from "./modes";
 import NavigateMode from "./NavigateMode";
 
 export class NullMode extends EditorMode {
+    public decorationType = vscode.window.createTextEditorDecorationType({});
+
     constructor(private manager: ModeManager) {
         super();
     }
@@ -39,7 +41,7 @@ export class NullMode extends EditorMode {
         editorManager.statusBar.text = `Initialising...`;
     }
 
-    async executeSubjectCommand(command: keyof SubjectActions | "name") {}
+    async executeSubjectCommand() {}
 
     async repeatSubjectCommand() {}
 }

@@ -170,8 +170,9 @@ export function getNextLineOfChangeOfIndentation(
                 line.firstNonWhitespaceCharacterIndex,
                 currentLine.firstNonWhitespaceCharacterIndex
             )
-        )
+        ) {
             return line;
+        }
     }
 }
 
@@ -258,4 +259,20 @@ export function moveToNextLineSameLevel(direction: Direction) {
  *  contains only punctuation */
 export function lineIsStopLine(line: vscode.TextLine) {
     return !/[a-zA-Z0-9]/.test(line.text);
+}
+
+export function lineIsSignificant(line: vscode.TextLine) {
+    return !lineIsStopLine(line);
+}
+
+export function getNextSignificantLine(
+    document: vscode.TextDocument,
+    position: vscode.Position,
+    direction: Direction
+): vscode.TextLine | undefined {
+    for (const line of iterLines(document, position.line, direction).skip(1)) {
+        if (lineIsSignificant(line)) {
+            return line;
+        }
+    }
 }

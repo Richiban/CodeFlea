@@ -75,6 +75,26 @@ export class Linqish<T> implements Iterable<T> {
         return this.iter[Symbol.iterator]();
     }
 
+    minBy(selector: (item: T) => number): T | undefined {
+        const iter = this.iter;
+
+        let currentBestItem = undefined;
+        let currentBestSelect = undefined;
+
+        for (const item of iter) {
+            const currentSelect = selector(item);
+            if (
+                currentBestSelect === undefined ||
+                currentBestSelect > currentSelect
+            ) {
+                currentBestSelect = currentSelect;
+                currentBestItem = item;
+            }
+        }
+
+        return currentBestItem;
+    }
+
     skip(numToSkip: number): Linqish<T> {
         const iter = this.iter;
 

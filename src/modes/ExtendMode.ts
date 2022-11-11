@@ -57,14 +57,14 @@ export default class ExtendMode extends EditorMode {
         }
     }
 
-    async refreshUI(editorManager: ModeManager) {
-        editorManager.statusBar.text = `Navigate (${this.subject?.name})`;
+    async refreshUI() {
+        this.manager.statusBar.text = `Navigate (${this.subject?.name})`;
 
-        if (editorManager.editor) {
-            editorManager.editor.options.cursorStyle =
+        if (this.manager.editor) {
+            this.manager.editor.options.cursorStyle =
                 vscode.TextEditorCursorStyle.BlockOutline;
 
-            editorManager.editor.options.lineNumbers =
+            this.manager.editor.options.lineNumbers =
                 vscode.TextEditorLineNumbersStyle.Relative;
         }
 
@@ -81,7 +81,8 @@ export default class ExtendMode extends EditorMode {
         );
     }
 
-    async end() {
+    async dispose() {
+        this.subject.dispose();
         await vscode.commands.executeCommand(
             "editor.action.cancelSelectionAnchor"
         );

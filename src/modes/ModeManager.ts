@@ -1,7 +1,11 @@
 import * as vscode from "vscode";
 import { Config } from "../config";
-import { inputBoxChar, quickCommandPicker } from "../utils/editor";
-import { GoToCommands, SpaceCommands } from "../utils/quickMenus";
+import { goToLine, quickCommandPicker, scrollToReveal } from "../utils/editor";
+import {
+    GoToCommands,
+    SpaceCommands,
+    ModifyCommands,
+} from "../utils/quickMenus";
 import { SubjectActions } from "../subjects/subjects";
 import { EditorMode, EditorModeType } from "./modes";
 import { NullMode } from "./NullMode";
@@ -32,10 +36,11 @@ export default class ModeManager {
 
     async changeMode(newMode: EditorModeType) {
         const previousMode = this.mode;
+
         this.mode = await this.mode.changeTo(newMode);
 
         if (!this.mode.equals(previousMode)) {
-            previousMode.end();
+            previousMode.dispose();
             this.mode.refreshUI(this);
         }
     }
@@ -60,7 +65,9 @@ export default class ModeManager {
     }
 
     async openSpaceMenu() {
-        const choice = await quickCommandPicker(SpaceCommands);
+        const choice = await quickCommandPicker(SpaceCommands, {
+            allowFreeEntry: false,
+        });
 
         if (choice) {
             await choice.execute();
@@ -68,7 +75,33 @@ export default class ModeManager {
     }
 
     async openGoToMenu() {
-        const choice = await quickCommandPicker(GoToCommands);
+        const choice = await quickCommandPicker(GoToCommands, {
+            allowFreeEntry: true,
+        });
+
+        if (typeof choice === "string") {
+            const parsed = parseInt(choice);
+
+            if (isNaN(parsed)) {
+                vscode.window.showErrorMessage(
+                    `${choice} is not a valid line number`
+                );
+            }
+
+            if (!this.editor) {
+                return;
+            }
+
+            await goToLine(parsed);
+        } else if (choice) {
+            choice.execute();
+        }
+    }
+
+    async openModifyMenu() {
+        const choice = await quickCommandPicker(ModifyCommands, {
+            allowFreeEntry: false,
+        });
 
         if (choice) {
             await choice.execute();
@@ -83,5 +116,9 @@ export default class ModeManager {
         if (command) {
             await vscode.commands.executeCommand(command);
         }
+    }
+
+    async undoLastCommand() {
+        await vscode.commands.executeCommand("cursorUndo");
     }
 }

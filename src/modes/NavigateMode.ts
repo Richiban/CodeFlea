@@ -5,8 +5,11 @@ import ExtendMode from "./ExtendMode";
 import ModeManager from "./ModeManager";
 import * as modes from "./modes";
 import * as editor from "../utils/editor";
+import * as selections from "../utils/selections";
 
 export default class NavigateMode extends modes.EditorMode {
+    private commandMultiplier: number = 0;
+
     constructor(
         private manager: ModeManager,
         public readonly subject: subjects.Subject
@@ -30,9 +33,11 @@ export default class NavigateMode extends modes.EditorMode {
                 return new ExtendMode(this.manager, this.subject, this);
 
             case "NAVIGATE":
-                if (newMode.subjectName !== this.subject.name) {
-                    await vscode.commands.executeCommand("cancelSelection");
+                if (this.manager.editor) {
+                    selections.collapseSelections(this.manager.editor);
+                }
 
+                if (newMode.subjectName !== this.subject.name) {
                     return new NavigateMode(
                         this.manager,
                         subjects.createFrom(this.manager, newMode.subjectName)
@@ -66,14 +71,18 @@ export default class NavigateMode extends modes.EditorMode {
         }
     }
 
-    refreshUI(editorManager: ModeManager) {
-        editorManager.statusBar.text = `Navigate (${this.subject?.name})`;
+    refreshUI() {
+        this.manager.statusBar.text = `Navigate (${this.subject?.name})`;
 
-        if (editorManager.editor) {
-            editorManager.editor.options.cursorStyle =
+        if (this.commandMultiplier > 1) {
+            this.manager.statusBar.text += ` x${this.commandMultiplier}`;
+        }
+
+        if (this.manager.editor) {
+            this.manager.editor.options.cursorStyle =
                 vscode.TextEditorCursorStyle.UnderlineThin;
 
-            editorManager.editor.options.lineNumbers =
+            this.manager.editor.options.lineNumbers =
                 vscode.TextEditorLineNumbersStyle.Relative;
         }
 
@@ -104,6 +113,13 @@ export default class NavigateMode extends modes.EditorMode {
         this.lastCommand = { commandName: command, args: args };
 
         await (this.subject[command] as any)(...args);
+
+        while (this.commandMultiplier > 1) {
+            await this.repeatSubjectCommand();
+            this.commandMultiplier--;
+        }
+
+        this.commandMultiplier = 0;
     }
 
     async repeatSubjectCommand() {
@@ -119,10 +135,29 @@ export default class NavigateMode extends modes.EditorMode {
             );
         }
 
-        await (cf as any)(...this.lastCommand.args);
+        await (this.subject[this.lastCommand.commandName] as any)(
+            ...this.lastCommand.args
+        );
+    }
+
+    onCharTyped(typed: { text: string }): modes.EditorMode {
+        const parsed = parseInt(typed.text, 10);
+
+        if (isNaN(parsed)) {
+            vscode.commands.executeCommand("default:type", typed);
+            return this;
+        }
+
+        this.commandMultiplier = this.commandMultiplier * 10 + parsed;
+
+        return this;
     }
 
     async fixSelection() {
         await this.subject.fixSelection();
+    }
+
+    async dispose() {
+        this.subject.dispose();
     }
 }

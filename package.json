@@ -246,13 +246,18 @@
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
             },
             {
+                "key": "/",
+                "command": "codeFlea.nextOccurrenceOfChar",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
                 "key": "z",
-                "command": "undo",
+                "command": "cursorUndo",
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
             },
             {
                 "key": "shift+z",
-                "command": "redo",
+                "command": "cursorRedo",
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
             },
             {
@@ -288,6 +293,11 @@
             {
                 "key": "enter",
                 "command": "codeFlea.repeatCommand",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "key": "shift+enter",
+                "command": "codeFlea.undoCommand",
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
             },
             {
@@ -338,6 +348,21 @@
             {
                 "key": "h",
                 "command": "codeFlea.goToNextOccurrence",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "key": "shift+j",
+                "command": "codeFlea.extendToPrevOccurrence",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "key": "shift+h",
+                "command": "codeFlea.extendToNextOccurrence",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "key": "m",
+                "command": "codeFlea.openModifyMenu",
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
             },
             {
