@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import * as common from "../common";
 import { SubjectActions } from "../subjects/subjects";
 import ExtendMode from "./ExtendMode";
 import ModeManager from "./ModeManager";
@@ -8,10 +9,12 @@ import NavigateMode from "./NavigateMode";
 export default class EditMode extends EditorMode {
     private keySequenceStarted: boolean = false;
 
-    public decorationType = vscode.window.createTextEditorDecorationType({});
+    public static decorationType = vscode.window.createTextEditorDecorationType(
+        {}
+    );
 
     constructor(
-        private manager: ModeManager,
+        private readonly context: common.ExtensionContext,
         private previousNavigateMode: NavigateMode
     ) {
         super();
@@ -24,13 +27,17 @@ export default class EditMode extends EditorMode {
         );
     }
 
+    copy(): EditorMode {
+        return new EditMode(this.context, this.previousNavigateMode);
+    }
+
     async changeTo(newMode: EditorModeType): Promise<EditorMode> {
         switch (newMode.kind) {
             case "EDIT":
                 return this;
             case "EXTEND":
                 return new ExtendMode(
-                    this.manager,
+                    this.context,
                     this.previousNavigateMode.subject,
                     this.previousNavigateMode
                 );
@@ -43,7 +50,7 @@ export default class EditMode extends EditorMode {
     onCharTyped(typed: { text: string }): EditorMode {
         if (this.keySequenceStarted) {
             if (
-                typed.text === this.manager.config.modes.navigateKeySequence[1]
+                typed.text === this.context.config.modes.navigateKeySequence[1]
             ) {
                 this.keySequenceStarted = false;
 
@@ -52,12 +59,12 @@ export default class EditMode extends EditorMode {
                 this.keySequenceStarted = false;
 
                 vscode.commands.executeCommand("default:type", {
-                    text: `${this.manager.config.modes.navigateKeySequence[0]}${typed.text}`,
+                    text: `${this.context.config.modes.navigateKeySequence[0]}${typed.text}`,
                 });
             }
         } else {
             if (
-                typed.text === this.manager.config.modes.navigateKeySequence[0]
+                typed.text === this.context.config.modes.navigateKeySequence[0]
             ) {
                 this.keySequenceStarted = true;
                 setTimeout(() => {
@@ -78,13 +85,15 @@ export default class EditMode extends EditorMode {
         return this;
     }
 
-    async refreshUI() {
-        this.manager.statusBar.text = `Edit`;
+    clearUI(): void {}
 
-        if (this.manager.editor) {
-            this.manager.editor.options.cursorStyle =
+    async refreshUI() {
+        this.context.statusBar.text = `Edit`;
+
+        if (this.context.editor) {
+            this.context.editor.options.cursorStyle =
                 vscode.TextEditorCursorStyle.Line;
-            this.manager.editor.options.lineNumbers =
+            this.context.editor.options.lineNumbers =
                 vscode.TextEditorLineNumbersStyle.On;
         }
 

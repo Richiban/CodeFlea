@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import * as subjects from "../subjects/subjects";
-import ModeManager from "./ModeManager";
 
 export type EditorModeType =
     | { kind: "EDIT" }
@@ -13,9 +12,11 @@ export abstract class EditorMode implements vscode.Disposable {
 
     abstract equals(previousMode: EditorMode): boolean;
     abstract changeTo(newMode: EditorModeType): Promise<EditorMode>;
-    abstract refreshUI(editorManager: ModeManager): void;
+    abstract clearUI(): void;
+    abstract refreshUI(): void;
     async dispose(): Promise<void> {}
     async fixSelection() {}
+    abstract copy(): EditorMode;
 
     onCharTyped(typed: { text: string }): EditorMode {
         vscode.commands.executeCommand("default:type", typed);

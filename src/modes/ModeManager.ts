@@ -6,16 +6,16 @@ import {
     SpaceCommands,
     ModifyCommands,
 } from "../utils/quickMenus";
-import { SubjectActions } from "../subjects/subjects";
+import { createFrom, SubjectActions } from "../subjects/subjects";
 import { EditorMode, EditorModeType } from "./modes";
 import { NullMode } from "./NullMode";
+import NavigateMode from "./NavigateMode";
 
 export default class ModeManager {
     private mode: EditorMode;
     public statusBar: vscode.StatusBarItem;
-    public editor: vscode.TextEditor | undefined;
 
-    constructor(editor: vscode.TextEditor | undefined, public config: Config) {
+    constructor(public config: Config, public editor: vscode.TextEditor) {
         this.statusBar = vscode.window.createStatusBarItem(
             "codeFlea",
             vscode.StatusBarAlignment.Left,
@@ -24,14 +24,21 @@ export default class ModeManager {
 
         this.mode = new NullMode(this);
 
-        this.editor = editor;
         this.statusBar.show();
     }
 
-    setEditor(editor: vscode.TextEditor | undefined) {
+    changeEditor(editor: vscode.TextEditor | undefined) {
+        this.mode.clearUI();
+
+        if (!editor) {
+            this.mode = new NullMode(this);
+            return;
+        }
+
         this.editor = editor;
 
-        this.mode.refreshUI(this);
+        this.mode = this.mode.copy();
+        this.mode.refreshUI();
     }
 
     async changeMode(newMode: EditorModeType) {
@@ -40,8 +47,8 @@ export default class ModeManager {
         this.mode = await this.mode.changeTo(newMode);
 
         if (!this.mode.equals(previousMode)) {
-            previousMode.dispose();
-            this.mode.refreshUI(this);
+            previousMode.clearUI();
+            this.mode.refreshUI();
         }
     }
 
@@ -61,7 +68,7 @@ export default class ModeManager {
     onCharTyped(typed: { text: string }) {
         this.mode = this.mode.onCharTyped(typed);
 
-        this.mode.refreshUI(this);
+        this.mode.refreshUI();
     }
 
     async openSpaceMenu() {
@@ -86,10 +93,6 @@ export default class ModeManager {
                 vscode.window.showErrorMessage(
                     `${choice} is not a valid line number`
                 );
-            }
-
-            if (!this.editor) {
-                return;
             }
 
             await goToLine(parsed);

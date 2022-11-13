@@ -17,7 +17,7 @@ export function quickCommandPicker(
         const quickPick = vscode.window.createQuickPick();
 
         quickPick.items = commands.map((e) => {
-            return { label: `(${e.quickKey}) ${e.label}` };
+            return { label: `[${e.quickKey}] ${e.label}` };
         });
 
         quickPick.onDidHide(() => {

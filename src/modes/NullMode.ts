@@ -2,32 +2,36 @@ import * as vscode from "vscode";
 import { createFrom, SubjectActions } from "../subjects/subjects";
 import EditMode from "./EditMode";
 import ExtendMode from "./ExtendMode";
-import ModeManager from "./ModeManager";
+import * as common from "../common";
 import { EditorMode, EditorModeType } from "./modes";
 import NavigateMode from "./NavigateMode";
 
 export class NullMode extends EditorMode {
-    public decorationType = vscode.window.createTextEditorDecorationType({});
-
-    constructor(private manager: ModeManager) {
+    constructor(private readonly context: common.ExtensionContext) {
         super();
     }
+
+    copy(): EditorMode {
+        return new NullMode(this.context);
+    }
+
+    clearUI(): void {}
 
     equals(previousMode: EditorMode): boolean {
         return previousMode instanceof NullMode;
     }
 
     async changeTo(newMode: EditorModeType): Promise<EditorMode> {
-        const defaultSubject = createFrom(this.manager, "WORD");
-        const navigateMode = new NavigateMode(this.manager, defaultSubject);
+        const defaultSubject = createFrom(this.context, "WORD");
+        const navigateMode = new NavigateMode(this.context, defaultSubject);
 
         switch (newMode.kind) {
             case "EDIT":
-                return new EditMode(this.manager, navigateMode);
+                return new EditMode(this.context, navigateMode);
 
             case "EXTEND":
                 return new ExtendMode(
-                    this.manager,
+                    this.context,
                     defaultSubject,
                     navigateMode
                 );
@@ -37,8 +41,8 @@ export class NullMode extends EditorMode {
         }
     }
 
-    refreshUI(editorManager: ModeManager): void {
-        editorManager.statusBar.text = `Initialising...`;
+    refreshUI() {
+        this.context.statusBar.text = `Initializing...`;
     }
 
     async executeSubjectCommand() {}

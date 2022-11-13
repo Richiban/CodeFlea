@@ -5,7 +5,7 @@ import * as lines from "../utils/lines";
 import * as words from "../utils/words";
 import * as selections from "../utils/selections";
 import * as positions from "../utils/positions";
-import { Char } from "../common";
+import * as common from "../common";
 import { swap } from "../utils/editor";
 
 export type SubjectType =
@@ -58,15 +58,9 @@ export type SubjectActions = {
 };
 
 export abstract class Subject implements SubjectActions, vscode.Disposable {
-    public abstract decorationType: vscode.TextEditorDecorationType;
+    constructor(protected context: common.ExtensionContext) {}
 
-    constructor(protected readonly editor: vscode.TextEditor) {}
-
-    dispose() {
-        if (this.editor) {
-            this.editor.setDecorations(this.decorationType, []);
-        }
-    }
+    dispose() {}
 
     async nextSubjectDown() {}
     async nextSubjectUp() {}
@@ -93,46 +87,51 @@ export abstract class Subject implements SubjectActions, vscode.Disposable {
 
     async nextSubjectMatch() {
         await vscode.commands.executeCommand(
-            "editor.action.moveSelectionToNextFindMatch"
+            "this.context.editor.action.moveSelectionToNextFindMatch"
         );
     }
 
     async prevSubjectMatch() {
         await vscode.commands.executeCommand(
-            "editor.action.moveSelectionToPreviousFindMatch"
+            "this.context.editor.action.moveSelectionToPreviousFindMatch"
         );
     }
 
     async extendPrevSubjectMatch() {
         await vscode.commands.executeCommand(
-            "editor.action.addSelectionToPreviousFindMatch"
+            "this.context.editor.action.addSelectionToPreviousFindMatch"
         );
     }
 
     async extendNextSubjectMatch() {
         await vscode.commands.executeCommand(
-            "editor.action.addSelectionToNextFindMatch"
+            "this.context.editor.action.addSelectionToNextFindMatch"
         );
     }
 
     async append() {
-        selections.collapseSelections(this.editor, "end");
+        selections.collapseSelections(this.context.editor, "end");
     }
 
     async prepend() {
-        selections.collapseSelections(this.editor, "start");
+        selections.collapseSelections(this.context.editor, "start");
     }
 
     async newLineAbove() {
-        await vscode.commands.executeCommand("editor.action.insertLineBefore");
+        await vscode.commands.executeCommand(
+            "this.context.editor.action.insertLineBefore"
+        );
     }
 
     async newLineBelow() {
-        await vscode.commands.executeCommand("editor.action.insertLineAfter");
+        await vscode.commands.executeCommand(
+            "this.context.editor.action.insertLineAfter"
+        );
     }
 
     abstract name: SubjectType;
     abstract fixSelection(): Promise<void>;
+    abstract clearUI(): void;
 
     equals(other: Subject) {
         return this.name === other.name;
@@ -140,34 +139,44 @@ export abstract class Subject implements SubjectActions, vscode.Disposable {
 }
 
 export function createFrom(
-    manager: ModeManager,
+    context: common.ExtensionContext,
     subjectName: SubjectType
 ): Subject {
     switch (subjectName) {
         case "LINE":
-            return new LineSubject(manager.editor!);
+            return new LineSubject(context);
         case "WORD":
-            return new WordSubject(manager.editor!);
+            return new WordSubject(context);
         case "ALL_LINES":
-            return new AllLinesSubject(manager.editor!);
+            return new AllLinesSubject(context);
         case "SMALL_WORD":
-            return new SmallWordSubject(manager.editor!);
+            return new SmallWordSubject(context);
         case "BLOCK":
-            return new BlockSubject(manager.editor!);
+            return new BlockSubject(context);
     }
 }
 export class AllLinesSubject extends Subject {
     readonly name = "ALL_LINES";
 
-    public decorationType = vscode.window.createTextEditorDecorationType({
-        border: "1px dashed #964d4d;",
-        fontWeight: "bold",
-    });
+    public static decorationType = vscode.window.createTextEditorDecorationType(
+        {
+            border: "1px dashed #8feb34;",
+            fontWeight: "bold",
+        }
+    );
+
+    clearUI() {
+        this.context.editor.setDecorations(AllLinesSubject.decorationType, []);
+    }
 
     async fixSelection() {
-        this.editor.selections = this.editor.selections.map((selection) => {
-            const startLine = this.editor.document.lineAt(selection.start.line);
-            const endLine = this.editor.document.lineAt(selection.end.line);
+        selections.map(this.context.editor, (selection) => {
+            const startLine = this.context.editor.document.lineAt(
+                selection.start.line
+            );
+            const endLine = this.context.editor.document.lineAt(
+                selection.end.line
+            );
 
             return new vscode.Selection(
                 new vscode.Position(
@@ -177,6 +186,11 @@ export class AllLinesSubject extends Subject {
                 endLine.range.end
             );
         });
+
+        this.context.editor.setDecorations(
+            AllLinesSubject.decorationType,
+            this.context.editor.selections
+        );
     }
 
     async nextSubjectUp() {
@@ -194,7 +208,9 @@ export class AllLinesSubject extends Subject {
     }
 
     async deleteSubject() {
-        await vscode.commands.executeCommand("editor.action.deleteLines");
+        await vscode.commands.executeCommand(
+            "this.context.editor.action.deleteLines"
+        );
         this.fixSelection();
     }
 }
@@ -202,13 +218,19 @@ export class AllLinesSubject extends Subject {
 export class BlockSubject extends Subject {
     readonly name = "BLOCK";
 
-    public decorationType = vscode.window.createTextEditorDecorationType({
-        border: "1px solid #aba246;",
-        fontWeight: "bold",
-    });
+    public static decorationType = vscode.window.createTextEditorDecorationType(
+        {
+            border: "1px solid #aba246;",
+            fontWeight: "bold",
+        }
+    );
+
+    clearUI() {
+        this.context.editor.setDecorations(BlockSubject.decorationType, []);
+    }
 
     async fixSelection() {
-        this.editor.selections = this.editor.selections.map((selection) => {
+        selections.map(this.context.editor, (selection) => {
             const startBlock = blocks.getContainingBlock(selection.start);
             const endBlock = blocks.getContainingBlock(selection.end);
 
@@ -221,11 +243,14 @@ export class BlockSubject extends Subject {
             );
         });
 
-        this.editor.setDecorations(this.decorationType, this.editor.selections);
+        this.context.editor.setDecorations(
+            BlockSubject.decorationType,
+            this.context.editor.selections
+        );
     }
 
     async nextSubjectDown() {
-        const from = this.editor?.selection.start;
+        const from = this.context.editor?.selection.start;
 
         blocks.moveToNextBlockStart("forwards", "same-indentation", from);
 
@@ -233,7 +258,7 @@ export class BlockSubject extends Subject {
     }
 
     async nextSubjectUp() {
-        const from = this.editor?.selection.start;
+        const from = this.context.editor?.selection.start;
 
         blocks.moveToNextBlockStart("backwards", "same-indentation", from);
 
@@ -241,7 +266,7 @@ export class BlockSubject extends Subject {
     }
 
     async nextSubjectLeft() {
-        const from = this.editor?.selection.start;
+        const from = this.context.editor?.selection.start;
 
         blocks.moveToNextBlockStart("backwards", "less-indentation", from);
 
@@ -249,7 +274,7 @@ export class BlockSubject extends Subject {
     }
 
     async nextSubjectRight() {
-        const from = this.editor?.selection.start;
+        const from = this.context.editor?.selection.start;
 
         blocks.moveToNextBlockStart("forwards", "more-indentation", from);
 
@@ -257,8 +282,8 @@ export class BlockSubject extends Subject {
     }
 
     async swapSubjectDown() {
-        this.editor.edit((e) => {
-            selections.map(this.editor, (selection) => {
+        this.context.editor.edit((e) => {
+            selections.map(this.context.editor, (selection) => {
                 const thisBlock = blocks.getContainingBlock(selection.start);
 
                 const nextBlock = blocks.getNextBlock(selection.end);
@@ -267,7 +292,7 @@ export class BlockSubject extends Subject {
                     return selection;
                 }
 
-                swap(this.editor.document, e, thisBlock, nextBlock);
+                swap(this.context.editor.document, e, thisBlock, nextBlock);
 
                 return new vscode.Selection(nextBlock.end, nextBlock.start);
             });
@@ -275,8 +300,8 @@ export class BlockSubject extends Subject {
     }
 
     async swapSubjectUp() {
-        this.editor.edit((e) => {
-            selections.map(this.editor, (selection) => {
+        this.context.editor.edit((e) => {
+            selections.map(this.context.editor, (selection) => {
                 const thisBlock = blocks.getContainingBlock(selection.start);
 
                 const nextBlock = blocks.getPrevBlock(selection.start);
@@ -285,7 +310,7 @@ export class BlockSubject extends Subject {
                     return selection;
                 }
 
-                swap(this.editor.document, e, thisBlock, nextBlock);
+                swap(this.context.editor.document, e, thisBlock, nextBlock);
 
                 return new vscode.Selection(nextBlock.end, nextBlock.start);
             });
@@ -293,20 +318,22 @@ export class BlockSubject extends Subject {
     }
 
     async deleteSubject() {
-        for (const selection of this.editor.selections) {
-            const line = this.editor.document.lineAt(selection.start.line);
+        for (const selection of this.context.editor.selections) {
+            const line = this.context.editor.document.lineAt(
+                selection.start.line
+            );
 
             const prevBlock = blocks.getPrevBlock(selection.start);
 
             if (prevBlock) {
-                this.editor.edit((e) => {
+                this.context.editor.edit((e) => {
                     e.delete(new vscode.Range(prevBlock.end, selection.end));
                 });
             } else {
                 const nextBlock = blocks.getNextBlock(selection.end);
 
                 if (nextBlock) {
-                    this.editor.edit((e) => {
+                    this.context.editor.edit((e) => {
                         e.delete(
                             new vscode.Range(selection.start, nextBlock.start)
                         );
@@ -315,29 +342,96 @@ export class BlockSubject extends Subject {
             }
         }
     }
+
+    async search(target: common.Char) {
+        selections.map(this.context.editor, (selection) => {
+            const blockPoints = new common.Linqish(
+                blocks.iterBlockBoundaries({
+                    fromPosition: selection.end,
+                })
+            ).filter(({ kind }) => kind === "block-start");
+
+            for (const { point } of blockPoints) {
+                const charRange = new vscode.Range(
+                    point,
+                    point.translate(undefined, 1)
+                );
+
+                const char = this.context.editor.document.getText(charRange);
+
+                if (char === target) {
+                    return new vscode.Selection(charRange.end, charRange.start);
+                }
+            }
+
+            return selection;
+        });
+
+        this.fixSelection();
+    }
+
+    async searchBackwards(target: common.Char) {
+        selections.map(this.context.editor, (selection) => {
+            const blockPoints = new common.Linqish(
+                blocks.iterBlockBoundaries({
+                    fromPosition: selection.end,
+                    direction: "backwards",
+                })
+            ).filter(({ kind }) => kind === "block-start");
+
+            for (const { point } of blockPoints) {
+                const charRange = new vscode.Range(
+                    point,
+                    point.translate(undefined, 1)
+                );
+
+                const char = this.context.editor.document.getText(charRange);
+
+                if (char === target) {
+                    return new vscode.Selection(charRange.end, charRange.start);
+                }
+            }
+
+            return selection;
+        });
+
+        this.fixSelection();
+    }
 }
 
 export class LineSubject extends Subject {
     readonly name = "LINE";
 
-    public decorationType = vscode.window.createTextEditorDecorationType({
-        border: "#8feb34;",
-        fontWeight: "bold",
-    });
+    public static decorationType = vscode.window.createTextEditorDecorationType(
+        {
+            border: "1px solid #8feb34;",
+            fontWeight: "bold",
+        }
+    );
 
     async changeSubject() {
         await vscode.commands.executeCommand("deleteLeft");
     }
 
     async deleteSubject() {
-        await vscode.commands.executeCommand("editor.action.deleteLines");
+        await vscode.commands.executeCommand(
+            "this.context.editor.action.deleteLines"
+        );
         this.fixSelection();
     }
 
+    clearUI() {
+        this.context.editor.setDecorations(LineSubject.decorationType, []);
+    }
+
     async fixSelection() {
-        selections.map(this.editor, (selection) => {
-            const startLine = this.editor.document.lineAt(selection.start.line);
-            const endLine = this.editor.document.lineAt(selection.end.line);
+        selections.map(this.context.editor, (selection) => {
+            const startLine = this.context.editor.document.lineAt(
+                selection.start.line
+            );
+            const endLine = this.context.editor.document.lineAt(
+                selection.end.line
+            );
 
             return new vscode.Selection(
                 endLine.range.end,
@@ -348,20 +442,26 @@ export class LineSubject extends Subject {
             );
         });
 
-        this.editor.setDecorations(this.decorationType, this.editor.selections);
+        this.context.editor.setDecorations(
+            LineSubject.decorationType,
+            this.context.editor.selections
+        );
     }
 
     async nextSubjectDown() {
         await vscode.commands.executeCommand("cursorDown");
 
         while (
-            this.editor.selections.reduce(
+            this.context.editor.selections.reduce(
                 (state, selection) =>
                     state &&
                     selection.isSingleLine &&
-                    selection.start.line < this.editor.document.lineCount - 1 &&
+                    selection.start.line <
+                        this.context.editor.document.lineCount - 1 &&
                     lines.lineIsStopLine(
-                        this.editor.document.lineAt(selection.start.line)
+                        this.context.editor.document.lineAt(
+                            selection.start.line
+                        )
                     ),
                 true
             )
@@ -376,13 +476,15 @@ export class LineSubject extends Subject {
         await vscode.commands.executeCommand("cursorUp");
 
         while (
-            this.editor.selections.reduce(
+            this.context.editor.selections.reduce(
                 (state, selection) =>
                     state &&
                     selection.isSingleLine &&
                     selection.start.line > 0 &&
                     lines.lineIsStopLine(
-                        this.editor.document.lineAt(selection.start.line)
+                        this.context.editor.document.lineAt(
+                            selection.start.line
+                        )
                     ),
                 true
             )
@@ -394,9 +496,7 @@ export class LineSubject extends Subject {
     }
 
     async nextSubjectLeft() {
-        const editor = this.editor;
-
-        this.editor.selections = this.editor.selections.map((selection) => {
+        selections.map(this.context.editor, (selection) => {
             if (!selection.isSingleLine) {
                 return selection;
             }
@@ -404,8 +504,8 @@ export class LineSubject extends Subject {
             const nextLine = lines.getNextLineOfChangeOfIndentation(
                 "lessThan",
                 "backwards",
-                editor.document,
-                editor.document.lineAt(selection.start.line)
+                this.context.editor.document,
+                this.context.editor.document.lineAt(selection.start.line)
             );
 
             if (nextLine) {
@@ -420,9 +520,7 @@ export class LineSubject extends Subject {
     }
 
     async nextSubjectRight() {
-        const editor = this.editor;
-
-        this.editor.selections = this.editor.selections.map((selection) => {
+        selections.map(this.context.editor, (selection) => {
             if (!selection.isSingleLine) {
                 return selection;
             }
@@ -430,8 +528,8 @@ export class LineSubject extends Subject {
             const nextLine = lines.getNextLineOfChangeOfIndentation(
                 "greaterThan",
                 "forwards",
-                editor.document,
-                editor.document.lineAt(selection.start.line)
+                this.context.editor.document,
+                this.context.editor.document.lineAt(selection.start.line)
             );
 
             if (nextLine) {
@@ -446,10 +544,8 @@ export class LineSubject extends Subject {
     }
 
     async swapSubjectLeft() {
-        const editor = this.editor;
-
-        editor.edit((e) => {
-            selections.map(editor, (selection) => {
+        this.context.editor.edit((e) => {
+            selections.map(this.context.editor, (selection) => {
                 if (!selection.isSingleLine) {
                     return selection;
                 }
@@ -457,18 +553,18 @@ export class LineSubject extends Subject {
                 const targetLine = lines.getNextLineOfChangeOfIndentation(
                     "lessThan",
                     "backwards",
-                    editor.document,
-                    editor.document.lineAt(selection.start.line)
+                    this.context.editor.document,
+                    this.context.editor.document.lineAt(selection.start.line)
                 );
 
                 if (targetLine) {
-                    const sourceLineRange = editor.document.lineAt(
+                    const sourceLineRange = this.context.editor.document.lineAt(
                         selection.start.line
                     ).rangeIncludingLineBreak;
 
                     e.insert(
                         targetLine.range.start,
-                        editor.document.getText(sourceLineRange)
+                        this.context.editor.document.getText(sourceLineRange)
                     );
 
                     e.delete(sourceLineRange);
@@ -479,10 +575,8 @@ export class LineSubject extends Subject {
         });
     }
     async swapSubjectRight() {
-        const editor = this.editor;
-
-        editor.edit((e) => {
-            selections.map(editor, (selection) => {
+        this.context.editor.edit((e) => {
+            selections.map(this.context.editor, (selection) => {
                 if (!selection.isSingleLine) {
                     return selection;
                 }
@@ -490,13 +584,14 @@ export class LineSubject extends Subject {
                 const targetLine = lines.getNextLineOfChangeOfIndentation(
                     "greaterThan",
                     "forwards",
-                    editor.document,
-                    editor.document.lineAt(selection.start.line)
+                    this.context.editor.document,
+                    this.context.editor.document.lineAt(selection.start.line)
                 );
 
                 if (targetLine) {
-                    const originalText = editor.document.getText(selection);
-                    const targetText = editor.document.getText(
+                    const originalText =
+                        this.context.editor.document.getText(selection);
+                    const targetText = this.context.editor.document.getText(
                         targetLine.range
                     );
 
@@ -516,22 +611,79 @@ export class LineSubject extends Subject {
 
     async swapSubjectDown() {
         await vscode.commands.executeCommand(
-            "editor.action.moveLinesDownAction"
+            "this.context.editor.action.moveLinesDownAction"
         );
     }
 
     async swapSubjectUp() {
-        await vscode.commands.executeCommand("editor.action.moveLinesUpAction");
+        await vscode.commands.executeCommand(
+            "this.context.editor.action.moveLinesUpAction"
+        );
+    }
+
+    async search(target: common.Char) {
+        selections.map(this.context.editor, (selection) => {
+            for (const line of lines
+                .iterLines(
+                    this.context.editor.document,
+                    selection.start.line,
+                    "forwards"
+                )
+                .skip(1)) {
+                const char = this.context.editor.document.getText(line.range)[
+                    line.firstNonWhitespaceCharacterIndex
+                ];
+
+                if (char === target) {
+                    return new vscode.Selection(
+                        line.range.end,
+                        line.range.start
+                    );
+                }
+            }
+
+            return selection;
+        });
+
+        this.fixSelection();
+    }
+
+    async searchBackwards(target: common.Char) {
+        selections.map(this.context.editor, (selection) => {
+            for (const line of lines
+                .iterLines(
+                    this.context.editor.document,
+                    selection.start.line,
+                    "backwards"
+                )
+                .skip(1)) {
+                const char = this.context.editor.document.getText(line.range)[
+                    line.firstNonWhitespaceCharacterIndex
+                ];
+
+                if (char === target) {
+                    return new vscode.Selection(
+                        line.range.end,
+                        line.range.start
+                    );
+                }
+            }
+
+            return selection;
+        });
+
+        this.fixSelection();
     }
 }
 
 export class SmallWordSubject extends Subject {
     readonly name = "SMALL_WORD";
 
-    public decorationType = vscode.window.createTextEditorDecorationType({
-        border: "1px dashed #964d4d;",
-        fontWeight: "bold",
-    });
+    public static decorationType = vscode.window.createTextEditorDecorationType(
+        {
+            border: "2px dotted #964d4d;",
+        }
+    );
 
     async nextSubjectDown() {
         await vscode.commands.executeCommand("cursorDown");
@@ -542,43 +694,49 @@ export class SmallWordSubject extends Subject {
     }
 
     async nextSubjectLeft() {
-        await vscode.commands.executeCommand("cursorWordPartLeft");
         await vscode.commands.executeCommand("cursorLeft");
+        await vscode.commands.executeCommand("cursorWordPartLeftSelect");
     }
 
     async nextSubjectRight() {
-        await vscode.commands.executeCommand("cursorWordPartRight");
+        await vscode.commands.executeCommand("cursorRight");
+        await vscode.commands.executeCommand("cursorWordPartRightSelect");
     }
 
     async fixSelection() {
-        await vscode.commands.executeCommand(
-            "editor.action.smartSelect.expand"
+        this.context.editor.setDecorations(
+            SmallWordSubject.decorationType,
+            this.context.editor.selections
         );
+    }
+
+    clearUI(): void {
+        this.context.editor.setDecorations(SmallWordSubject.decorationType, []);
     }
 }
 
 export class WordSubject extends Subject {
     readonly name = "WORD";
 
-    public decorationType = vscode.window.createTextEditorDecorationType({
-        border: "1px dashed #964d4d;",
-        fontWeight: "bold",
-    });
+    public static decorationType = vscode.window.createTextEditorDecorationType(
+        {
+            border: "1px solid #964d4d;",
+            fontWeight: "bold",
+        }
+    );
 
     async changeSubject() {
         await vscode.commands.executeCommand("deleteLeft");
     }
 
+    clearUI(): void {
+        this.context.editor.setDecorations(WordSubject.decorationType, []);
+    }
+
     async fixSelection() {
-        const editor = this.editor;
-
-        if (!editor) {
-            return;
-        }
-
-        editor.selections = editor.selections.map((selection) => {
+        selections.map(this.context.editor, (selection) => {
             const wordRange = words.expandSelectionToWords(
-                editor.document,
+                this.context.editor.document,
                 selection
             );
 
@@ -589,68 +747,72 @@ export class WordSubject extends Subject {
             return selection;
         });
 
-        editor.setDecorations(this.decorationType, editor.selections);
+        this.context.editor.setDecorations(
+            WordSubject.decorationType,
+            this.context.editor.selections
+        );
     }
 
     async nextSubjectDown() {
-        const editor = this.editor;
+        this.context.editor.selections = this.context.editor.selections.map(
+            (selection) => {
+                if (!selection.isSingleLine) {
+                    return selection;
+                }
 
-        editor.selections = editor.selections.map((selection) => {
-            if (!selection.isSingleLine) {
+                const nextLine = lines.getNextSignificantLine(
+                    this.context.editor.document,
+                    selection.end,
+                    "forwards"
+                );
+
+                if (nextLine) {
+                    return new vscode.Selection(
+                        selection.start.with(nextLine.lineNumber),
+                        selection.start.with(nextLine.lineNumber)
+                    );
+                }
+
                 return selection;
             }
-
-            const nextLine = lines.getNextSignificantLine(
-                editor.document,
-                selection.end,
-                "forwards"
-            );
-
-            if (nextLine) {
-                return new vscode.Selection(
-                    selection.start.with(nextLine.lineNumber),
-                    selection.start.with(nextLine.lineNumber)
-                );
-            }
-
-            return selection;
-        });
+        );
 
         this.fixSelection();
     }
 
     async nextSubjectUp() {
-        const editor = this.editor;
+        this.context.editor.selections = this.context.editor.selections.map(
+            (selection) => {
+                if (!selection.isSingleLine) {
+                    return selection;
+                }
 
-        editor.selections = editor.selections.map((selection) => {
-            if (!selection.isSingleLine) {
+                const nextLine = lines.getNextSignificantLine(
+                    this.context.editor.document,
+                    selection.end,
+                    "backwards"
+                );
+
+                if (nextLine) {
+                    return new vscode.Selection(
+                        selection.start.with(nextLine.lineNumber),
+                        selection.start.with(nextLine.lineNumber)
+                    );
+                }
+
                 return selection;
             }
-
-            const nextLine = lines.getNextSignificantLine(
-                editor.document,
-                selection.end,
-                "backwards"
-            );
-
-            if (nextLine) {
-                return new vscode.Selection(
-                    selection.start.with(nextLine.lineNumber),
-                    selection.start.with(nextLine.lineNumber)
-                );
-            }
-
-            return selection;
-        });
+        );
 
         this.fixSelection();
     }
 
     async nextSubjectLeft() {
-        const editor = this.editor;
-
-        selections.map(editor, (selection) => {
-            const wordRange = words.prevWord(editor.document, selection.start);
+        selections.map(this.context.editor, (selection) => {
+            const wordRange = words.prevWord(
+                this.context.editor.document,
+                selection.start
+            );
 
             if (wordRange) {
                 return new vscode.Selection(wordRange.end, wordRange.start);
@@ -663,10 +825,11 @@ export class WordSubject extends Subject {
     }
 
     async nextSubjectRight() {
-        const editor = this.editor;
-
-        selections.map(editor, (selection) => {
-            const wordRange = words.nextWord(editor.document, selection.end);
+        selections.map(this.context.editor, (selection) => {
+            const wordRange = words.nextWord(
+                this.context.editor.document,
+                selection.end
+            );
 
             if (wordRange) {
                 return new vscode.Selection(wordRange.end, wordRange.start);
@@ -679,11 +842,11 @@ export class WordSubject extends Subject {
     }
 
     async swapSubjectLeft() {
-        await words.swapWordsWithNeighbours(this.editor, "backwards");
+        await words.swapWordsWithNeighbors(this.context.editor, "backwards");
     }
 
     async swapSubjectRight() {
-        await words.swapWordsWithNeighbours(this.editor, "forwards");
+        await words.swapWordsWithNeighbors(this.context.editor, "forwards");
     }
 
     async firstSubjectInLine() {
@@ -697,45 +860,46 @@ export class WordSubject extends Subject {
     }
 
     async deleteSubject() {
-        const editor = this.editor;
-        const charsToRemove = [" ", ",", ":", "."];
-
-        for (const selection of this.editor.selections) {
-            await this.editor.edit((e) => {
+        for (const selection of this.context.editor.selections) {
+            await this.context.editor.edit((e) => {
                 e.delete(selection);
 
                 let danglingTextRange = new vscode.Range(
                     positions.translateWithWrap(
-                        editor.document,
+                        this.context.editor.document,
                         selection.start,
                         -1
                     ) || selection.start,
                     selection.start
                 );
 
-                let danglingText = editor.document.getText(danglingTextRange);
+                let danglingText =
+                    this.context.editor.document.getText(danglingTextRange);
+
+                const charsToRemove = " :.,".split("");
 
                 while (charsToRemove.includes(danglingText)) {
                     e.delete(danglingTextRange);
 
                     danglingTextRange = new vscode.Range(
                         positions.translateWithWrap(
-                            editor.document,
+                            this.context.editor.document,
                             danglingTextRange.start,
                             -1
                         ) || danglingTextRange.start,
                         danglingTextRange.start
                     );
-                    danglingText = editor.document.getText(danglingTextRange);
+                    danglingText =
+                        this.context.editor.document.getText(danglingTextRange);
                 }
             });
 
             if (
-                this.editor.document.lineAt(selection.active.line)
+                this.context.editor.document.lineAt(selection.active.line)
                     .isEmptyOrWhitespace
             ) {
                 await vscode.commands.executeCommand(
-                    "editor.action.deleteLines"
+                    "this.context.editor.action.deleteLines"
                 );
             }
         }
@@ -743,10 +907,10 @@ export class WordSubject extends Subject {
         await this.fixSelection();
     }
 
-    async search(target: Char) {
-        selections.map(this.editor, (selection) => {
+    async search(target: common.Char) {
+        selections.map(this.context.editor, (selection) => {
             const searchResult = words.search(
-                this.editor,
+                this.context.editor,
                 selection.end,
                 target,
                 "forwards"
@@ -765,10 +929,10 @@ export class WordSubject extends Subject {
         this.fixSelection();
     }
 
-    async searchBackwards(target: Char) {
-        selections.map(this.editor, (selection) => {
+    async searchBackwards(target: common.Char) {
+        selections.map(this.context.editor, (selection) => {
             const searchResult = words.search(
-                this.editor,
+                this.context.editor,
                 selection.start,
                 target,
                 "backwards"

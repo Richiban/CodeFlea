@@ -391,6 +391,26 @@
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
             },
             {
+                "command": "codeFlea.extendSubjectUp",
+                "key": "shift+u",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "command": "codeFlea.extendSubjectDown",
+                "key": "shift+e",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "command": "codeFlea.extendSubjectLeft",
+                "key": "shift+n",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
+                "command": "codeFlea.extendSubjectRight",
+                "key": "shift+i",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+            },
+            {
                 "command": "codeFlea.swapSubjectUp",
                 "key": "ctrl+u",
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"

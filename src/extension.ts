@@ -13,7 +13,10 @@ import ModeManager from "./modes/ModeManager";
 export function activate(context: vscode.ExtensionContext) {
     const config = loadConfig();
     const fleaJumper = new FleaJumper(config);
-    const modeManager = new ModeManager(vscode.window.activeTextEditor, config);
+    const modeManager = new ModeManager(
+        config,
+        vscode.window.activeTextEditor!
+    );
 
     const container: Container = {
         manager: modeManager,
@@ -26,7 +29,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     vscode.window.onDidChangeActiveTextEditor((editor) => {
-        modeManager.setEditor(editor);
+        modeManager.changeEditor(editor);
     });
 
     vscode.window.onDidChangeTextEditorSelection((e) => {

@@ -17,10 +17,6 @@ export abstract class ExtensionCommand {
 
     constructor(protected readonly container: Container) {}
 
-    protected get editor() {
-        return this.container.manager.editor;
-    }
-
     abstract execute(...args: any[]): void | Promise<void>;
 }
 
@@ -583,8 +579,9 @@ class NewLineBelow extends ExtensionCommand {
     id = "codeFlea.newLineBelow";
 
     async execute() {
-        await this.container.manager.executeSubjectCommand("newLineBelow");
+        await this.container.manager.executeSubjectCommand("append");
         this.container.manager.changeMode({ kind: "EDIT" });
+        await this.container.manager.executeSubjectCommand("newLineBelow");
     }
 }
 
@@ -593,8 +590,9 @@ class NewLineAbove extends ExtensionCommand {
     id = "codeFlea.newLineAbove";
 
     async execute() {
-        await this.container.manager.executeSubjectCommand("newLineAbove");
+        await this.container.manager.executeSubjectCommand("prepend");
         this.container.manager.changeMode({ kind: "EDIT" });
+        await this.container.manager.executeSubjectCommand("newLineAbove");
     }
 }
 

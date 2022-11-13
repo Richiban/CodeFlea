@@ -120,7 +120,7 @@ function findWordClosestTo(
     return wordRange;
 }
 
-export async function swapWordsWithNeighbours(
+export async function swapWordsWithNeighbors(
     editor: vscode.TextEditor,
     direction: Direction
 ) {

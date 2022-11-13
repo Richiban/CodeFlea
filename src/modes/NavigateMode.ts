@@ -2,16 +2,16 @@ import * as vscode from "vscode";
 import * as subjects from "../subjects/subjects";
 import EditMode from "./EditMode";
 import ExtendMode from "./ExtendMode";
-import ModeManager from "./ModeManager";
 import * as modes from "./modes";
 import * as editor from "../utils/editor";
 import * as selections from "../utils/selections";
+import * as common from "../common";
 
 export default class NavigateMode extends modes.EditorMode {
     private commandMultiplier: number = 0;
 
     constructor(
-        private manager: ModeManager,
+        private readonly context: common.ExtensionContext,
         public readonly subject: subjects.Subject
     ) {
         super();
@@ -24,46 +24,50 @@ export default class NavigateMode extends modes.EditorMode {
         );
     }
 
+    copy(): modes.EditorMode {
+        return new NavigateMode(this.context, this.subject);
+    }
+
     async changeTo(newMode: modes.EditorModeType): Promise<modes.EditorMode> {
         switch (newMode.kind) {
             case "EDIT":
-                return new EditMode(this.manager, this);
+                return new EditMode(this.context, this);
 
             case "EXTEND":
-                return new ExtendMode(this.manager, this.subject, this);
+                return new ExtendMode(this.context, this.subject, this);
 
             case "NAVIGATE":
-                if (this.manager.editor) {
-                    selections.collapseSelections(this.manager.editor);
+                if (editor) {
+                    selections.collapseSelections(this.context.editor);
                 }
 
                 if (newMode.subjectName !== this.subject.name) {
                     return new NavigateMode(
-                        this.manager,
-                        subjects.createFrom(this.manager, newMode.subjectName)
+                        this.context,
+                        subjects.createFrom(this.context, newMode.subjectName)
                     );
                 }
 
                 switch (newMode.subjectName) {
                     case "LINE":
                         return new NavigateMode(
-                            this.manager,
-                            subjects.createFrom(this.manager, "ALL_LINES")
+                            this.context,
+                            subjects.createFrom(this.context, "ALL_LINES")
                         );
                     case "WORD":
                         return new NavigateMode(
-                            this.manager,
-                            subjects.createFrom(this.manager, "SMALL_WORD")
+                            this.context,
+                            subjects.createFrom(this.context, "SMALL_WORD")
                         );
                     case "SMALL_WORD":
                         return new NavigateMode(
-                            this.manager,
-                            subjects.createFrom(this.manager, "WORD")
+                            this.context,
+                            subjects.createFrom(this.context, "WORD")
                         );
                     case "ALL_LINES":
                         return new NavigateMode(
-                            this.manager,
-                            subjects.createFrom(this.manager, "LINE")
+                            this.context,
+                            subjects.createFrom(this.context, "LINE")
                         );
                 }
 
@@ -71,18 +75,22 @@ export default class NavigateMode extends modes.EditorMode {
         }
     }
 
+    clearUI() {
+        this.subject.clearUI();
+    }
+
     refreshUI() {
-        this.manager.statusBar.text = `Navigate (${this.subject?.name})`;
+        this.context.statusBar.text = `Navigate (${this.subject?.name})`;
 
         if (this.commandMultiplier > 1) {
-            this.manager.statusBar.text += ` x${this.commandMultiplier}`;
+            this.context.statusBar.text += ` x${this.commandMultiplier}`;
         }
 
-        if (this.manager.editor) {
-            this.manager.editor.options.cursorStyle =
+        if (this.context.editor) {
+            this.context.editor.options.cursorStyle =
                 vscode.TextEditorCursorStyle.UnderlineThin;
 
-            this.manager.editor.options.lineNumbers =
+            this.context.editor.options.lineNumbers =
                 vscode.TextEditorLineNumbersStyle.Relative;
         }
 
@@ -155,6 +163,13 @@ export default class NavigateMode extends modes.EditorMode {
 
     async fixSelection() {
         await this.subject.fixSelection();
+
+        if (this.context.editor) {
+            editor.scrollToReveal(
+                this.context.editor.selection.start,
+                this.context.editor.selection.end
+            );
+        }
     }
 
     async dispose() {

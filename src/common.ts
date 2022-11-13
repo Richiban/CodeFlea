@@ -23,6 +23,12 @@ export type JumpLocation = {
 
 export type Parameter<T> = T extends (arg: infer U) => any ? U : never;
 
+export type ExtensionContext = {
+    statusBar: vscode.StatusBarItem;
+    config: Config;
+    editor: vscode.TextEditor;
+};
+
 export type Char = string & { length: 1 };
 
 export function opposite(direction: Direction) {
