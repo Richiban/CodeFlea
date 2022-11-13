@@ -6,7 +6,8 @@ export function collapseSelections(
     editor: vscode.TextEditor,
     endType: SelectionEndType = "start"
 ) {
-    editor.selections = editor.selections.map(
+    map(
+        editor,
         (selection) =>
             new vscode.Selection(selection[endType], selection[endType])
     );

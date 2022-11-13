@@ -1,5 +1,4 @@
-import * as vscode from "vscode";
-import { createFrom, SubjectActions } from "../subjects/subjects";
+import { createFrom } from "../subjects/subjects";
 import EditMode from "./EditMode";
 import ExtendMode from "./ExtendMode";
 import * as common from "../common";

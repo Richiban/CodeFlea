@@ -1,15 +1,14 @@
 import * as vscode from "vscode";
 import { Config } from "../config";
-import { goToLine, quickCommandPicker, scrollToReveal } from "../utils/editor";
+import { goToLine, quickCommandPicker } from "../utils/editor";
 import {
     GoToCommands,
     SpaceCommands,
     ModifyCommands,
 } from "../utils/quickMenus";
-import { createFrom, SubjectActions } from "../subjects/subjects";
+import { SubjectActions } from "../subjects/subjects";
 import { EditorMode, EditorModeType } from "./modes";
 import { NullMode } from "./NullMode";
-import NavigateMode from "./NavigateMode";
 
 export default class ModeManager {
     private mode: EditorMode;

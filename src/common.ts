@@ -223,8 +223,11 @@ export class Linqish<T> implements Iterable<T> {
                 let currentIterator: Iterator<T | U> = i1;
 
                 const swapIterators = () => {
-                    if (currentIterator === i1) currentIterator = i2;
-                    else currentIterator = i1;
+                    if (currentIterator === i1) {
+                        currentIterator = i2;
+                    } else {
+                        currentIterator = i1;
+                    }
                 };
 
                 while (true) {

@@ -1,4 +1,3 @@
-import ModeManager from "../modes/ModeManager";
 import * as blocks from "../utils/blocks";
 import * as vscode from "vscode";
 import * as lines from "../utils/lines";
@@ -87,25 +86,25 @@ export abstract class Subject implements SubjectActions, vscode.Disposable {
 
     async nextSubjectMatch() {
         await vscode.commands.executeCommand(
-            "this.context.editor.action.moveSelectionToNextFindMatch"
+            "editor.action.moveSelectionToNextFindMatch"
         );
     }
 
     async prevSubjectMatch() {
         await vscode.commands.executeCommand(
-            "this.context.editor.action.moveSelectionToPreviousFindMatch"
+            "editor.action.moveSelectionToPreviousFindMatch"
         );
     }
 
     async extendPrevSubjectMatch() {
         await vscode.commands.executeCommand(
-            "this.context.editor.action.addSelectionToPreviousFindMatch"
+            "editor.action.addSelectionToPreviousFindMatch"
         );
     }
 
     async extendNextSubjectMatch() {
         await vscode.commands.executeCommand(
-            "this.context.editor.action.addSelectionToNextFindMatch"
+            "editor.action.addSelectionToNextFindMatch"
         );
     }
 
@@ -118,15 +117,11 @@ export abstract class Subject implements SubjectActions, vscode.Disposable {
     }
 
     async newLineAbove() {
-        await vscode.commands.executeCommand(
-            "this.context.editor.action.insertLineBefore"
-        );
+        await vscode.commands.executeCommand("editor.action.insertLineBefore");
     }
 
     async newLineBelow() {
-        await vscode.commands.executeCommand(
-            "this.context.editor.action.insertLineAfter"
-        );
+        await vscode.commands.executeCommand("editor.action.insertLineAfter");
     }
 
     abstract name: SubjectType;
@@ -208,9 +203,7 @@ export class AllLinesSubject extends Subject {
     }
 
     async deleteSubject() {
-        await vscode.commands.executeCommand(
-            "this.context.editor.action.deleteLines"
-        );
+        await vscode.commands.executeCommand("editor.action.deleteLines");
         this.fixSelection();
     }
 }
@@ -414,9 +407,7 @@ export class LineSubject extends Subject {
     }
 
     async deleteSubject() {
-        await vscode.commands.executeCommand(
-            "this.context.editor.action.deleteLines"
-        );
+        await vscode.commands.executeCommand("editor.action.deleteLines");
         this.fixSelection();
     }
 
@@ -611,14 +602,12 @@ export class LineSubject extends Subject {
 
     async swapSubjectDown() {
         await vscode.commands.executeCommand(
-            "this.context.editor.action.moveLinesDownAction"
+            "editor.action.moveLinesDownAction"
         );
     }
 
     async swapSubjectUp() {
-        await vscode.commands.executeCommand(
-            "this.context.editor.action.moveLinesUpAction"
-        );
+        await vscode.commands.executeCommand("editor.action.moveLinesUpAction");
     }
 
     async search(target: common.Char) {
@@ -754,55 +743,51 @@ export class WordSubject extends Subject {
     }
 
     async nextSubjectDown() {
-        this.context.editor.selections = this.context.editor.selections.map(
-            (selection) => {
-                if (!selection.isSingleLine) {
-                    return selection;
-                }
-
-                const nextLine = lines.getNextSignificantLine(
-                    this.context.editor.document,
-                    selection.end,
-                    "forwards"
-                );
-
-                if (nextLine) {
-                    return new vscode.Selection(
-                        selection.start.with(nextLine.lineNumber),
-                        selection.start.with(nextLine.lineNumber)
-                    );
-                }
-
+        selections.map(this.context.editor, (selection) => {
+            if (!selection.isSingleLine) {
                 return selection;
             }
-        );
+
+            const nextLine = lines.getNextSignificantLine(
+                this.context.editor.document,
+                selection.end,
+                "forwards"
+            );
+
+            if (nextLine) {
+                return new vscode.Selection(
+                    selection.start.with(nextLine.lineNumber),
+                    selection.start.with(nextLine.lineNumber)
+                );
+            }
+
+            return selection;
+        });
 
         this.fixSelection();
     }
 
     async nextSubjectUp() {
-        this.context.editor.selections = this.context.editor.selections.map(
-            (selection) => {
-                if (!selection.isSingleLine) {
-                    return selection;
-                }
-
-                const nextLine = lines.getNextSignificantLine(
-                    this.context.editor.document,
-                    selection.end,
-                    "backwards"
-                );
-
-                if (nextLine) {
-                    return new vscode.Selection(
-                        selection.start.with(nextLine.lineNumber),
-                        selection.start.with(nextLine.lineNumber)
-                    );
-                }
-
+        selections.map(this.context.editor, (selection) => {
+            if (!selection.isSingleLine) {
                 return selection;
             }
-        );
+
+            const nextLine = lines.getNextSignificantLine(
+                this.context.editor.document,
+                selection.end,
+                "backwards"
+            );
+
+            if (nextLine) {
+                return new vscode.Selection(
+                    selection.start.with(nextLine.lineNumber),
+                    selection.start.with(nextLine.lineNumber)
+                );
+            }
+
+            return selection;
+        });
 
         this.fixSelection();
     }
@@ -838,6 +823,18 @@ export class WordSubject extends Subject {
             return selection;
         });
 
+        this.fixSelection();
+    }
+
+    async extendSubjectDown() {
+        selections.collapseSelections(this.context.editor);
+        await vscode.commands.executeCommand("editor.action.insertCursorBelow");
+        this.fixSelection();
+    }
+
+    async extendSubjectUp() {
+        selections.collapseSelections(this.context.editor);
+        await vscode.commands.executeCommand("editor.action.insertCursorAbove");
         this.fixSelection();
     }
 
@@ -899,7 +896,7 @@ export class WordSubject extends Subject {
                     .isEmptyOrWhitespace
             ) {
                 await vscode.commands.executeCommand(
-                    "this.context.editor.action.deleteLines"
+                    "editor.action.deleteLines"
                 );
             }
         }

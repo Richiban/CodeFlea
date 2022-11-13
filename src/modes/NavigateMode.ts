@@ -122,12 +122,19 @@ export default class NavigateMode extends modes.EditorMode {
 
         await (this.subject[command] as any)(...args);
 
+        let refreshNeeded = false;
+
         while (this.commandMultiplier > 1) {
             await this.repeatSubjectCommand();
             this.commandMultiplier--;
+            refreshNeeded = true;
         }
 
         this.commandMultiplier = 0;
+
+        if (refreshNeeded) {
+            this.refreshUI();
+        }
     }
 
     async repeatSubjectCommand() {

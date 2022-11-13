@@ -1,12 +1,6 @@
 import * as vscode from "vscode";
-import {
-    Container,
-    ExtensionCommand,
-    registerCommand,
-    registeredCommands,
-} from "./commands";
+import { Container, registeredCommands } from "./commands";
 import { loadConfig } from "./config";
-import { scrollEditor } from "./utils/editor";
 import { FleaJumper } from "./jump/fleajump";
 import ModeManager from "./modes/ModeManager";
 

@@ -1,11 +1,8 @@
-import * as vscode from "vscode";
 import * as blocks from "./utils/blocks";
 import { Config } from "./config";
 import * as editor from "./utils/editor";
 import { FleaJumper } from "./jump/fleajump";
-import * as lines from "./utils/lines";
 import type ModeManager from "./modes/ModeManager";
-import * as points from "./utils/points";
 
 export abstract class ExtensionCommand {
     abstract id: string;

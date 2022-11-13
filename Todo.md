@@ -18,3 +18,5 @@
 -   Moving words up and down gradually works cursor left/right
 -   Deleting the only block in a scope deletes the scope too
 -   Switching editor leaves decorations in place
+-   Can't select first block in file
+-   Null mode keeps being selected
