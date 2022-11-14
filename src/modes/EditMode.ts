@@ -35,11 +35,7 @@ export default class EditMode extends EditorMode {
             case "EDIT":
                 return this;
             case "EXTEND":
-                return new ExtendMode(
-                    this.context,
-                    this.previousNavigateMode.subject,
-                    this.previousNavigateMode
-                );
+                return new ExtendMode(this.context, this.previousNavigateMode);
 
             case "NAVIGATE":
                 return this.previousNavigateMode;

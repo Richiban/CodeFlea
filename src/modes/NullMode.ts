@@ -25,11 +25,7 @@ export class NullMode extends EditorMode {
                 return new EditMode(this.context, navigateMode);
 
             case "EXTEND":
-                return new ExtendMode(
-                    this.context,
-                    defaultSubject,
-                    navigateMode
-                );
+                return new ExtendMode(this.context, navigateMode);
 
             case "NAVIGATE":
                 return navigateMode;

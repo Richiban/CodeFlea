@@ -238,32 +238,32 @@
             {
                 "key": ",",
                 "command": "codeFlea.changeToEditMode",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "key": ".",
                 "command": "codeFlea.customVsCodeCommand",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "key": "/",
                 "command": "codeFlea.nextOccurrenceOfChar",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "key": "shift+/",
                 "command": "codeFlea.prevOccurrenceOfChar",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "key": "z",
                 "command": "cursorUndo",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "key": "shift+z",
                 "command": "cursorRedo",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "key": "v",
@@ -271,99 +271,104 @@
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
             },
             {
+                "key": "v",
+                "command": "codeFlea.changeToNavigationMode",
+                "when": "editorTextFocus && editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
                 "key": "w",
                 "command": "codeFlea.changeToWordSubject",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "key": "x",
                 "command": "codeFlea.changeToLineSubject",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "key": "b",
                 "command": "codeFlea.changeToBlockSubject",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "key": "a",
                 "command": "codeFlea.changeToEditModeAppend",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "key": "p",
                 "command": "codeFlea.changeToEditModePrepend",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "key": "enter",
                 "command": "codeFlea.repeatCommand",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "key": "shift+enter",
                 "command": "codeFlea.undoCommand",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "key": "space",
                 "command": "codeFlea.openSpaceMenu",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "key": "g",
                 "command": "codeFlea.openGoToMenu",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "key": "q",
                 "command": "codeFlea.changeToCharacterSubject",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "key": "s",
                 "command": "codeFlea.search",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "key": "f",
                 "command": "codeFlea.searchBackwards",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "key": "l",
                 "command": "codeFlea.goToFirstSubjectInLine",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "key": "y",
                 "command": "codeFlea.goToLastSubjectInLine",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "key": "j",
                 "command": "codeFlea.goToPrevOccurrence",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "key": "h",
                 "command": "codeFlea.goToNextOccurrence",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "key": "shift+j",
                 "command": "codeFlea.extendToPrevOccurrence",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "key": "shift+h",
                 "command": "codeFlea.extendToNextOccurrence",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "key": "m",
                 "command": "codeFlea.openModifyMenu",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "command": "codeFlea.input.cancel",
@@ -373,112 +378,112 @@
             {
                 "command": "codeFlea.nextSubjectUp",
                 "key": "u",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "command": "codeFlea.nextSubjectDown",
                 "key": "e",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "command": "codeFlea.nextSubjectLeft",
                 "key": "n",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "command": "codeFlea.nextSubjectRight",
                 "key": "i",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "command": "codeFlea.extendSubjectUp",
                 "key": "shift+u",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "command": "codeFlea.extendSubjectDown",
                 "key": "shift+e",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "command": "codeFlea.extendSubjectLeft",
                 "key": "shift+n",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "command": "codeFlea.extendSubjectRight",
                 "key": "shift+i",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "command": "codeFlea.swapSubjectUp",
                 "key": "ctrl+u",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "command": "codeFlea.swapSubjectDown",
                 "key": "ctrl+e",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "command": "codeFlea.swapSubjectLeft",
                 "key": "ctrl+n",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "command": "codeFlea.swapSubjectRight",
                 "key": "ctrl+i",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "command": "codeFlea.extendSubjectUp",
                 "key": "shift+u",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "command": "editor.action.quickFix",
                 "key": "r",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "command": "codeFlea.extendSubjectDown",
                 "key": "alt+e",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "command": "codeFlea.extendSubjectLeft",
                 "key": "alt+n",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "command": "codeFlea.extendSubjectRight",
                 "key": "alt+i",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "command": "codeFlea.deleteSubject",
                 "key": "d",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "command": "codeFlea.change",
                 "key": "c",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "command": "codeFlea.newLineBelow",
                 "key": "o",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "command": "codeFlea.newLineAbove",
                 "key": "shift+o",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "key": "'",
                 "command": "codeFlea.jump",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE'"
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             }
         ]
     },

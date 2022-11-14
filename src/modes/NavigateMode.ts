@@ -30,7 +30,7 @@ export default class NavigateMode extends modes.EditorMode {
                 return new EditMode(this.context, this);
 
             case "EXTEND":
-                return new ExtendMode(this.context, this.subject, this);
+                return new ExtendMode(this.context, this);
 
             case "NAVIGATE":
                 if (editor) {

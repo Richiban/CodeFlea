@@ -165,7 +165,7 @@ export class Linqish<T> implements Iterable<T> {
         );
     }
 
-    zipWith<T2>(iter2: Iterable<T2>) {
+    zipWith<T2>(iter2: Iterable<T2>): Linqish<readonly [T, T2]> {
         const i1 = this.iter[Symbol.iterator]();
         const i2 = iter2[Symbol.iterator]();
 

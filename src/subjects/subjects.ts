@@ -69,10 +69,43 @@ export abstract class Subject implements SubjectActions, vscode.Disposable {
     async addSubjectUp() {}
     async addSubjectLeft() {}
     async addSubjectRight() {}
-    async extendSubjectDown() {}
-    async extendSubjectUp() {}
-    async extendSubjectLeft() {}
-    async extendSubjectRight() {}
+
+    async extendSubjectUp(): Promise<void> {
+        const existingSelections = this.context.editor.selections;
+
+        await this.nextSubjectUp();
+
+        this.context.editor.selections =
+            this.context.editor.selections.concat(existingSelections);
+    }
+
+    async extendSubjectDown() {
+        const existingSelections = this.context.editor.selections;
+
+        await this.nextSubjectDown();
+
+        this.context.editor.selections =
+            this.context.editor.selections.concat(existingSelections);
+    }
+
+    async extendSubjectLeft(): Promise<void> {
+        const existingSelections = this.context.editor.selections;
+
+        await this.nextSubjectLeft();
+
+        this.context.editor.selections =
+            this.context.editor.selections.concat(existingSelections);
+    }
+
+    async extendSubjectRight() {
+        const existingSelections = this.context.editor.selections;
+
+        await this.nextSubjectRight();
+
+        this.context.editor.selections =
+            this.context.editor.selections.concat(existingSelections);
+    }
+
     async swapSubjectDown() {}
     async swapSubjectUp() {}
     async swapSubjectLeft() {}
@@ -318,6 +351,24 @@ export class BlockSubject extends Subject {
                 return new vscode.Selection(nextBlock.end, nextBlock.start);
             });
         });
+    }
+
+    async extendSubjectUp(): Promise<void> {
+        const existingSelections = this.context.editor.selections;
+
+        await this.nextSubjectUp();
+
+        this.context.editor.selections =
+            this.context.editor.selections.concat(existingSelections);
+    }
+
+    async extendSubjectDown() {
+        const existingSelections = this.context.editor.selections;
+
+        await this.nextSubjectDown();
+
+        this.context.editor.selections =
+            this.context.editor.selections.concat(existingSelections);
     }
 
     async deleteSubject() {
@@ -840,37 +891,6 @@ export class WordSubject extends Subject {
         this.fixSelection();
     }
 
-    async extendSubjectDown() {
-        selections.collapseSelections(this.context.editor);
-        await vscode.commands.executeCommand("editor.action.insertCursorBelow");
-        this.fixSelection();
-    }
-
-    async extendSubjectUp() {
-        selections.collapseSelections(this.context.editor);
-        await vscode.commands.executeCommand("editor.action.insertCursorAbove");
-        this.fixSelection();
-    }
-
-    async extendSubjectLeft() {
-        selections.map(this.context.editor, (selection) => {
-            const wordRange = words.prevWord(
-                this.context.editor.document,
-                selection.start
-            );
-
-            if (wordRange) {
-                return new vscode.Selection(wordRange.end, selection.end);
-            }
-
-            return selection;
-        });
-
-        this.fixSelection();
-    }
-
-    async extendSubjectRight() {}
-
     async swapSubjectLeft() {
         await words.swapWordsWithNeighbors(this.context.editor, "backwards");
     }
@@ -892,36 +912,7 @@ export class WordSubject extends Subject {
     async deleteSubject() {
         for (const selection of this.context.editor.selections) {
             await this.context.editor.edit((e) => {
-                e.delete(selection);
-
-                let danglingTextRange = new vscode.Range(
-                    positions.translateWithWrap(
-                        this.context.editor.document,
-                        selection.start,
-                        -1
-                    ) || selection.start,
-                    selection.start
-                );
-
-                let danglingText =
-                    this.context.editor.document.getText(danglingTextRange);
-
-                const charsToRemove = " :.,".split("");
-
-                while (charsToRemove.includes(danglingText)) {
-                    e.delete(danglingTextRange);
-
-                    danglingTextRange = new vscode.Range(
-                        positions.translateWithWrap(
-                            this.context.editor.document,
-                            danglingTextRange.start,
-                            -1
-                        ) || danglingTextRange.start,
-                        danglingTextRange.start
-                    );
-                    danglingText =
-                        this.context.editor.document.getText(danglingTextRange);
-                }
+                words.deleteWord(this.context.editor, e, selection);
             });
 
             if (

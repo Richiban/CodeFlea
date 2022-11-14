@@ -4,28 +4,32 @@ import * as subjects from "../subjects/subjects";
 import EditMode from "./EditMode";
 import { EditorMode, EditorModeType } from "./modes";
 import NavigateMode from "./NavigateMode";
+import * as selections from "../utils/selections";
 
 export default class ExtendMode extends EditorMode {
+    private readonly wrappedMode: NavigateMode;
+
     constructor(
         private readonly context: common.ExtensionContext,
-        public readonly subject: subjects.Subject,
-        private previousMode: NavigateMode
+        previousMode: NavigateMode
     ) {
         super();
+
+        this.wrappedMode = previousMode;
     }
 
-    copy(): EditorMode {
-        return new ExtendMode(this.context, this.subject, this.previousMode);
+    async fixSelection() {
+        await this.wrappedMode.fixSelection();
     }
 
     async changeTo(newMode: EditorModeType): Promise<EditorMode> {
         switch (newMode.kind) {
             case "EDIT":
-                return new EditMode(this.context, this.previousMode);
+                return new EditMode(this.context, this.wrappedMode);
             case "NAVIGATE":
-                return this.previousMode;
+                return this.wrappedMode;
             case "EXTEND":
-                if (newMode.subjectName !== this.subject.name) {
+                if (newMode.subjectName !== this.wrappedMode.subject.name) {
                     await vscode.commands.executeCommand("cancelSelection");
 
                     return new NavigateMode(
@@ -64,7 +68,7 @@ export default class ExtendMode extends EditorMode {
     clearUI(): void {}
 
     async refreshUI() {
-        this.context.statusBar.text = `Navigate (${this.subject?.name})`;
+        this.context.statusBar.text = `Extend (${this.wrappedMode.subject?.name})`;
 
         if (this.context.editor) {
             this.context.editor.options.cursorStyle =
@@ -74,38 +78,40 @@ export default class ExtendMode extends EditorMode {
                 vscode.TextEditorLineNumbersStyle.Relative;
         }
 
-        vscode.commands.executeCommand(
-            "setContext",
-            "codeFlea.mode",
-            "NAVIGATE"
-        );
+        vscode.commands.executeCommand("setContext", "codeFlea.mode", "EXTEND");
 
-        this.subject?.fixSelection();
+        this.wrappedMode.fixSelection();
 
         await vscode.commands.executeCommand(
             "editor.action.setSelectionAnchor"
         );
     }
 
-    async dispose() {
-        this.subject.dispose();
-        await vscode.commands.executeCommand(
-            "editor.action.cancelSelectionAnchor"
-        );
-    }
-
     async executeSubjectCommand(
         command: keyof subjects.SubjectActions
     ): Promise<void> {
-        //await this.subject[command]();
+        const existingSelections = new common.Linqish(
+            this.context.editor.selections
+        );
+
+        await this.wrappedMode.executeSubjectCommand(command);
+
+        const newSelections = existingSelections
+            .zipWith(this.context.editor.selections)
+            .map(([a, b]) => {
+                return new vscode.Selection(a.start, b.end);
+            })
+            .toArray();
+
+        this.context.editor.selections = newSelections;
     }
 
     async repeatSubjectCommand() {}
 
-    equals(previousMode: EditorMode): boolean {
+    equals(other: EditorMode): boolean {
         return (
-            previousMode instanceof ExtendMode &&
-            previousMode.subject === this.subject
+            other instanceof ExtendMode &&
+            other.wrappedMode.equals(this.wrappedMode)
         );
     }
 }

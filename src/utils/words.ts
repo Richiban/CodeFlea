@@ -172,3 +172,38 @@ export function search(
 
     return undefined;
 }
+
+export function deleteWord(
+    editor: vscode.TextEditor,
+    e: vscode.TextEditorEdit,
+    selection: vscode.Selection
+) {
+    e.delete(selection);
+
+    let danglingTextRange = new vscode.Range(
+        positions.translateWithWrap(
+            editor.document,
+            selection.start,
+            -1
+        ) || selection.start,
+        selection.start
+    );
+
+    let danglingText = editor.document.getText(danglingTextRange);
+
+    const charsToRemove = ":.,".split("");
+
+    while (charsToRemove.includes(danglingText)) {
+        e.delete(danglingTextRange);
+
+        danglingTextRange = new vscode.Range(
+            positions.translateWithWrap(
+                editor.document,
+                danglingTextRange.start,
+                -1
+            ) || danglingTextRange.start,
+            danglingTextRange.start
+        );
+        danglingText = editor.document.getText(danglingTextRange);
+    }
+}
