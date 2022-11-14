@@ -7,10 +7,12 @@ import ModeManager from "./modes/ModeManager";
 export function activate(context: vscode.ExtensionContext) {
     const config = loadConfig();
     const fleaJumper = new FleaJumper(config);
-    const modeManager = new ModeManager(
-        config,
-        vscode.window.activeTextEditor!
-    );
+    const modeManager = new ModeManager(config);
+    const editor = vscode.window.activeTextEditor;
+
+    if (editor) {
+        modeManager.changeEditor(editor);
+    }
 
     const container: Container = {
         manager: modeManager,
@@ -22,8 +24,8 @@ export function activate(context: vscode.ExtensionContext) {
         fleaJumper.updateConfig(loadConfig());
     });
 
-    vscode.window.onDidChangeActiveTextEditor((editor) => {
-        modeManager.changeEditor(editor);
+    vscode.window.onDidChangeActiveTextEditor(async (editor) => {
+        await modeManager.changeEditor(editor);
     });
 
     vscode.window.onDidChangeTextEditorSelection((e) => {
@@ -33,8 +35,6 @@ export function activate(context: vscode.ExtensionContext) {
 
         modeManager.fixSelection();
     });
-
-    modeManager.changeMode({ kind: "NAVIGATE", subjectName: "WORD" });
 
     for (const constructor of registeredCommands) {
         const command = new constructor(container);

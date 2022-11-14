@@ -24,10 +24,6 @@ export default class NavigateMode extends modes.EditorMode {
         );
     }
 
-    copy(): modes.EditorMode {
-        return new NavigateMode(this.context, this.subject);
-    }
-
     async changeTo(newMode: modes.EditorModeType): Promise<modes.EditorMode> {
         switch (newMode.kind) {
             case "EDIT":

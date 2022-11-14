@@ -17,5 +17,16 @@ export function map(
     editor: vscode.TextEditor,
     mapper: (selection: vscode.Selection) => vscode.Selection
 ) {
-    editor.selections = editor.selections.map(mapper);
+    if (editor) {
+        editor.selections = editor.selections.map(mapper);
+    }
+}
+
+export function flatMap(
+    editor: vscode.TextEditor,
+    mapper: (selection: vscode.Selection) => vscode.Selection[]
+) {
+    if (editor) {
+        editor.selections = editor.selections.flatMap(mapper);
+    }
 }

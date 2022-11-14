@@ -6,15 +6,18 @@ import {
     SpaceCommands,
     ModifyCommands,
 } from "../utils/quickMenus";
-import { SubjectActions } from "../subjects/subjects";
+import { createFrom, SubjectActions } from "../subjects/subjects";
 import { EditorMode, EditorModeType } from "./modes";
 import { NullMode } from "./NullMode";
+import EditMode from "./EditMode";
+import NavigateMode from "./NavigateMode";
 
 export default class ModeManager {
     private mode: EditorMode;
     public statusBar: vscode.StatusBarItem;
+    public editor: vscode.TextEditor = undefined!;
 
-    constructor(public config: Config, public editor: vscode.TextEditor) {
+    constructor(public config: Config) {
         this.statusBar = vscode.window.createStatusBarItem(
             "codeFlea",
             vscode.StatusBarAlignment.Left,
@@ -26,17 +29,23 @@ export default class ModeManager {
         this.statusBar.show();
     }
 
-    changeEditor(editor: vscode.TextEditor | undefined) {
+    async changeEditor(editor: vscode.TextEditor | undefined) {
         this.mode.clearUI();
 
         if (!editor) {
             this.mode = new NullMode(this);
             return;
+        } else {
+            if (this.mode instanceof NullMode) {
+                await this.changeMode({
+                    kind: "NAVIGATE",
+                    subjectName: "WORD",
+                });
+            }
         }
 
         this.editor = editor;
 
-        this.mode = this.mode.copy();
         this.mode.refreshUI();
     }
 

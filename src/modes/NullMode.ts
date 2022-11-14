@@ -10,10 +10,6 @@ export class NullMode extends EditorMode {
         super();
     }
 
-    copy(): EditorMode {
-        return new NullMode(this.context);
-    }
-
     clearUI(): void {}
 
     equals(previousMode: EditorMode): boolean {

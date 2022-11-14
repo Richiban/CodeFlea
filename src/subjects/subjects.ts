@@ -198,6 +198,16 @@ export class AllLinesSubject extends Subject {
         this.fixSelection();
     }
 
+    async extendSubjectDown() {
+        await vscode.commands.executeCommand("editor.action.insertCursorBelow");
+        this.fixSelection();
+    }
+
+    async extendSubjectUp() {
+        await vscode.commands.executeCommand("editor.action.insertCursorAbove");
+        this.fixSelection();
+    }
+
     async changeSubject() {
         await vscode.commands.executeCommand("deleteLeft");
     }
@@ -723,6 +733,10 @@ export class WordSubject extends Subject {
     }
 
     async fixSelection() {
+        if (!this.context.editor) {
+            return;
+        }
+
         selections.map(this.context.editor, (selection) => {
             const wordRange = words.expandSelectionToWords(
                 this.context.editor.document,
@@ -837,6 +851,25 @@ export class WordSubject extends Subject {
         await vscode.commands.executeCommand("editor.action.insertCursorAbove");
         this.fixSelection();
     }
+
+    async extendSubjectLeft() {
+        selections.map(this.context.editor, (selection) => {
+            const wordRange = words.prevWord(
+                this.context.editor.document,
+                selection.start
+            );
+
+            if (wordRange) {
+                return new vscode.Selection(wordRange.end, selection.end);
+            }
+
+            return selection;
+        });
+
+        this.fixSelection();
+    }
+
+    async extendSubjectRight() {}
 
     async swapSubjectLeft() {
         await words.swapWordsWithNeighbors(this.context.editor, "backwards");

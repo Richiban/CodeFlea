@@ -16,7 +16,6 @@ export abstract class EditorMode implements vscode.Disposable {
     abstract refreshUI(): void;
     async dispose(): Promise<void> {}
     async fixSelection() {}
-    abstract copy(): EditorMode;
 
     onCharTyped(typed: { text: string }): EditorMode {
         vscode.commands.executeCommand("default:type", typed);
