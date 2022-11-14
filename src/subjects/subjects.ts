@@ -813,20 +813,13 @@ export class WordSubject extends Subject {
                 return selection;
             }
 
-            const nextLine = lines.getNextSignificantLine(
-                this.context.editor.document,
-                selection.end,
-                "forwards"
+            return (
+                words.nextWordUpDown(
+                    this.context.editor.document,
+                    selection.active,
+                    "down"
+                ) ?? selection
             );
-
-            if (nextLine) {
-                return new vscode.Selection(
-                    selection.start.with(nextLine.lineNumber),
-                    selection.start.with(nextLine.lineNumber)
-                );
-            }
-
-            return selection;
         });
 
         this.fixSelection();
@@ -838,20 +831,13 @@ export class WordSubject extends Subject {
                 return selection;
             }
 
-            const nextLine = lines.getNextSignificantLine(
-                this.context.editor.document,
-                selection.end,
-                "backwards"
+            return (
+                words.nextWordUpDown(
+                    this.context.editor.document,
+                    selection.active,
+                    "up"
+                ) ?? selection
             );
-
-            if (nextLine) {
-                return new vscode.Selection(
-                    selection.start.with(nextLine.lineNumber),
-                    selection.start.with(nextLine.lineNumber)
-                );
-            }
-
-            return selection;
         });
 
         this.fixSelection();
@@ -859,9 +845,10 @@ export class WordSubject extends Subject {
 
     async nextSubjectLeft() {
         selections.map(this.context.editor, (selection) => {
-            const wordRange = words.prevWord(
+            const wordRange = words.nextWord(
                 this.context.editor.document,
-                selection.start
+                selection.start,
+                "backwards"
             );
 
             if (wordRange) {
@@ -878,7 +865,8 @@ export class WordSubject extends Subject {
         selections.map(this.context.editor, (selection) => {
             const wordRange = words.nextWord(
                 this.context.editor.document,
-                selection.end
+                selection.end,
+                "forwards"
             );
 
             if (wordRange) {

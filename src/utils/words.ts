@@ -3,6 +3,7 @@ import { Char, Direction, Linqish } from "../common";
 import { swap } from "./editor";
 import * as positions from "./positions";
 import * as selections from "./selections";
+import * as lines from "./lines";
 
 export function iterWords(
     document: vscode.TextDocument,
@@ -13,10 +14,8 @@ export function iterWords(
         (function* () {
             let nextPosition: vscode.Position | undefined = startingPosition;
 
-            let advance = direction === "forwards" ? nextWord : prevWord;
-
             do {
-                const wordRange = advance(document, nextPosition);
+                const wordRange = nextWord(document, nextPosition, direction);
 
                 if (wordRange) {
                     yield wordRange;
@@ -33,37 +32,36 @@ export function iterWords(
     );
 }
 
-export function nextWord(
+export function nextWordUpDown(
     document: vscode.TextDocument,
-    currentPosition: vscode.Position
-): vscode.Range | undefined {
-    let wordRange = undefined;
-    let newPosition: vscode.Position | undefined = currentPosition;
+    currentPosition: vscode.Position,
+    direction: "up" | "down"
+): vscode.Selection | undefined {
+    const nextLine = lines.getNextSignificantLine(
+        document,
+        currentPosition,
+        direction === "down" ? "forwards" : "backwards"
+    );
 
-    do {
-        newPosition = positions.translateWithWrap(document, newPosition, 2);
-
-        if (newPosition) {
-            wordRange = document.getWordRangeAtPosition(newPosition);
-        }
-    } while (!wordRange && newPosition);
-
-    if (wordRange) {
-        return new vscode.Range(wordRange.start, wordRange.end);
+    if (nextLine) {
+        return new vscode.Selection(
+            currentPosition.with(nextLine.lineNumber),
+            currentPosition.with(nextLine.lineNumber)
+        );
     }
-
-    return undefined;
 }
 
-export function prevWord(
+export function nextWord(
     document: vscode.TextDocument,
-    currentPosition: vscode.Position
+    currentPosition: vscode.Position,
+    direction: Direction
 ): vscode.Range | undefined {
     let wordRange = undefined;
     let newPosition: vscode.Position | undefined = currentPosition;
+    const diff = direction === "forwards" ? 2 : -2;
 
     do {
-        newPosition = positions.translateWithWrap(document, newPosition, -2);
+        newPosition = positions.translateWithWrap(document, newPosition, diff);
 
         if (newPosition) {
             wordRange = document.getWordRangeAtPosition(newPosition);
@@ -113,8 +111,8 @@ function findWordClosestTo(
     position: vscode.Position
 ) {
     const wordRange = new Linqish([
-        prevWord(document, position),
-        nextWord(document, position),
+        nextWord(document, position, "backwards"),
+        nextWord(document, position, "forwards"),
     ]).minBy((w) => Math.abs(w!.end.line - position.line));
 
     return wordRange;
@@ -124,15 +122,15 @@ export async function swapWordsWithNeighbors(
     editor: vscode.TextEditor,
     direction: Direction
 ) {
-    const getTargetWord = direction === "forwards" ? nextWord : prevWord;
     const getEnd: keyof vscode.Range =
         direction === "forwards" ? "end" : "start";
 
     await editor.edit((e) => {
         selections.map(editor, (selection) => {
-            const targetWordRange = getTargetWord(
+            const targetWordRange = nextWord(
                 editor.document,
-                selection[getEnd]
+                selection[getEnd],
+                direction
             );
 
             if (targetWordRange) {
@@ -181,11 +179,8 @@ export function deleteWord(
     e.delete(selection);
 
     let danglingTextRange = new vscode.Range(
-        positions.translateWithWrap(
-            editor.document,
+        positions.translateWithWrap(editor.document, selection.start, -1) ||
             selection.start,
-            -1
-        ) || selection.start,
         selection.start
     );
 

@@ -78,13 +78,13 @@ export default class ExtendMode extends EditorMode {
                 vscode.TextEditorLineNumbersStyle.Relative;
         }
 
-        vscode.commands.executeCommand("setContext", "codeFlea.mode", "EXTEND");
+        await vscode.commands.executeCommand(
+            "setContext",
+            "codeFlea.mode",
+            "EXTEND"
+        );
 
         this.wrappedMode.fixSelection();
-
-        await vscode.commands.executeCommand(
-            "editor.action.setSelectionAnchor"
-        );
     }
 
     async executeSubjectCommand(
