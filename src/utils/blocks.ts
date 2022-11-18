@@ -90,74 +90,84 @@ export function selectAllBlocksInCurrentScope(cursorPosition: vscode.Position) {
     );
 }
 
-export function* iterBlockBoundaries(options: {
+export function iterBlockBoundaries(options: {
     fromPosition: vscode.Position;
     direction?: common.Direction;
     indentationLevel?: common.IndentationRequest;
     restrictToCurrentScope?: boolean;
     bounds?: Bounds;
-}): Generator<BlockBoundary> {
-    const document = getEditor().document;
+}): common.Linqish<BlockBoundary> {
+    return new common.Linqish(
+        (function* () {
+            const document = getEditor().document;
 
-    const finalOptions: Required<typeof options> = {
-        direction: "forwards",
-        indentationLevel: "same-indentation",
-        restrictToCurrentScope: false,
-        bounds: { start: { line: 0 }, end: { line: document.lineCount - 1 } },
-        ...options,
-    };
+            const finalOptions: Required<typeof options> = {
+                direction: "forwards",
+                indentationLevel: "same-indentation",
+                restrictToCurrentScope: false,
+                bounds: {
+                    start: { line: 0 },
+                    end: { line: document.lineCount - 1 },
+                },
+                ...options,
+            };
 
-    const documentLines = lines.iterLinePairs(
-        document,
-        options.fromPosition.line,
-        finalOptions.direction
-    );
-
-    for (const { prev, current } of documentLines) {
-        let candidateLine: vscode.TextLine | undefined;
-        let kind: BlockBoundary["kind"] | undefined;
-
-        if (current && lineIsBlockStart(prev, current)) {
-            candidateLine = current;
-            kind = "block-start";
-        } else if (prev && lineIsBlockEnd(prev, current)) {
-            candidateLine = prev;
-            kind = "block-end";
-        }
-
-        if (candidateLine && kind) {
-            const relativeIndentation = lines.getRelativeIndentation(
-                document.lineAt(options.fromPosition.line),
-                candidateLine
+            const documentLines = lines.iterLinePairs(
+                document,
+                options.fromPosition.line,
+                finalOptions.direction
             );
 
-            if (
-                finalOptions.restrictToCurrentScope &&
-                relativeIndentation === "less-indentation"
-            ) {
-                return;
-            }
+            for (const { prev, current } of documentLines) {
+                let candidateLine: vscode.TextLine | undefined;
+                let kind: BlockBoundary["kind"] | undefined;
 
-            if (
-                finalOptions.indentationLevel === "any-indentation" ||
-                relativeIndentation === finalOptions.indentationLevel
-            ) {
-                switch (kind) {
-                    case "block-start":
-                        const point = new vscode.Position(
-                            candidateLine.lineNumber,
-                            candidateLine.firstNonWhitespaceCharacterIndex
-                        );
+                if (current && lineIsBlockStart(prev, current)) {
+                    candidateLine = current;
+                    kind = "block-start";
+                } else if (prev && lineIsBlockEnd(prev, current)) {
+                    candidateLine = prev;
+                    kind = "block-end";
+                }
 
-                        yield { kind, point };
-                        break;
-                    case "block-end":
-                        yield { kind: kind, point: candidateLine.range.end };
-                        break;
+                if (candidateLine && kind) {
+                    const relativeIndentation = lines.getRelativeIndentation(
+                        document.lineAt(options.fromPosition.line),
+                        candidateLine
+                    );
+
+                    if (
+                        finalOptions.restrictToCurrentScope &&
+                        relativeIndentation === "less-indentation"
+                    ) {
+                        return;
+                    }
+
+                    if (
+                        finalOptions.indentationLevel === "any-indentation" ||
+                        relativeIndentation === finalOptions.indentationLevel
+                    ) {
+                        switch (kind) {
+                            case "block-start":
+                                const point = new vscode.Position(
+                                    candidateLine.lineNumber,
+                                    candidateLine.firstNonWhitespaceCharacterIndex
+                                );
+
+                                yield { kind, point };
+                                break;
+                            case "block-end":
+                                yield {
+                                    kind: kind,
+                                    point: candidateLine.range.end,
+                                };
+                                break;
+                        }
+                    }
                 }
             }
-        }
-    }
+        })()
+    );
 }
 
 export function* iterBlocksInCurrentScope(options: {
@@ -342,11 +352,11 @@ export function getContainingBlock(
     return new vscode.Range(result[0], result[1]);
 }
 
-export function nextBlockEnd(
+export function moveToNextBlockEnd(
     startingPosition: vscode.Position,
     direction: common.Direction,
     indentation: common.IndentationRequest
-) {
+): void {
     const indent = lines.lineIsBlank(startingPosition.line)
         ? "any-indentation"
         : indentation;
@@ -366,20 +376,30 @@ export function nextBlockEnd(
     }
 }
 
-export function getNextBlock(startPosition: vscode.Position) {
+export function getNextBlockInScope(
+    startPosition: vscode.Position,
+    direction: common.Direction
+): vscode.Range | undefined {
     for (const block of iterBlocksInCurrentScope({
         fromPosition: startPosition,
-        direction: "forwards",
+        direction: direction,
     })) {
         return block;
     }
 }
 
-export function getPrevBlock(startPosition: vscode.Position) {
+export function getFirstLastBlockInScope(
+    startPosition: vscode.Position,
+    direction: common.Direction
+): vscode.Range | undefined {
+    let current = undefined;
+
     for (const block of iterBlocksInCurrentScope({
         fromPosition: startPosition,
-        direction: "backwards",
+        direction: direction,
     })) {
-        return block;
+        current = block;
     }
+
+    return current;
 }

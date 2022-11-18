@@ -13,7 +13,6 @@
 -   Improve cleanup (empty lines and dangling operators) after deleting word
 -   Fix indentation when moving lines left and right
 -   Some blocks over over-selecting
--   Some subjects do not scroll editor when selection moves
 -   Open line below inserts in wrong place when multiple lines selected
 -   Moving words up and down gradually works cursor left/right
 -   Deleting the only block in a scope deletes the scope too

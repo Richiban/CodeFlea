@@ -129,6 +129,18 @@ export function swap(
     return target;
 }
 
+export function move(
+    document: vscode.TextDocument,
+    textEditorEdit: vscode.TextEditorEdit,
+    rangeToMove: vscode.Range,
+    newLocation: vscode.Position
+) {
+    const textToMove = document.getText(rangeToMove);
+
+    textEditorEdit.delete(rangeToMove);
+    textEditorEdit.insert(newLocation, textToMove);
+}
+
 export function goToLine(lineNumber: number) {
     const editor = getEditor();
 

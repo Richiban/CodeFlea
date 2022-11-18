@@ -4,7 +4,7 @@ import EditMode from "./EditMode";
 import ExtendMode from "./ExtendMode";
 import * as modes from "./modes";
 import * as editor from "../utils/editor";
-import * as selections from "../utils/selections";
+import * as selections from "../utils/selectionsAndRanges";
 import * as common from "../common";
 
 export default class NavigateMode extends modes.EditorMode {
@@ -53,9 +53,9 @@ export default class NavigateMode extends modes.EditorMode {
                     case "WORD":
                         return new NavigateMode(
                             this.context,
-                            subjects.createFrom(this.context, "SMALL_WORD")
+                            subjects.createFrom(this.context, "SUBWORD")
                         );
-                    case "SMALL_WORD":
+                    case "SUBWORD":
                         return new NavigateMode(
                             this.context,
                             subjects.createFrom(this.context, "WORD")
@@ -106,12 +106,11 @@ export default class NavigateMode extends modes.EditorMode {
             );
         }
 
-        const args: [] | [string] = [];
+        let args: [] | [string] = [];
 
         if (this.subject[command].length === 1) {
             const input = await editor.inputBoxChar(command);
-
-            (args as string[]).push(input);
+            args = [input];
         }
 
         this.lastCommand = { commandName: command, args: args };
@@ -166,13 +165,6 @@ export default class NavigateMode extends modes.EditorMode {
 
     async fixSelection() {
         await this.subject.fixSelection();
-
-        if (this.context.editor) {
-            editor.scrollToReveal(
-                this.context.editor.selection.start,
-                this.context.editor.selection.end
-            );
-        }
     }
 
     async dispose() {

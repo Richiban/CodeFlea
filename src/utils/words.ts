@@ -2,8 +2,15 @@ import * as vscode from "vscode";
 import { Char, Direction, Linqish } from "../common";
 import { swap } from "./editor";
 import * as positions from "./positions";
-import * as selections from "./selections";
+import * as selections from "./selectionsAndRanges";
 import * as lines from "./lines";
+
+export type SubTextRange = {
+    text: string;
+    range: { start: number; end: number };
+};
+
+type CharClass = "wordStart" | "wordCont" | "operator" | "whitespace";
 
 export function iterWords(
     document: vscode.TextDocument,
@@ -61,7 +68,17 @@ export function nextWord(
     const diff = direction === "forwards" ? 2 : -2;
 
     do {
-        newPosition = positions.translateWithWrap(document, newPosition, diff);
+        const nextPosition = positions.translateWithWrap(
+            document,
+            newPosition,
+            diff
+        );
+
+        if (nextPosition.isEqual(newPosition)) {
+            newPosition = undefined;
+        } else {
+            newPosition = nextPosition;
+        }
 
         if (newPosition) {
             wordRange = document.getWordRangeAtPosition(newPosition);
@@ -73,6 +90,173 @@ export function nextWord(
     }
 
     return undefined;
+}
+
+function getSubwordRangeAtPosition(
+    document: vscode.TextDocument,
+    position: vscode.Position
+): vscode.Range | undefined {
+    const line = document.lineAt(position.line);
+
+    const subwords = splitTextIntoSubWords(line.text);
+
+    const range = subwords.find(
+        (w) =>
+            w.range.start <= position.character &&
+            w.range.end > position.character
+    );
+
+    if (range) {
+        return new vscode.Range(
+            position.line,
+            range.range.start,
+            position.line,
+            range.range.end
+        );
+    }
+
+    return undefined;
+}
+
+export function expandSelectionToSubwords(
+    document: vscode.TextDocument,
+    selection: vscode.Selection
+) {
+    let [newStart, newEnd] = [selection.start, selection.end];
+
+    const leftWord = getSubwordRangeAtPosition(document, selection.start);
+
+    if (leftWord && !selection.start.isEqual(leftWord.start)) {
+        newStart = leftWord.start;
+    }
+
+    const rightWord = getSubwordRangeAtPosition(document, selection.end);
+
+    if (rightWord && !selection.end.isEqual(rightWord.end)) {
+        newEnd = rightWord.end;
+    }
+
+    const newSelection = new vscode.Selection(newEnd, newStart);
+
+    if (newSelection.isEmpty) {
+        const wordRange = getSubwordRangeAtPosition(
+            document,
+            newSelection.start
+        );
+
+        if (wordRange) {
+            return new vscode.Selection(wordRange.end, wordRange.start);
+        }
+    }
+
+    return newSelection;
+}
+
+export function iterSubwords(
+    editor: vscode.TextEditor,
+    options: {
+        fromPosition: vscode.Position;
+        direction?: Direction;
+    }
+): Linqish<vscode.Range> {
+    return new Linqish<vscode.Range>(
+        (function* () {
+            const line = editor.document.lineAt(options.fromPosition.line);
+            const subwords =
+                options.direction === "backwards"
+                    ? splitTextIntoSubWords(line.text)
+                          .reverse()
+                          .filter(
+                              (w) =>
+                                  w.range.end <= options.fromPosition.character
+                          )
+                    : splitTextIntoSubWords(line.text).filter(
+                          (w) => w.range.start >= options.fromPosition.character
+                      );
+
+            for (const {
+                text,
+                range: { start, end },
+            } of subwords) {
+                yield new vscode.Range(
+                    line.lineNumber,
+                    start,
+                    line.lineNumber,
+                    end
+                );
+            }
+        })()
+    );
+}
+
+const segmenter = new (Intl as any).Segmenter("en", {
+    granularity: "word",
+});
+
+function getCharClass(char: string): CharClass | undefined {
+    if (char.length !== 1) {
+        return undefined;
+    }
+
+    if (char.match(/[a-z]/)) {
+        return "wordCont";
+    }
+    if (char.match(/[0-9]/)) {
+        return "wordCont";
+    }
+    if (char.match(/[A-Z]/)) {
+        return "wordStart";
+    }
+    if (char.match(/\s/)) {
+        return "whitespace";
+    }
+
+    return "operator";
+}
+
+function splitTextIntoSubWords(text: string): SubTextRange[] {
+    const results: SubTextRange[] = [];
+
+    let prevCharClass: CharClass | undefined = undefined;
+    let currentWord = "";
+    let currentWordIndex = 0;
+    let index = 0;
+
+    for (const char of text) {
+        const charClass = getCharClass(char);
+
+        if (
+            prevCharClass === charClass ||
+            (prevCharClass === "wordStart" && charClass === "wordCont")
+        ) {
+            currentWord += char;
+        } else {
+            results.push({
+                text: currentWord,
+                range: {
+                    start: currentWordIndex,
+                    end: currentWordIndex + currentWord.length,
+                },
+            });
+            currentWord = char;
+            currentWordIndex = index;
+        }
+
+        prevCharClass = charClass;
+        index++;
+    }
+
+    if (currentWord) {
+        results.push({
+            text: currentWord,
+            range: {
+                start: currentWordIndex,
+                end: currentWordIndex + currentWord.length,
+            },
+        });
+    }
+
+    return results;
 }
 
 export function expandSelectionToWords(
@@ -179,8 +363,7 @@ export function deleteWord(
     e.delete(selection);
 
     let danglingTextRange = new vscode.Range(
-        positions.translateWithWrap(editor.document, selection.start, -1) ||
-            selection.start,
+        positions.translateWithWrap(editor.document, selection.start, -1),
         selection.start
     );
 
@@ -196,7 +379,7 @@ export function deleteWord(
                 editor.document,
                 danglingTextRange.start,
                 -1
-            ) || danglingTextRange.start,
+            ),
             danglingTextRange.start
         );
         danglingText = editor.document.getText(danglingTextRange);

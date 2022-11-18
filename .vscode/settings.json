@@ -15,7 +15,8 @@
         "fleajump",
         "lightskyblue",
         "Linqish",
-        "Richibansoft"
+        "Richibansoft",
+        "SUBWORD"
     ],
     "terminal.integrated.commandsToSkipShell": [
         "workbench.action.focusNextGroup"

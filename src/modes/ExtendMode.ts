@@ -4,7 +4,7 @@ import * as subjects from "../subjects/subjects";
 import EditMode from "./EditMode";
 import { EditorMode, EditorModeType } from "./modes";
 import NavigateMode from "./NavigateMode";
-import * as selections from "../utils/selections";
+import * as selections from "../utils/selectionsAndRanges";
 
 export default class ExtendMode extends EditorMode {
     private readonly wrappedMode: NavigateMode;
@@ -47,9 +47,9 @@ export default class ExtendMode extends EditorMode {
                     case "WORD":
                         return new NavigateMode(
                             this.context,
-                            subjects.createFrom(this.context, "SMALL_WORD")
+                            subjects.createFrom(this.context, "SUBWORD")
                         );
-                    case "SMALL_WORD":
+                    case "SUBWORD":
                         return new NavigateMode(
                             this.context,
                             subjects.createFrom(this.context, "WORD")

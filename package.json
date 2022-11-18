@@ -247,7 +247,7 @@
             },
             {
                 "key": "/",
-                "command": "codeFlea.nextOccurrenceOfChar",
+                "command": "editor.action.selectToBracket",
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
@@ -337,12 +337,12 @@
             },
             {
                 "key": "l",
-                "command": "codeFlea.goToFirstSubjectInLine",
+                "command": "codeFlea.goToFirstSubjectInScope",
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "key": "y",
-                "command": "codeFlea.goToLastSubjectInLine",
+                "command": "codeFlea.goToLastSubjectInScope",
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {

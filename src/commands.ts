@@ -515,22 +515,24 @@ class OpenGoToMenuCommand extends ExtensionCommand {
 }
 
 @registerCommand()
-class FirstInLineCommand extends ExtensionCommand {
-    id = "codeFlea.goToFirstSubjectInLine";
+class FirstInScopeCommand extends ExtensionCommand {
+    id = "codeFlea.goToFirstSubjectInScope";
 
     async execute() {
         await this.container.manager.executeSubjectCommand(
-            "firstSubjectInLine"
+            "firstSubjectInScope"
         );
     }
 }
 
 @registerCommand()
-class LastInLineCommand extends ExtensionCommand {
-    id = "codeFlea.goToLastSubjectInLine";
+class LastInScopeCommand extends ExtensionCommand {
+    id = "codeFlea.goToLastSubjectInScope";
 
     async execute() {
-        await this.container.manager.executeSubjectCommand("lastSubjectInLine");
+        await this.container.manager.executeSubjectCommand(
+            "lastSubjectInScope"
+        );
     }
 }
 

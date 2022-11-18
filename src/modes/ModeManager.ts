@@ -107,6 +107,8 @@ export default class ModeManager {
         } else if (choice) {
             choice.execute();
         }
+
+        this.mode.fixSelection();
     }
 
     async openModifyMenu() {
@@ -117,6 +119,8 @@ export default class ModeManager {
         if (choice) {
             await choice.execute();
         }
+
+        this.mode.fixSelection();
     }
 
     async customVsCodeCommand() {
@@ -127,9 +131,13 @@ export default class ModeManager {
         if (command) {
             await vscode.commands.executeCommand(command);
         }
+
+        this.mode.fixSelection();
     }
 
     async undoLastCommand() {
         await vscode.commands.executeCommand("cursorUndo");
+
+        this.mode.fixSelection();
     }
 }

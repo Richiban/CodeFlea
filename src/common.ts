@@ -157,7 +157,9 @@ export class Linqish<T> implements Iterable<T> {
         return new Linqish(
             (function* () {
                 for (const x of iter) {
-                    if (f(x) === false) return;
+                    if (f(x) === false) {
+                        return;
+                    }
 
                     yield x;
                 }
