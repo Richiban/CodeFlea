@@ -166,6 +166,18 @@ export function iterBlockBoundaries(options: {
                     }
                 }
             }
+
+            if (finalOptions.direction === "forwards") {
+                // yield {
+                //     kind: "block-end",
+                //     point: candidateLine.range.end,
+                // };
+            } else {
+                yield {
+                    kind: "block-start",
+                    point: new vscode.Position(0, 0),
+                };
+            }
         })()
     );
 }

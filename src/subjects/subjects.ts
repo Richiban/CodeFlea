@@ -882,6 +882,14 @@ export class SubWordSubject extends Subject {
         this.fixSelection();
     }
 
+    async firstSubjectInScope() {
+        await vscode.commands.executeCommand("cursorHome");
+    }
+
+    async lastSubjectInScope(): Promise<void> {
+        await vscode.commands.executeCommand("cursorEnd");
+    }
+
     async fixSelection() {
         if (!this.context.editor) {
             return;
@@ -1044,12 +1052,10 @@ export class WordSubject extends Subject {
 
     async firstSubjectInScope() {
         await vscode.commands.executeCommand("cursorHome");
-        this.fixSelection();
     }
 
     async lastSubjectInScope(): Promise<void> {
         await vscode.commands.executeCommand("cursorEnd");
-        this.fixSelection();
     }
 
     async deleteSubject() {
