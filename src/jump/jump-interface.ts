@@ -10,7 +10,7 @@ export type UserSelection =
     | { tag: "None" }
     | { tag: "Cancelled" };
 
-function generateJumpCodeImage(
+export function generateJumpCodeImage(
     config: Config,
     code: string,
     interfaceType: InterfaceType

@@ -12,6 +12,7 @@ export abstract class EditorMode implements vscode.Disposable {
 
     abstract equals(previousMode: EditorMode): boolean;
     abstract changeTo(newMode: EditorModeType): Promise<EditorMode>;
+    abstract changeNumHandler(): EditorMode;
     abstract clearUI(): void;
     abstract refreshUI(): void;
     async dispose(): Promise<void> {}

@@ -12,6 +12,8 @@ export type SubTextRange = {
 
 type CharClass = "wordStart" | "wordCont" | "operator" | "whitespace";
 
+const separationCharacters = " ,.:=+-*/%\r\n".split("");
+
 export function iterWords(
     document: vscode.TextDocument,
     startingPosition: vscode.Position,
@@ -66,6 +68,8 @@ export function nextWord(
     let wordRange = undefined;
     let newPosition: vscode.Position | undefined = currentPosition;
     const diff = direction === "forwards" ? 2 : -2;
+    {
+    }
 
     do {
         const nextPosition = positions.translateWithWrap(
@@ -102,7 +106,7 @@ function getSubwordRangeAtPosition(
 
     const range = subwords.find(
         (w) =>
-            w.range.start <= position.character &&
+            w.range.start < position.character &&
             w.range.end > position.character
     );
 
@@ -153,37 +157,44 @@ export function expandSelectionToSubwords(
 }
 
 export function iterSubwords(
-    editor: vscode.TextEditor,
-    options: {
-        fromPosition: vscode.Position;
-        direction?: Direction;
-    }
+    document: vscode.TextDocument,
+    fromPosition: vscode.Position,
+    direction: Direction
 ): Linqish<vscode.Range> {
     return new Linqish<vscode.Range>(
         (function* () {
-            const line = editor.document.lineAt(options.fromPosition.line);
-            const subwords =
-                options.direction === "backwards"
-                    ? splitTextIntoSubWords(line.text)
-                          .reverse()
-                          .filter(
-                              (w) =>
-                                  w.range.end <= options.fromPosition.character
-                          )
-                    : splitTextIntoSubWords(line.text).filter(
-                          (w) => w.range.start >= options.fromPosition.character
-                      );
+            let isFirstLine = true;
 
-            for (const {
-                text,
-                range: { start, end },
-            } of subwords) {
-                yield new vscode.Range(
-                    line.lineNumber,
-                    start,
-                    line.lineNumber,
-                    end
-                );
+            for (const line of lines.iterLines(
+                document,
+                fromPosition.line,
+                direction
+            )) {
+                const subwords =
+                    direction === "forwards"
+                        ? splitTextIntoSubWords(line.text).filter(
+                              (sw) =>
+                                  !isFirstLine ||
+                                  sw.range.start >= fromPosition.character
+                          )
+                        : splitTextIntoSubWords(line.text)
+                              .filter(
+                                  (sw) =>
+                                      !isFirstLine ||
+                                      sw.range.end <= fromPosition.character
+                              )
+                              .reverse();
+
+                for (const { range } of subwords) {
+                    yield new vscode.Range(
+                        line.lineNumber,
+                        range.start,
+                        line.lineNumber,
+                        range.end
+                    );
+                }
+
+                isFirstLine = false;
             }
         })()
     );
@@ -226,6 +237,7 @@ function splitTextIntoSubWords(text: string): SubTextRange[] {
         const charClass = getCharClass(char);
 
         if (
+            currentWord === "" ||
             prevCharClass === charClass ||
             (prevCharClass === "wordStart" && charClass === "wordCont")
         ) {
@@ -310,7 +322,7 @@ export async function swapWordsWithNeighbors(
         direction === "forwards" ? "end" : "start";
 
     await editor.edit((e) => {
-        selections.map(editor, (selection) => {
+        selections.tryMap(editor, (selection) => {
             const targetWordRange = nextWord(
                 editor.document,
                 selection[getEnd],
@@ -347,7 +359,9 @@ export function search(
             wordRange.start.translate(undefined, 1)
         );
 
-        if (editor.document.getText(charRange) === targetChar) {
+        if (
+            editor.document.getText(charRange).localeCompare(targetChar) === 0
+        ) {
             return wordRange;
         }
     }
@@ -355,33 +369,110 @@ export function search(
     return undefined;
 }
 
+export function searchSubword(
+    document: vscode.TextDocument,
+    startingPosition: vscode.Position,
+    targetChar: Char,
+    direction: Direction
+): vscode.Range | undefined {
+    for (const wordRange of iterSubwords(
+        document,
+        startingPosition,
+        direction
+    )) {
+        const charRange = new vscode.Range(
+            wordRange.start,
+            wordRange.start.translate(undefined, 1)
+        );
+
+        if (
+            document.getText(charRange).localeCompare(targetChar, undefined, {
+                sensitivity: "base",
+            }) === 0
+        ) {
+            return wordRange;
+        }
+    }
+
+    return undefined;
+}
+
+function getSeparatingText(
+    document: vscode.TextDocument,
+    wordRange: vscode.Range
+): vscode.Range | undefined {
+    const wordBefore = iterWords(
+        document,
+        wordRange.start,
+        "backwards"
+    ).tryFirst();
+
+    const wordAfter = iterWords(document, wordRange.end, "forwards").tryFirst();
+
+    const separatingTextRangeBefore =
+        wordBefore && new vscode.Range(wordBefore.end, wordRange.start);
+
+    const separatingTextRangeAfter =
+        wordAfter && new vscode.Range(wordRange.end, wordAfter.start);
+
+    const separatingTextBefore =
+        separatingTextRangeBefore &&
+        document.getText(separatingTextRangeBefore);
+
+    const separatingTextAfter =
+        separatingTextRangeAfter && document.getText(separatingTextRangeAfter);
+
+    if (
+        separatingTextAfter &&
+        (separatingTextBefore === undefined ||
+            separatingTextAfter.length < separatingTextBefore.length) &&
+        separatingTextAfter
+            .split("")
+            .every((c) => separationCharacters.includes(c))
+    ) {
+        return separatingTextRangeAfter;
+    }
+
+    if (
+        separatingTextBefore &&
+        separatingTextBefore
+            .split("")
+            .every((c) => separationCharacters.includes(c))
+    ) {
+        return separatingTextRangeBefore;
+    }
+}
+
 export function deleteWord(
-    editor: vscode.TextEditor,
+    document: vscode.TextDocument,
     e: vscode.TextEditorEdit,
     selection: vscode.Selection
-) {
+): void {
     e.delete(selection);
 
-    let danglingTextRange = new vscode.Range(
-        positions.translateWithWrap(editor.document, selection.start, -1),
-        selection.start
-    );
+    const separationText = getSeparatingText(document, selection);
 
-    let danglingText = editor.document.getText(danglingTextRange);
-
-    const charsToRemove = ":.,".split("");
-
-    while (charsToRemove.includes(danglingText)) {
-        e.delete(danglingTextRange);
-
-        danglingTextRange = new vscode.Range(
-            positions.translateWithWrap(
-                editor.document,
-                danglingTextRange.start,
-                -1
-            ),
-            danglingTextRange.start
-        );
-        danglingText = editor.document.getText(danglingTextRange);
+    if (separationText) {
+        e.delete(separationText);
     }
+}
+
+export function duplicateWord(
+    document: vscode.TextDocument,
+    textEdit: vscode.TextEditorEdit,
+    selection: vscode.Selection
+): void {
+    const separationTextRange = getSeparatingText(document, selection);
+
+    if (separationTextRange) {
+        const separationText = document.getText(separationTextRange);
+
+        if (separationTextRange.start <= selection.end) {
+            textEdit.insert(selection.end, separationText);
+        } else {
+            textEdit.insert(selection.start, separationText);
+        }
+    }
+
+    textEdit.insert(selection.end, document.getText(selection));
 }

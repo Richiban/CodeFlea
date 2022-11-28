@@ -81,6 +81,24 @@ export class Linqish<T> implements Iterable<T> {
         return this.iter[Symbol.iterator]();
     }
 
+    tryElementAt(number: number): T | undefined {
+        return this.skip(number).tryFirst();
+    }
+
+    counted(): Linqish<readonly [T, number]> {
+        const iter = this.iter;
+
+        return new Linqish(
+            (function* () {
+                let count = 0;
+                for (const item of iter) {
+                    yield [item, count] as const;
+                    count++;
+                }
+            })()
+        );
+    }
+
     minBy(selector: (item: T) => number): T | undefined {
         const iter = this.iter;
 
@@ -114,6 +132,26 @@ export class Linqish<T> implements Iterable<T> {
                     } else {
                         yield x;
                     }
+                }
+            })()
+        );
+    }
+
+    take(count: number): Linqish<T> {
+        const iter = this.iter;
+
+        return new Linqish(
+            (function* () {
+                let numRemaining = Math.max(0, count);
+
+                for (const x of iter) {
+                    if (numRemaining <= 0) {
+                        return;
+                    }
+
+                    numRemaining--;
+
+                    yield x;
                 }
             })()
         );
@@ -210,6 +248,21 @@ export class Linqish<T> implements Iterable<T> {
                 for (const x of iter) {
                     if (f(x)) {
                         yield x;
+                    }
+                }
+            })()
+        );
+    }
+
+    filterMap<R>(f: (x: T) => R | undefined) {
+        const iter = this.iter;
+
+        return new Linqish(
+            (function* () {
+                for (const x of iter) {
+                    const r = f(x);
+                    if (r !== undefined) {
+                        yield r;
                     }
                 }
             })()

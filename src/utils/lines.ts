@@ -141,8 +141,9 @@ export function getNearestLineOfChangeOfIndentation(
                 forwardsLine.firstNonWhitespaceCharacterIndex,
                 currentLine.firstNonWhitespaceCharacterIndex
             )
-        )
+        ) {
             return forwardsLine;
+        }
 
         if (
             backwardsLine &&
@@ -151,8 +152,9 @@ export function getNearestLineOfChangeOfIndentation(
                 backwardsLine.firstNonWhitespaceCharacterIndex,
                 currentLine.firstNonWhitespaceCharacterIndex
             )
-        )
+        ) {
             return backwardsLine;
+        }
     }
 }
 
@@ -228,7 +230,9 @@ export function moveToChangeOfIndentation(
             }
         }
 
-        if (line) moveCursorTo(line.range.start);
+        if (line) {
+            moveCursorTo(line.range.start);
+        }
     }
 }
 
@@ -280,4 +284,68 @@ export function getNextSignificantLine(
             return line;
         }
     }
+}
+
+export function swapLineSideways(
+    document: vscode.TextDocument,
+    position: vscode.Position,
+    edit: vscode.TextEditorEdit,
+    direction: "left" | "right"
+): vscode.Range | undefined {
+    const sourceLine = document.lineAt(position.line);
+    const targetIndentation: Change =
+        direction === "right" ? "greaterThan" : "lessThan";
+    const lineDirection: Direction =
+        direction === "right" ? "forwards" : "backwards";
+
+    const targetLine = getNextLineOfChangeOfIndentation(
+        targetIndentation,
+        lineDirection,
+        document,
+        sourceLine
+    );
+
+    if (targetLine) {
+        const sourceLineRange = sourceLine.rangeIncludingLineBreak;
+        const newLineText =
+            targetLine.text.substring(
+                0,
+                targetLine.firstNonWhitespaceCharacterIndex
+            ) +
+            document
+                .getText(sourceLineRange)
+                .substring(sourceLine.firstNonWhitespaceCharacterIndex);
+
+        edit.insert(targetLine.range.start, newLineText);
+        edit.delete(sourceLineRange);
+
+        return new vscode.Range(
+            new vscode.Position(
+                targetLine.lineNumber,
+                sourceLine.range.start.character
+            ),
+            new vscode.Position(
+                targetLine.lineNumber,
+                sourceLine.range.end.character
+            )
+        );
+    }
+}
+
+export function duplicate(
+    document: vscode.TextDocument,
+    textEdit: vscode.TextEditorEdit,
+    selection: vscode.Selection
+) {
+    const startLine = document.lineAt(selection.start.line);
+    const endLine = document.lineAt(selection.end.line);
+
+    const linesToDuplicate = document.getText(
+        new vscode.Range(
+            startLine.range.start,
+            endLine.rangeIncludingLineBreak.end
+        )
+    );
+
+    textEdit.insert(startLine.range.start, linesToDuplicate);
 }

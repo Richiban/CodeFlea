@@ -415,3 +415,21 @@ export function getFirstLastBlockInScope(
 
     return current;
 }
+
+export function duplicate(
+    document: vscode.TextDocument,
+    textEdit: vscode.TextEditorEdit,
+    block: vscode.Range
+) {
+    const startLine = document.lineAt(block.start.line);
+    const endLine = document.lineAt(block.end.line);
+
+    const linesToDuplicate = document.getText(
+        new vscode.Range(
+            startLine.range.start,
+            endLine.rangeIncludingLineBreak.end
+        )
+    );
+
+    textEdit.insert(startLine.range.start, linesToDuplicate);
+}

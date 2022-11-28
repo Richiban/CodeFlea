@@ -466,6 +466,16 @@
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
+                "command": "codeFlea.duplicateSubject",
+                "key": "shift+d",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "command": "codeFlea.changeNumHandler",
+                "key": "`",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
                 "command": "codeFlea.change",
                 "key": "c",
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"

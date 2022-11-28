@@ -6,13 +6,13 @@ import * as modes from "./modes";
 import * as editor from "../utils/editor";
 import * as selections from "../utils/selectionsAndRanges";
 import * as common from "../common";
+import { NumHandler } from "../handlers/NumHandler";
 
 export default class NavigateMode extends modes.EditorMode {
-    private commandMultiplier: number = 0;
-
     constructor(
         private readonly context: common.ExtensionContext,
-        public readonly subject: subjects.Subject
+        public readonly subject: subjects.Subject,
+        private readonly numHandler: NumHandler
     ) {
         super();
     }
@@ -24,13 +24,27 @@ export default class NavigateMode extends modes.EditorMode {
         );
     }
 
+    with(
+        args: Partial<{
+            context: common.ExtensionContext;
+            subject: subjects.Subject;
+            numHandler: NumHandler;
+        }>
+    ) {
+        return new NavigateMode(
+            args.context ?? this.context,
+            args.subject ?? this.subject,
+            args.numHandler ?? this.numHandler
+        );
+    }
+
     async changeTo(newMode: modes.EditorModeType): Promise<modes.EditorMode> {
         switch (newMode.kind) {
             case "EDIT":
                 return new EditMode(this.context, this);
 
             case "EXTEND":
-                return new ExtendMode(this.context, this);
+                return new ExtendMode(this.context, this, this.numHandler);
 
             case "NAVIGATE":
                 if (editor) {
@@ -38,49 +52,54 @@ export default class NavigateMode extends modes.EditorMode {
                 }
 
                 if (newMode.subjectName !== this.subject.name) {
-                    return new NavigateMode(
-                        this.context,
-                        subjects.createFrom(this.context, newMode.subjectName)
-                    );
+                    return this.with({
+                        subject: subjects.createFrom(
+                            this.context,
+                            newMode.subjectName
+                        ),
+                    });
                 }
 
                 switch (newMode.subjectName) {
                     case "LINE":
-                        return new NavigateMode(
-                            this.context,
-                            subjects.createFrom(this.context, "ALL_LINES")
-                        );
+                        return this.with({
+                            subject: subjects.createFrom(
+                                this.context,
+                                "ALL_LINES"
+                            ),
+                        });
                     case "WORD":
-                        return new NavigateMode(
-                            this.context,
-                            subjects.createFrom(this.context, "SUBWORD")
-                        );
+                        return this.with({
+                            subject: subjects.createFrom(
+                                this.context,
+                                "SUBWORD"
+                            ),
+                        });
                     case "SUBWORD":
-                        return new NavigateMode(
-                            this.context,
-                            subjects.createFrom(this.context, "WORD")
-                        );
+                        return this.with({
+                            subject: subjects.createFrom(this.context, "WORD"),
+                        });
                     case "ALL_LINES":
-                        return new NavigateMode(
-                            this.context,
-                            subjects.createFrom(this.context, "LINE")
-                        );
+                        return this.with({
+                            subject: subjects.createFrom(this.context, "LINE"),
+                        });
                 }
 
                 return this;
         }
     }
 
+    changeNumHandler(): modes.EditorMode {
+        return this.with({ numHandler: this.numHandler.change() });
+    }
+
     clearUI() {
         this.subject.clearUI();
+        this.numHandler.clear();
     }
 
     refreshUI() {
         this.context.statusBar.text = `Navigate (${this.subject?.name})`;
-
-        if (this.commandMultiplier > 1) {
-            this.context.statusBar.text += ` x${this.commandMultiplier}`;
-        }
 
         if (this.context.editor) {
             this.context.editor.options.cursorStyle =
@@ -96,7 +115,7 @@ export default class NavigateMode extends modes.EditorMode {
             "NAVIGATE"
         );
 
-        this.subject?.fixSelection();
+        this.fixSelection();
     }
 
     async executeSubjectCommand(command: keyof subjects.SubjectActions) {
@@ -115,20 +134,15 @@ export default class NavigateMode extends modes.EditorMode {
 
         this.lastCommand = { commandName: command, args: args };
 
-        await (this.subject[command] as any)(...args);
-
-        let refreshNeeded = false;
-
-        while (this.commandMultiplier > 1) {
-            await this.repeatSubjectCommand();
-            this.commandMultiplier--;
-            refreshNeeded = true;
-        }
-
-        this.commandMultiplier = 0;
+        const { needsUiRefresh: refreshNeeded } =
+            await this.numHandler.handleCommandExecution(async () => {
+                await (this.subject[command] as any)(...args);
+            });
 
         if (refreshNeeded) {
             this.refreshUI();
+        } else {
+            this.fixSelection();
         }
     }
 
@@ -158,13 +172,18 @@ export default class NavigateMode extends modes.EditorMode {
             return this;
         }
 
-        this.commandMultiplier = this.commandMultiplier * 10 + parsed;
+        this.numHandler.handleNumKey(parsed);
 
         return this;
     }
 
     async fixSelection() {
         await this.subject.fixSelection();
+
+        this.numHandler.setRanges(
+            this.subject.iterAll("forwards"),
+            this.subject.iterAll("backwards")
+        );
     }
 
     async dispose() {

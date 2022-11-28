@@ -2,23 +2,44 @@ import * as vscode from "vscode";
 
 export type SelectionEndType = keyof Pick<vscode.Selection, "start" | "end">;
 
+export function getMidPoint(range: vscode.Range): vscode.Position {
+    return new vscode.Position(
+        range.start.line + Math.floor((range.end.line - range.start.line) / 2),
+        range.start.character +
+            Math.floor((range.end.character - range.start.character) / 2)
+    );
+}
+
 export function collapseSelections(
     editor: vscode.TextEditor,
     endType: SelectionEndType = "start"
 ) {
-    map(
+    tryMap(
         editor,
         (selection) =>
             new vscode.Selection(selection[endType], selection[endType])
     );
 }
 
-export function map(
+export function tryMap(
     editor: vscode.TextEditor,
-    mapper: (selection: vscode.Selection) => vscode.Selection
+    mapper: (selection: vscode.Selection) => vscode.Range | undefined
 ) {
     if (editor) {
-        editor.selections = editor.selections.map(mapper);
+        editor.selections = editor.selections.map((selection) => {
+            const newSelection = mapper(selection);
+
+            if (!newSelection) {
+                return selection;
+            } else if (newSelection instanceof vscode.Selection) {
+                return newSelection;
+            } else {
+                return new vscode.Selection(
+                    newSelection.start,
+                    newSelection.end
+                );
+            }
+        });
     }
 }
 
@@ -60,4 +81,12 @@ export function expandToIncludeBlankLines(
         endLine,
         editor.document.lineAt(endLine).rangeIncludingLineBreak.end.character
     );
+}
+
+export function pointToRange(point: vscode.Position): any {
+    return new vscode.Range(point, point);
+}
+
+export function rangeToSelection(range: vscode.Range): vscode.Selection {
+    return new vscode.Selection(range.start, range.end);
 }

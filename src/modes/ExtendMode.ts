@@ -4,14 +4,15 @@ import * as subjects from "../subjects/subjects";
 import EditMode from "./EditMode";
 import { EditorMode, EditorModeType } from "./modes";
 import NavigateMode from "./NavigateMode";
-import * as selections from "../utils/selectionsAndRanges";
+import { NumHandler } from "../handlers/NumHandler";
 
 export default class ExtendMode extends EditorMode {
     private readonly wrappedMode: NavigateMode;
 
     constructor(
         private readonly context: common.ExtensionContext,
-        previousMode: NavigateMode
+        previousMode: NavigateMode,
+        private readonly numHandler: NumHandler
     ) {
         super();
 
@@ -34,7 +35,8 @@ export default class ExtendMode extends EditorMode {
 
                     return new NavigateMode(
                         this.context,
-                        subjects.createFrom(this.context, newMode.subjectName)
+                        subjects.createFrom(this.context, newMode.subjectName),
+                        this.numHandler
                     );
                 }
 
@@ -42,22 +44,26 @@ export default class ExtendMode extends EditorMode {
                     case "LINE":
                         return new NavigateMode(
                             this.context,
-                            subjects.createFrom(this.context, "ALL_LINES")
+                            subjects.createFrom(this.context, "ALL_LINES"),
+                            this.numHandler
                         );
                     case "WORD":
                         return new NavigateMode(
                             this.context,
-                            subjects.createFrom(this.context, "SUBWORD")
+                            subjects.createFrom(this.context, "SUBWORD"),
+                            this.numHandler
                         );
                     case "SUBWORD":
                         return new NavigateMode(
                             this.context,
-                            subjects.createFrom(this.context, "WORD")
+                            subjects.createFrom(this.context, "WORD"),
+                            this.numHandler
                         );
                     case "ALL_LINES":
                         return new NavigateMode(
                             this.context,
-                            subjects.createFrom(this.context, "LINE")
+                            subjects.createFrom(this.context, "LINE"),
+                            this.numHandler
                         );
                 }
 
@@ -65,7 +71,27 @@ export default class ExtendMode extends EditorMode {
         }
     }
 
-    clearUI(): void {}
+    changeNumHandler(): EditorMode {
+        return this.with({ numHandler: this.numHandler.change() });
+    }
+
+    with(
+        args: Partial<{
+            context: common.ExtensionContext;
+            wrappedMode: NavigateMode;
+            numHandler: NumHandler;
+        }>
+    ) {
+        return new ExtendMode(
+            args.context ?? this.context,
+            args.wrappedMode ?? this.wrappedMode,
+            args.numHandler ?? this.numHandler
+        );
+    }
+
+    clearUI(): void {
+        this.wrappedMode.clearUI();
+    }
 
     async refreshUI() {
         this.context.statusBar.text = `Extend (${this.wrappedMode.subject?.name})`;

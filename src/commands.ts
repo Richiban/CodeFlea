@@ -156,6 +156,24 @@ class DeleteCommand extends ExtensionCommand {
 }
 
 @registerCommand()
+class DuplicateCommand extends ExtensionCommand {
+    id = "codeFlea.duplicateSubject";
+
+    async execute() {
+        await this.container.manager.executeSubjectCommand("duplicateSubject");
+    }
+}
+
+@registerCommand()
+class ChangeNumHandlerCommand extends ExtensionCommand {
+    id = "codeFlea.changeNumHandler";
+
+    async execute() {
+        await this.container.manager.changeNumHandler();
+    }
+}
+
+@registerCommand()
 class WordSubjectCommand extends ExtensionCommand {
     id = "codeFlea.changeToWordSubject";
 

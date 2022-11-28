@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import * as common from "../common";
+import { defaultNumHandler } from "../handlers/NumHandler";
 import { SubjectActions } from "../subjects/subjects";
 import ExtendMode from "./ExtendMode";
 import { EditorMode, EditorModeType } from "./modes";
@@ -35,11 +36,19 @@ export default class EditMode extends EditorMode {
             case "EDIT":
                 return this;
             case "EXTEND":
-                return new ExtendMode(this.context, this.previousNavigateMode);
+                return new ExtendMode(
+                    this.context,
+                    this.previousNavigateMode,
+                    defaultNumHandler(this.context)
+                );
 
             case "NAVIGATE":
                 return this.previousNavigateMode;
         }
+    }
+
+    changeNumHandler(): EditorMode {
+        return this;
     }
 
     onCharTyped(typed: { text: string }): EditorMode {

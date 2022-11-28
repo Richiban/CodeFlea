@@ -60,6 +60,12 @@ export default class ModeManager {
         }
     }
 
+    async changeNumHandler() {
+        this.mode.clearUI();
+        this.mode = this.mode.changeNumHandler();
+        this.mode.refreshUI();
+    }
+
     async executeSubjectCommand(command: keyof SubjectActions) {
         console.log(`Executing subject command (${command})`);
         await this.mode.executeSubjectCommand(command);

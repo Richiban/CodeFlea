@@ -16,7 +16,8 @@
         "lightskyblue",
         "Linqish",
         "Richibansoft",
-        "SUBWORD"
+        "SUBWORD",
+        "Subwords"
     ],
     "terminal.integrated.commandsToSkipShell": [
         "workbench.action.focusNextGroup"

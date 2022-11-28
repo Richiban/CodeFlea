@@ -1,12 +1,7 @@
 # To implement
 
--   Add slash for next char
--   Implement small words
--   Implement extend mode
 -   Implement extending subjects
--   Searching lines
--   Searching blocks
--   Delete blocks
+-   Searching case-insensitive
 
 # Bugs
 
@@ -16,6 +11,6 @@
 -   Open line below inserts in wrong place when multiple lines selected
 -   Moving words up and down gradually works cursor left/right
 -   Deleting the only block in a scope deletes the scope too
--   Switching editor leaves decorations in place
--   Can't select first block in file
--   Null mode keeps being selected
+-   Extend mode is pretty broken (especially going up or left)
+-   Selecting with the mouse is broken in one direction
+-   Sometimes change (c) leaves the decorations in place even while editing
