@@ -6,16 +6,17 @@ import {
     SpaceCommands,
     ModifyCommands,
 } from "../utils/quickMenus";
-import { createFrom, SubjectActions } from "../subjects/subjects";
+import { SubjectActions } from "../subjects/subjects";
 import { EditorMode, EditorModeType } from "./modes";
 import { NullMode } from "./NullMode";
-import EditMode from "./EditMode";
-import NavigateMode from "./NavigateMode";
+import * as common from "../common";
+import { tryMap } from "../utils/selectionsAndRanges";
 
 export default class ModeManager {
     private mode: EditorMode;
     public statusBar: vscode.StatusBarItem;
     public editor: vscode.TextEditor = undefined!;
+    private readonly messageBuffer: common.Msg[] = [];
 
     constructor(public config: Config) {
         this.statusBar = vscode.window.createStatusBarItem(
@@ -27,6 +28,63 @@ export default class ModeManager {
         this.mode = new NullMode(this);
 
         this.statusBar.show();
+    }
+
+    dispatch(...messages: common.Msg[]) {
+        return this.messageBuffer.push(...messages);
+    }
+
+    private async flushMessages() {
+        for (const message of this.messageBuffer) {
+            await this.handle(message);
+        }
+    }
+
+    private async handle(message: common.Msg) {
+        switch (message.kind) {
+            case "changeMode":
+                this.changeMode(message.newMode);
+                break;
+            case "vscodeCommand":
+                await vscode.commands.executeCommand(message.command);
+                break;
+            case "mapEditorSelections":
+                this.editor.selections = tryMap(this.editor, message.mapper);
+
+                this.editor.setDecorations(
+                    message.decorationType,
+                    this.editor.selections
+                );
+
+                this.editor.revealRange(this.editor.selection);
+                break;
+            case "setEditorDecorations":
+                this.editor.setDecorations(
+                    message.decorationType,
+                    message.targets
+                );
+                break;
+            case "clearEditorDecorations":
+                this.editor.setDecorations(message.decorationType, []);
+                break;
+            case "setStatusBarText":
+                this.statusBar.text = message.text;
+                break;
+            case "scrollEditor":
+                this.editor.revealRange(message.revealRange);
+                break;
+            case "customEdit":
+                this.editor.edit(message.edit);
+                break;
+            case "customEditPerSelection":
+                this.editor.edit((e) => {
+                    for (const selection of this.editor.selections) {
+                        message.edit(e, selection);
+                    }
+                });
+            default:
+                throw new Error("Unhandled message");
+        }
     }
 
     async changeEditor(editor: vscode.TextEditor | undefined) {
@@ -69,14 +127,17 @@ export default class ModeManager {
     async executeSubjectCommand(command: keyof SubjectActions) {
         console.log(`Executing subject command (${command})`);
         await this.mode.executeSubjectCommand(command);
+        await this.flushMessages();
     }
 
     async repeatSubjectCommand() {
         await this.mode.repeatSubjectCommand();
+        await this.flushMessages();
     }
 
     async fixSelection() {
         await this.mode.fixSelection();
+        await this.flushMessages();
     }
 
     onCharTyped(typed: { text: string }) {

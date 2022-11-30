@@ -307,31 +307,26 @@ export function extendBlockSelection(
     }
 }
 
-export function moveToNextBlockStart(
+export function getNextBlockStart(
     direction: common.Direction,
     indentation: common.IndentationRequest,
     from: vscode.Position
-) {
+): vscode.Range | undefined {
     const indent = lines.lineIsBlank(from.line)
         ? "any-indentation"
         : indentation;
 
-    for (const { kind, point } of iterBlockBoundaries({
+    return iterBlockBoundaries({
         fromPosition: from,
         direction,
         indentationLevel: indent,
-    })) {
-        if (kind !== "block-start" || from.isEqual(point)) {
-            continue;
-        }
-
-        const containingBlock = getContainingBlock(point);
-        scrollToReveal(containingBlock.start, containingBlock.end);
-
-        moveCursorTo(point);
-
-        return;
-    }
+    })
+        .filterMap((x) => {
+            if (x.kind === "block-start" || from.isEqual(x.point)) {
+                return getContainingBlock(x.point);
+            }
+        })
+        .tryFirst();
 }
 
 export function getContainingBlock(

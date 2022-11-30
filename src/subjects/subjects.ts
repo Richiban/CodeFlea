@@ -5,50 +5,51 @@ import * as words from "../utils/words";
 import * as selections from "../utils/selectionsAndRanges";
 import * as editor from "../utils/editor";
 import * as common from "../common";
+import { threadId } from "worker_threads";
 
 export type SubjectType = "WORD" | "LINE" | "SUBWORD" | "ALL_LINES" | "BLOCK";
 
 export type SubjectActions = {
-    nextSubjectDown(): Promise<void>;
-    nextSubjectUp(): Promise<void>;
-    nextSubjectLeft(): Promise<void>;
-    nextSubjectRight(): Promise<void>;
+    nextSubjectDown(): void;
+    nextSubjectUp(): void;
+    nextSubjectLeft(): void;
+    nextSubjectRight(): void;
 
-    addSubjectDown(): Promise<void>;
-    addSubjectUp(): Promise<void>;
-    addSubjectLeft(): Promise<void>;
-    addSubjectRight(): Promise<void>;
+    addSubjectDown(): void;
+    addSubjectUp(): void;
+    addSubjectLeft(): void;
+    addSubjectRight(): void;
 
-    extendSubjectDown(): Promise<void>;
-    extendSubjectUp(): Promise<void>;
-    extendSubjectLeft(): Promise<void>;
-    extendSubjectRight(): Promise<void>;
+    extendSubjectDown(): void;
+    extendSubjectUp(): void;
+    extendSubjectLeft(): void;
+    extendSubjectRight(): void;
 
-    swapSubjectDown(): Promise<void>;
-    swapSubjectUp(): Promise<void>;
-    swapSubjectLeft(): Promise<void>;
-    swapSubjectRight(): Promise<void>;
+    swapSubjectDown(): void;
+    swapSubjectUp(): void;
+    swapSubjectLeft(): void;
+    swapSubjectRight(): void;
 
-    nextSubjectMatch(): Promise<void>;
-    prevSubjectMatch(): Promise<void>;
-    extendNextSubjectMatch(): Promise<void>;
-    extendPrevSubjectMatch(): Promise<void>;
+    nextSubjectMatch(): void;
+    prevSubjectMatch(): void;
+    extendNextSubjectMatch(): void;
+    extendPrevSubjectMatch(): void;
 
-    firstSubjectInScope(): Promise<void>;
-    lastSubjectInScope(): Promise<void>;
+    firstSubjectInScope(): void;
+    lastSubjectInScope(): void;
 
-    deleteSubject(): Promise<void>;
-    changeSubject(): Promise<void>;
-    duplicateSubject(): Promise<void>;
+    deleteSubject(): void;
+    changeSubject(): void;
+    duplicateSubject(): void;
 
-    append(): Promise<void>;
-    prepend(): Promise<void>;
+    append(): void;
+    prepend(): void;
 
-    newLineAbove(): Promise<void>;
-    newLineBelow(): Promise<void>;
+    newLineAbove(): void;
+    newLineBelow(): void;
 
-    search(target: common.Char): Promise<void>;
-    searchBackwards(target: string): Promise<void>;
+    search(target: common.Char): void;
+    searchBackwards(target: string): void;
 };
 
 export abstract class Subject implements SubjectActions, vscode.Disposable {
@@ -56,115 +57,128 @@ export abstract class Subject implements SubjectActions, vscode.Disposable {
 
     dispose() {}
 
-    async nextSubjectDown() {}
-    async nextSubjectUp() {}
-    async nextSubjectLeft() {}
-    async nextSubjectRight() {}
-    async addSubjectDown() {}
-    async addSubjectUp() {}
-    async addSubjectLeft() {}
-    async addSubjectRight() {}
+    nextSubjectDown() {}
+    nextSubjectUp() {}
+    nextSubjectLeft() {}
+    nextSubjectRight() {}
+    addSubjectDown() {}
+    addSubjectUp() {}
+    addSubjectLeft() {}
+    addSubjectRight() {}
 
-    async extendSubjectUp(): Promise<void> {
-        const existingSelections = this.context.editor.selections;
-
-        await this.nextSubjectUp();
-
-        this.context.editor.selections =
-            this.context.editor.selections.concat(existingSelections);
+    extendSubjectUp() {
+        // TODO: restore this
+        // const existingSelections = this.context.editor.selections;
+        // await this.nextSubjectUp();
+        // this.context.editor.selections =
+        //     this.context.editor.selections.concat(existingSelections);
     }
 
-    async extendSubjectDown() {
-        const existingSelections = this.context.editor.selections;
-
-        await this.nextSubjectDown();
-
-        this.context.editor.selections =
-            this.context.editor.selections.concat(existingSelections);
+    extendSubjectDown() {
+        // TODO: restore this
+        // const existingSelections = this.context.editor.selections;
+        // await this.nextSubjectDown();
+        // this.context.editor.selections =
+        //     this.context.editor.selections.concat(existingSelections);
     }
 
-    async extendSubjectLeft(): Promise<void> {
-        const existingSelections = this.context.editor.selections;
-
-        await this.nextSubjectLeft();
-
-        this.context.editor.selections =
-            this.context.editor.selections.concat(existingSelections);
+    extendSubjectLeft() {
+        // TODO: restore this
+        // const existingSelections = this.context.editor.selections;
+        // await this.nextSubjectLeft();
+        // this.context.editor.selections =
+        //     this.context.editor.selections.concat(existingSelections);
     }
 
-    async extendSubjectRight() {
-        const existingSelections = this.context.editor.selections;
-
-        await this.nextSubjectRight();
-
-        this.context.editor.selections =
-            this.context.editor.selections.concat(existingSelections);
+    extendSubjectRight() {
+        // TODO: restore this
+        // const existingSelections = this.context.editor.selections;
+        // await this.nextSubjectRight();
+        // this.context.editor.selections =
+        //     this.context.editor.selections.concat(existingSelections);
     }
 
-    async swapSubjectDown() {}
-    async swapSubjectUp() {}
-    async swapSubjectLeft() {}
-    async swapSubjectRight() {}
-    async deleteSubject() {
-        await vscode.commands.executeCommand("deleteLeft");
+    swapSubjectDown() {}
+    swapSubjectUp() {}
+    swapSubjectLeft() {}
+    swapSubjectRight() {}
+    deleteSubject() {
+        this.context.dispatch({
+            kind: "vscodeCommand",
+            command: "deleteLeft",
+        });
     }
 
-    async duplicateSubject() {
-        await vscode.commands.executeCommand(
-            "editor.action.duplicateSelection"
-        );
+    duplicateSubject() {
+        this.context.dispatch({
+            kind: "vscodeCommand",
+            command: "editor.action.duplicateSelection",
+        });
     }
 
-    async changeSubject() {
-        await vscode.commands.executeCommand("deleteLeft");
+    changeSubject() {
+        this.context.dispatch({
+            kind: "vscodeCommand",
+            command: "deleteLeft",
+        });
     }
-    async firstSubjectInScope() {}
-    async lastSubjectInScope() {}
-    async search(target: string) {}
-    async searchBackwards(target: string) {}
+    firstSubjectInScope() {}
+    lastSubjectInScope() {}
+    search(target: string) {}
+    searchBackwards(target: string) {}
 
-    async nextSubjectMatch() {
-        await vscode.commands.executeCommand(
-            "editor.action.moveSelectionToNextFindMatch"
-        );
-    }
-
-    async prevSubjectMatch() {
-        await vscode.commands.executeCommand(
-            "editor.action.moveSelectionToPreviousFindMatch"
-        );
+    nextSubjectMatch() {
+        this.context.dispatch({
+            kind: "vscodeCommand",
+            command: "editor.action.moveSelectionToNextFindMatch",
+        });
     }
 
-    async extendPrevSubjectMatch() {
-        await vscode.commands.executeCommand(
-            "editor.action.addSelectionToPreviousFindMatch"
-        );
+    prevSubjectMatch() {
+        this.context.dispatch({
+            kind: "vscodeCommand",
+            command: "editor.action.moveSelectionToPreviousFindMatch",
+        });
     }
 
-    async extendNextSubjectMatch() {
-        await vscode.commands.executeCommand(
-            "editor.action.addSelectionToNextFindMatch"
-        );
+    extendPrevSubjectMatch() {
+        this.context.dispatch({
+            kind: "vscodeCommand",
+            command: "editor.action.addSelectionToPreviousFindMatch",
+        });
     }
 
-    async append() {
+    extendNextSubjectMatch() {
+        this.context.dispatch({
+            kind: "vscodeCommand",
+            command: "editor.action.addSelectionToNextFindMatch",
+        });
+    }
+
+    append() {
         selections.collapseSelections(this.context.editor, "end");
     }
 
-    async prepend() {
+    prepend() {
         selections.collapseSelections(this.context.editor, "start");
     }
 
-    async newLineAbove() {
-        await vscode.commands.executeCommand("editor.action.insertLineBefore");
+    newLineAbove() {
+        this.context.dispatch({
+            kind: "vscodeCommand",
+            command: "editor.action.insertLineBefore",
+        });
     }
 
-    async newLineBelow() {
-        await vscode.commands.executeCommand("editor.action.insertLineAfter");
+    newLineBelow() {
+        this.context.dispatch({
+            kind: "vscodeCommand",
+            command: "editor.action.insertLineAfter",
+        });
     }
 
     abstract name: SubjectType;
-    abstract fixSelection(): Promise<void>;
+    abstract fixSelection(): void;
     abstract clearUI(): void;
 
     equals(other: Subject) {
@@ -204,57 +218,59 @@ export class AllLinesSubject extends Subject {
         this.context.editor.setDecorations(AllLinesSubject.decorationType, []);
     }
 
-    async fixSelection() {
-        selections.tryMap(this.context.editor, (selection) => {
-            const startLine = this.context.editor.document.lineAt(
-                selection.start.line
-            );
-            const endLine = this.context.editor.document.lineAt(
-                selection.end.line
-            );
-
-            return new vscode.Selection(
-                new vscode.Position(
-                    startLine.lineNumber,
-                    startLine.firstNonWhitespaceCharacterIndex
-                ),
-                endLine.range.end
-            );
+    fixSelection() {
+        this.context.dispatch({
+            kind: "mapEditorSelections",
+            decorationType: AllLinesSubject.decorationType,
+            mapper: (selection) => {
+                const startLine = this.context.editor.document.lineAt(
+                    selection.start.line
+                );
+                const endLine = this.context.editor.document.lineAt(
+                    selection.end.line
+                );
+                return new vscode.Selection(
+                    new vscode.Position(
+                        startLine.lineNumber,
+                        startLine.firstNonWhitespaceCharacterIndex
+                    ),
+                    endLine.range.end
+                );
+            },
         });
-
-        this.context.editor.setDecorations(
-            AllLinesSubject.decorationType,
-            this.context.editor.selections
-        );
-
-        editor.scrollToReveal(
-            this.context.editor.selection.start,
-            this.context.editor.selection.end
-        );
     }
 
-    async nextSubjectUp() {
-        await vscode.commands.executeCommand("cursorUp");
+    nextSubjectUp() {
+        this.context.dispatch({ kind: "vscodeCommand", command: "cursorUp" });
     }
 
-    async nextSubjectDown() {
-        await vscode.commands.executeCommand("cursorDown");
+    nextSubjectDown() {
+        this.context.dispatch({ kind: "vscodeCommand", command: "cursorDown" });
     }
 
-    async extendSubjectDown() {
-        await vscode.commands.executeCommand("editor.action.insertCursorBelow");
+    extendSubjectDown() {
+        this.context.dispatch({
+            kind: "vscodeCommand",
+            command: "editor.action.insertCursorBelow",
+        });
     }
 
-    async extendSubjectUp() {
-        await vscode.commands.executeCommand("editor.action.insertCursorAbove");
+    extendSubjectUp() {
+        this.context.dispatch({
+            kind: "vscodeCommand",
+            command: "editor.action.insertCursorAbove",
+        });
     }
 
-    async changeSubject() {
-        await vscode.commands.executeCommand("deleteLeft");
+    changeSubject() {
+        this.context.dispatch({ kind: "vscodeCommand", command: "deleteLeft" });
     }
 
-    async deleteSubject() {
-        await vscode.commands.executeCommand("editor.action.deleteLines");
+    deleteSubject() {
+        this.context.dispatch({
+            kind: "vscodeCommand",
+            command: "editor.action.deleteLines",
+        });
     }
 
     iterAll(direction: common.Direction): common.Linqish<vscode.Range> {
@@ -278,59 +294,79 @@ export class BlockSubject extends Subject {
     );
 
     clearUI() {
-        this.context.editor.setDecorations(BlockSubject.decorationType, []);
-    }
-
-    async fixSelection() {
-        selections.tryMap(this.context.editor, (selection) => {
-            const startBlock = blocks.getContainingBlock(selection.start);
-            const endBlock = blocks.getContainingBlock(selection.end);
-
-            return new vscode.Selection(
-                new vscode.Position(endBlock.end.line, endBlock.end.character),
-                new vscode.Position(
-                    startBlock.start.line,
-                    startBlock.start.character
-                )
-            );
+        this.context.dispatch({
+            kind: "clearEditorDecorations",
+            decorationType: BlockSubject.decorationType,
         });
-
-        this.context.editor.setDecorations(
-            BlockSubject.decorationType,
-            this.context.editor.selections
-        );
-
-        editor.scrollToReveal(
-            this.context.editor.selection.start,
-            this.context.editor.selection.end
-        );
     }
 
-    async nextSubjectDown() {
-        const from = this.context.editor?.selection.start;
+    fixSelection() {
+        this.context.dispatch({
+            kind: "mapEditorSelections",
+            decorationType: BlockSubject.decorationType,
+            mapper: (selection) => {
+                const startBlock = blocks.getContainingBlock(selection.start);
+                const endBlock = blocks.getContainingBlock(selection.end);
 
-        blocks.moveToNextBlockStart("forwards", "same-indentation", from);
+                return new vscode.Selection(
+                    new vscode.Position(
+                        endBlock.end.line,
+                        endBlock.end.character
+                    ),
+                    new vscode.Position(
+                        startBlock.start.line,
+                        startBlock.start.character
+                    )
+                );
+            },
+        });
     }
 
-    async nextSubjectUp() {
-        const from = this.context.editor?.selection.start;
-
-        blocks.moveToNextBlockStart("backwards", "same-indentation", from);
+    nextSubjectDown() {
+        this.context.dispatch({
+            kind: "mapEditorSelections",
+            decorationType: BlockSubject.decorationType,
+            mapper: (selection) =>
+                blocks.getNextBlockInScope(selection.start, "forwards"),
+        });
     }
 
-    async nextSubjectLeft() {
-        const from = this.context.editor?.selection.start;
-
-        blocks.moveToNextBlockStart("backwards", "less-indentation", from);
+    nextSubjectUp() {
+        this.context.dispatch({
+            kind: "mapEditorSelections",
+            decorationType: BlockSubject.decorationType,
+            mapper: (selection) =>
+                blocks.getNextBlockInScope(selection.start, "backwards"),
+        });
     }
 
-    async nextSubjectRight() {
-        const from = this.context.editor?.selection.start;
-
-        blocks.moveToNextBlockStart("forwards", "more-indentation", from);
+    nextSubjectLeft() {
+        this.context.dispatch({
+            kind: "mapEditorSelections",
+            decorationType: BlockSubject.decorationType,
+            mapper: (selection) =>
+                blocks.getNextBlockStart(
+                    "backwards",
+                    "less-indentation",
+                    selection.start
+                ),
+        });
     }
 
-    async swapSubjectDown() {
+    nextSubjectRight() {
+        this.context.dispatch({
+            kind: "mapEditorSelections",
+            decorationType: BlockSubject.decorationType,
+            mapper: (selection) =>
+                blocks.getNextBlockStart(
+                    "forwards",
+                    "more-indentation",
+                    selection.end
+                ),
+        });
+    }
+
+    swapSubjectDown() {
         this.context.editor.edit((e) => {
             selections.tryMap(this.context.editor, (selection) => {
                 const thisBlock = blocks.getContainingBlock(selection.start);
@@ -356,7 +392,7 @@ export class BlockSubject extends Subject {
         });
     }
 
-    async swapSubjectLeft() {
+    swapSubjectLeft() {
         this.context.editor.edit((textEdit) => {
             selections.tryMap(this.context.editor, (selection) => {
                 const thisBlock = blocks.getContainingBlock(selection.start);
@@ -391,7 +427,7 @@ export class BlockSubject extends Subject {
         });
     }
 
-    async swapSubjectUp() {
+    swapSubjectUp() {
         this.context.editor.edit((e) => {
             selections.tryMap(this.context.editor, (selection) => {
                 const thisBlock = blocks.getContainingBlock(selection.start);
@@ -417,65 +453,72 @@ export class BlockSubject extends Subject {
         });
     }
 
-    async extendSubjectUp(): Promise<void> {
+    extendSubjectUp() {
         const existingSelections = this.context.editor.selections;
 
-        await this.nextSubjectUp();
+        // TODO restore this
+        //await this.nextSubjectUp();
 
         this.context.editor.selections =
             this.context.editor.selections.concat(existingSelections);
     }
 
-    async extendSubjectDown() {
+    extendSubjectDown() {
         const existingSelections = this.context.editor.selections;
 
-        await this.nextSubjectDown();
+        // TODO restore this
+        //await this.nextSubjectDown();
 
         this.context.editor.selections =
             this.context.editor.selections.concat(existingSelections);
     }
 
-    async firstSubjectInScope() {
-        selections.tryMap(this.context.editor, (selection) =>
-            blocks.getFirstLastBlockInScope(selection.start, "backwards")
-        );
+    firstSubjectInScope() {
+        this.context.dispatch({
+            kind: "mapEditorSelections",
+            decorationType: BlockSubject.decorationType,
+            mapper: (selection) =>
+                blocks.getFirstLastBlockInScope(selection.start, "backwards"),
+        });
     }
 
-    async lastSubjectInScope() {
-        selections.tryMap(this.context.editor, (selection) =>
-            blocks.getFirstLastBlockInScope(selection.start, "forwards")
-        );
+    lastSubjectInScope() {
+        this.context.dispatch({
+            kind: "mapEditorSelections",
+            decorationType: BlockSubject.decorationType,
+            mapper: (selection) =>
+                blocks.getFirstLastBlockInScope(selection.start, "forwards"),
+        });
     }
 
-    async deleteSubject() {
-        for (const selection of this.context.editor.selections) {
-            const prevBlock = blocks.getNextBlockInScope(
-                selection.start,
-                "backwards"
-            );
-
-            if (prevBlock) {
-                this.context.editor.edit((e) => {
-                    e.delete(new vscode.Range(prevBlock.end, selection.end));
-                });
-            } else {
-                const nextBlock = blocks.getNextBlockInScope(
-                    selection.end,
-                    "forwards"
+    deleteSubject() {
+        this.context.dispatch({
+            kind: "customEditPerSelection",
+            edit: (edit, selection) => {
+                const prevBlock = blocks.getNextBlockInScope(
+                    selection.start,
+                    "backwards"
                 );
 
-                if (nextBlock) {
-                    this.context.editor.edit((e) => {
-                        e.delete(
+                if (prevBlock) {
+                    edit.delete(new vscode.Range(prevBlock.end, selection.end));
+                } else {
+                    const nextBlock = blocks.getNextBlockInScope(
+                        selection.end,
+                        "forwards"
+                    );
+
+                    if (nextBlock) {
+                        edit.delete(
                             new vscode.Range(selection.start, nextBlock.start)
                         );
-                    });
+                    }
                 }
-            }
-        }
+            },
+        });
     }
 
-    async duplicateSubject(): Promise<void> {
+    duplicateSubject() {
         for (const selection of this.context.editor.selections) {
             this.context.editor.edit((e) => {
                 blocks.duplicate(this.context.editor.document, e, selection);
@@ -483,7 +526,7 @@ export class BlockSubject extends Subject {
         }
     }
 
-    async search(target: common.Char) {
+    search(target: common.Char) {
         selections.tryMap(this.context.editor, (selection) => {
             const blockPoints = new common.Linqish(
                 blocks.iterBlockBoundaries({
@@ -508,7 +551,7 @@ export class BlockSubject extends Subject {
         });
     }
 
-    async searchBackwards(target: common.Char) {
+    searchBackwards(target: common.Char) {
         selections.tryMap(this.context.editor, (selection) => {
             const blockPoints = blocks
                 .iterBlockBoundaries({
@@ -557,211 +600,234 @@ export class LineSubject extends Subject {
         }
     );
 
-    async changeSubject() {
-        await vscode.commands.executeCommand("deleteLeft");
+    changeSubject() {
+        this.context.dispatch({ kind: "vscodeCommand", command: "deleteLeft" });
     }
 
-    async deleteSubject() {
-        await vscode.commands.executeCommand("editor.action.deleteLines");
+    deleteSubject() {
+        this.context.dispatch({
+            kind: "vscodeCommand",
+            command: "editor.action.deleteLines",
+        });
     }
 
-    async duplicateSubject(): Promise<void> {
-        for (const selection of this.context.editor.selections) {
-            await this.context.editor.edit((e) => {
+    duplicateSubject() {
+        this.context.dispatch({
+            kind: "customEditPerSelection",
+            edit: (e, selection) => {
                 lines.duplicate(this.context.editor.document, e, selection);
-            });
-        }
+            },
+        });
     }
 
     clearUI() {
-        this.context.editor.setDecorations(LineSubject.decorationType, []);
-    }
-
-    async fixSelection() {
-        selections.tryMap(this.context.editor, (selection) => {
-            const startLine = this.context.editor.document.lineAt(
-                selection.start.line
-            );
-            const endLine = this.context.editor.document.lineAt(
-                selection.end.line
-            );
-
-            return new vscode.Selection(
-                endLine.range.end,
-                new vscode.Position(
-                    startLine.lineNumber,
-                    startLine.firstNonWhitespaceCharacterIndex
-                )
-            );
+        this.context.dispatch({
+            kind: "clearEditorDecorations",
+            decorationType: LineSubject.decorationType,
         });
-
-        this.context.editor.setDecorations(
-            LineSubject.decorationType,
-            this.context.editor.selections
-        );
-
-        editor.scrollToReveal(
-            this.context.editor.selection.start,
-            this.context.editor.selection.end
-        );
     }
 
-    async nextSubjectDown() {
-        selections.tryMap(
-            this.context.editor,
-            (selection) =>
+    fixSelection() {
+        this.context.dispatch({
+            kind: "mapEditorSelections",
+            decorationType: LineSubject.decorationType,
+            mapper: (selection) => {
+                const startLine = this.context.editor.document.lineAt(
+                    selection.start.line
+                );
+                const endLine = this.context.editor.document.lineAt(
+                    selection.end.line
+                );
+                return new vscode.Selection(
+                    endLine.range.end,
+                    new vscode.Position(
+                        startLine.lineNumber,
+                        startLine.firstNonWhitespaceCharacterIndex
+                    )
+                );
+            },
+        });
+    }
+
+    nextSubjectDown() {
+        this.context.dispatch({
+            kind: "mapEditorSelections",
+            decorationType: LineSubject.decorationType,
+            mapper: (selection) =>
                 lines.getNextSignificantLine(
                     this.context.editor.document,
                     selection.end,
                     "forwards"
-                )?.range
-        );
+                )?.range,
+        });
     }
 
-    async nextSubjectUp() {
-        selections.tryMap(
-            this.context.editor,
-            (selection) =>
+    nextSubjectUp() {
+        this.context.dispatch({
+            kind: "mapEditorSelections",
+            decorationType: LineSubject.decorationType,
+            mapper: (selection) =>
                 lines.getNextSignificantLine(
                     this.context.editor.document,
                     selection.end,
                     "backwards"
-                )?.range
-        );
-    }
-
-    async nextSubjectLeft() {
-        selections.tryMap(this.context.editor, (selection) => {
-            if (!selection.isSingleLine) {
-                return selection;
-            }
-
-            const nextLine = lines.getNextLineOfChangeOfIndentation(
-                "lessThan",
-                "backwards",
-                this.context.editor.document,
-                this.context.editor.document.lineAt(selection.start.line)
-            );
-
-            if (nextLine) {
-                return nextLine.range;
-            }
+                )?.range,
         });
     }
 
-    async nextSubjectRight() {
-        selections.tryMap(this.context.editor, (selection) => {
-            if (!selection.isSingleLine) {
-                return selection;
-            }
+    nextSubjectLeft() {
+        this.context.dispatch({
+            kind: "mapEditorSelections",
+            decorationType: LineSubject.decorationType,
+            mapper: (selection) => {
+                if (!selection.isSingleLine) {
+                    return selection;
+                }
 
-            return lines.getNextLineOfChangeOfIndentation(
-                "greaterThan",
-                "forwards",
-                this.context.editor.document,
-                this.context.editor.document.lineAt(selection.start.line)
-            )?.range;
-        });
-    }
-
-    async swapSubjectLeft() {
-        const newSelections: vscode.Selection[] = [];
-
-        await this.context.editor.edit((e) => {
-            for (const selection of this.context.editor.selections) {
-                const newSelection = lines.swapLineSideways(
+                const nextLine = lines.getNextLineOfChangeOfIndentation(
+                    "lessThan",
+                    "backwards",
                     this.context.editor.document,
-                    selection.start,
-                    e,
-                    "left"
+                    this.context.editor.document.lineAt(selection.start.line)
                 );
 
-                if (newSelection) {
-                    newSelections.push(
-                        new vscode.Selection(
-                            newSelection.start,
-                            newSelection.end
-                        )
-                    );
+                if (nextLine) {
+                    return nextLine.range;
                 }
-            }
-        });
-
-        this.context.editor.selections = newSelections;
-    }
-    async swapSubjectRight() {
-        const newSelections: vscode.Selection[] = [];
-
-        await this.context.editor.edit((e) => {
-            for (const selection of this.context.editor.selections) {
-                const newSelection = lines.swapLineSideways(
-                    this.context.editor.document,
-                    selection.start,
-                    e,
-                    "right"
-                );
-
-                if (newSelection) {
-                    newSelections.push(
-                        new vscode.Selection(
-                            newSelection.start,
-                            newSelection.end
-                        )
-                    );
-                }
-            }
-        });
-
-        this.context.editor.selections = newSelections;
-    }
-
-    async swapSubjectDown() {
-        await vscode.commands.executeCommand(
-            "editor.action.moveLinesDownAction"
-        );
-    }
-
-    async swapSubjectUp() {
-        await vscode.commands.executeCommand("editor.action.moveLinesUpAction");
-    }
-
-    async search(target: common.Char) {
-        selections.tryMap(this.context.editor, (selection) => {
-            for (const line of lines
-                .iterLines(
-                    this.context.editor.document,
-                    selection.start.line,
-                    "forwards"
-                )
-                .skip(1)) {
-                const char = this.context.editor.document.getText(line.range)[
-                    line.firstNonWhitespaceCharacterIndex
-                ];
-
-                if (char === target) {
-                    return line.range;
-                }
-            }
+            },
         });
     }
 
-    async searchBackwards(target: common.Char) {
-        selections.tryMap(this.context.editor, (selection) => {
-            for (const line of lines
-                .iterLines(
-                    this.context.editor.document,
-                    selection.start.line,
-                    "backwards"
-                )
-                .skip(1)) {
-                const char = this.context.editor.document.getText(line.range)[
-                    line.firstNonWhitespaceCharacterIndex
-                ];
-
-                if (char === target) {
-                    return line.range;
+    nextSubjectRight() {
+        this.context.dispatch({
+            kind: "mapEditorSelections",
+            decorationType: LineSubject.decorationType,
+            mapper: (selection) => {
+                if (!selection.isSingleLine) {
+                    return selection;
                 }
-            }
+
+                return lines.getNextLineOfChangeOfIndentation(
+                    "greaterThan",
+                    "forwards",
+                    this.context.editor.document,
+                    this.context.editor.document.lineAt(selection.start.line)
+                )?.range;
+            },
+        });
+    }
+
+    swapSubjectLeft() {
+        // TODO: restore this
+        // const newSelections: vscode.Selection[] = [];
+        // await this.context.editor.edit((e) => {
+        //     for (const selection of this.context.editor.selections) {
+        //         const newSelection = lines.swapLineSideways(
+        //             this.context.editor.document,
+        //             selection.start,
+        //             e,
+        //             "left"
+        //         );
+        //         if (newSelection) {
+        //             newSelections.push(
+        //                 new vscode.Selection(
+        //                     newSelection.start,
+        //                     newSelection.end
+        //                 )
+        //             );
+        //         }
+        //     }
+        // });
+        // this.context.editor.selections = newSelections;
+    }
+
+    swapSubjectRight() {
+        // TODO: restore this
+        // const newSelections: vscode.Selection[] = [];
+        // await this.context.editor.edit((e) => {
+        //     for (const selection of this.context.editor.selections) {
+        //         const newSelection = lines.swapLineSideways(
+        //             this.context.editor.document,
+        //             selection.start,
+        //             e,
+        //             "right"
+        //         );
+        //         if (newSelection) {
+        //             newSelections.push(
+        //                 new vscode.Selection(
+        //                     newSelection.start,
+        //                     newSelection.end
+        //                 )
+        //             );
+        //         }
+        //     }
+        // });
+        // this.context.editor.selections = newSelections;
+    }
+
+    swapSubjectDown() {
+        this.context.dispatch({
+            kind: "vscodeCommand",
+            command: "editor.action.moveLinesDownAction",
+        });
+    }
+
+    swapSubjectUp() {
+        this.context.dispatch({
+            kind: "vscodeCommand",
+            command: "editor.action.moveLinesUpAction",
+        });
+    }
+
+    search(target: common.Char) {
+        this.context.dispatch({
+            kind: "mapEditorSelections",
+            decorationType: LineSubject.decorationType,
+            mapper: (selection) => {
+                return lines
+                    .iterLines(
+                        this.context.editor.document,
+                        selection.start.line,
+                        "forwards"
+                    )
+                    .skip(1)
+                    .filterMap((line) => {
+                        const char = this.context.editor.document.getText(
+                            line.range
+                        )[line.firstNonWhitespaceCharacterIndex];
+
+                        if (char === target) {
+                            return line.range;
+                        }
+                    })
+                    .tryFirst();
+            },
+        });
+    }
+
+    searchBackwards(target: common.Char) {
+        this.context.dispatch({
+            kind: "mapEditorSelections",
+            decorationType: LineSubject.decorationType,
+            mapper: (selection) => {
+                return lines
+                    .iterLines(
+                        this.context.editor.document,
+                        selection.start.line,
+                        "backwards"
+                    )
+                    .skip(1)
+                    .filterMap((line) => {
+                        const char = this.context.editor.document.getText(
+                            line.range
+                        )[line.firstNonWhitespaceCharacterIndex];
+
+                        if (char === target) {
+                            return line.range;
+                        }
+                    })
+                    .tryFirst();
+            },
         });
     }
 
@@ -772,8 +838,9 @@ export class LineSubject extends Subject {
                 this.context.editor.selection.start.line,
                 direction
             )
-            .filter((line) => lines.lineIsSignificant(line))
-            .map((line) => line.range);
+            .filterMap((line) =>
+                lines.lineIsSignificant(line) ? line.range : undefined
+            );
     }
 }
 
@@ -786,95 +853,100 @@ export class SubWordSubject extends Subject {
         }
     );
 
-    async nextSubjectDown() {
-        await vscode.commands.executeCommand("cursorDown");
+    nextSubjectDown() {
+        this.context.dispatch({ kind: "vscodeCommand", command: "cursorDown" });
     }
 
-    async nextSubjectUp() {
-        await vscode.commands.executeCommand("cursorUp");
+    nextSubjectUp() {
+        this.context.dispatch({ kind: "vscodeCommand", command: "cursorUp" });
     }
 
-    async nextSubjectLeft() {
-        selections.tryMap(this.context.editor, (selection) =>
-            words
-                .iterSubwords(
-                    this.context.editor.document,
-                    selection.start,
-                    "backwards"
-                )
-                .tryFirst()
-        );
+    nextSubjectLeft() {
+        this.context.dispatch({
+            kind: "mapEditorSelections",
+            decorationType: SubWordSubject.decorationType,
+            mapper: (selection) =>
+                words
+                    .iterSubwords(
+                        this.context.editor.document,
+                        selection.start,
+                        "backwards"
+                    )
+                    .tryFirst(),
+        });
     }
 
-    async nextSubjectRight() {
-        selections.tryMap(this.context.editor, (selection) =>
-            words
-                .iterSubwords(
+    nextSubjectRight() {
+        this.context.dispatch({
+            kind: "mapEditorSelections",
+            decorationType: SubWordSubject.decorationType,
+            mapper: (selection) =>
+                words
+                    .iterSubwords(
+                        this.context.editor.document,
+                        selection.start,
+                        "forwards"
+                    )
+                    .tryFirst(),
+        });
+    }
+
+    firstSubjectInScope() {
+        this.context.dispatch({ kind: "vscodeCommand", command: "cursorHome" });
+    }
+
+    lastSubjectInScope() {
+        this.context.dispatch({ kind: "vscodeCommand", command: "cursorEnd" });
+    }
+
+    search(target: common.Char) {
+        this.context.dispatch({
+            kind: "mapEditorSelections",
+            decorationType: SubWordSubject.decorationType,
+            mapper: (selection) =>
+                words.searchSubword(
                     this.context.editor.document,
                     selection.end,
+                    target,
                     "forwards"
-                )
-                .tryFirst()
-        );
-    }
-
-    async firstSubjectInScope() {
-        await vscode.commands.executeCommand("cursorHome");
-    }
-
-    async lastSubjectInScope() {
-        await vscode.commands.executeCommand("cursorEnd");
-    }
-
-    async search(target: common.Char) {
-        selections.tryMap(this.context.editor, (selection) =>
-            words.searchSubword(
-                this.context.editor.document,
-                selection.end,
-                target,
-                "forwards"
-            )
-        );
-    }
-
-    async searchBackwards(target: common.Char) {
-        selections.tryMap(this.context.editor, (selection) =>
-            words.searchSubword(
-                this.context.editor.document,
-                selection.start,
-                target,
-                "backwards"
-            )
-        );
-    }
-
-    async fixSelection() {
-        if (!this.context.editor) {
-            return;
-        }
-
-        selections.tryMap(this.context.editor, (selection) => {
-            const wordRange = words.expandSelectionToSubwords(
-                this.context.editor.document,
-                selection
-            );
-
-            return wordRange ?? selection;
+                ),
         });
+    }
 
-        this.context.editor.setDecorations(
-            SubWordSubject.decorationType,
-            this.context.editor.selections
-        );
+    searchBackwards(target: common.Char) {
+        this.context.dispatch({
+            kind: "mapEditorSelections",
+            decorationType: SubWordSubject.decorationType,
+            mapper: (selection) =>
+                words.searchSubword(
+                    this.context.editor.document,
+                    selection.start,
+                    target,
+                    "backwards"
+                ),
+        });
+    }
 
-        editor.scrollToReveal(
-            this.context.editor.selection.start,
-            this.context.editor.selection.end
-        );
+    fixSelection() {
+        this.context.dispatch({
+            kind: "mapEditorSelections",
+            decorationType: SubWordSubject.decorationType,
+            mapper: (selection) => {
+                const wordRange = words.expandSelectionToSubwords(
+                    this.context.editor.document,
+                    selection
+                );
+
+                return wordRange ?? selection;
+            },
+        });
     }
 
     clearUI(): void {
-        this.context.editor.setDecorations(SubWordSubject.decorationType, []);
+        this.context.dispatch({
+            kind: "clearEditorDecorations",
+            decorationType: SubWordSubject.decorationType,
+        });
     }
 
     iterAll(direction: common.Direction): common.Linqish<vscode.Range> {
@@ -899,126 +971,156 @@ export class WordSubject extends Subject {
     public static quickNumberDecoration =
         vscode.window.createTextEditorDecorationType({});
 
-    async changeSubject() {
-        await vscode.commands.executeCommand("deleteLeft");
+    changeSubject() {
+        this.context.dispatch({ kind: "vscodeCommand", command: "deleteLeft" });
     }
 
     clearUI(): void {
-        this.context.editor.setDecorations(WordSubject.decorationType, []);
+        this.context.dispatch({
+            kind: "clearEditorDecorations",
+            decorationType: WordSubject.decorationType,
+        });
     }
 
-    async fixSelection() {
-        if (!this.context.editor) {
-            return;
-        }
-
-        selections.tryMap(this.context.editor, (selection) =>
-            words.expandSelectionToWords(
-                this.context.editor.document,
-                selection
-            )
-        );
-
-        this.context.editor.setDecorations(
-            WordSubject.decorationType,
-            this.context.editor.selections
-        );
-
-        editor.scrollToReveal(
-            this.context.editor.selection.start,
-            this.context.editor.selection.end
-        );
+    fixSelection() {
+        this.context.dispatch({
+            kind: "mapEditorSelections",
+            decorationType: WordSubject.decorationType,
+            mapper: (selection) =>
+                words.expandRangeToWords(
+                    this.context.editor.document,
+                    selection
+                ),
+        });
     }
 
-    async nextSubjectDown() {
-        selections.tryMap(this.context.editor, (selection) =>
-            words.nextWordUpDown(
-                this.context.editor.document,
-                selection.active,
-                "down"
-            )
-        );
+    nextSubjectDown() {
+        this.context.dispatch({
+            kind: "mapEditorSelections",
+            decorationType: WordSubject.decorationType,
+            mapper: (selection) =>
+                words.nextWordUpDown(
+                    this.context.editor.document,
+                    selection.active,
+                    "down"
+                ),
+        });
     }
 
-    async nextSubjectUp() {
-        selections.tryMap(this.context.editor, (selection) =>
-            words.nextWordUpDown(
-                this.context.editor.document,
-                selection.active,
-                "up"
-            )
-        );
+    nextSubjectUp() {
+        this.context.dispatch({
+            kind: "mapEditorSelections",
+            decorationType: WordSubject.decorationType,
+            mapper: (selection) =>
+                words.nextWordUpDown(
+                    this.context.editor.document,
+                    selection.active,
+                    "up"
+                ),
+        });
     }
 
-    async nextSubjectLeft() {
-        selections.tryMap(this.context.editor, (selection) =>
-            words.nextWord(
-                this.context.editor.document,
-                selection.start,
-                "backwards"
-            )
-        );
+    nextSubjectLeft() {
+        this.context.dispatch({
+            kind: "mapEditorSelections",
+            decorationType: WordSubject.decorationType,
+            mapper: (selection) =>
+                words.nextWord(
+                    this.context.editor.document,
+                    selection.start,
+                    "backwards"
+                ),
+        });
     }
 
-    async nextSubjectRight() {
-        selections.tryMap(this.context.editor, (selection) =>
-            words.nextWord(
-                this.context.editor.document,
-                selection.end,
-                "forwards"
-            )
-        );
+    nextSubjectRight() {
+        this.context.dispatch({
+            kind: "mapEditorSelections",
+            decorationType: WordSubject.decorationType,
+            mapper: (selection) =>
+                words.nextWord(
+                    this.context.editor.document,
+                    selection.end,
+                    "forwards"
+                ),
+        });
     }
 
-    async swapSubjectLeft() {
-        await words.swapWordsWithNeighbors(this.context.editor, "backwards");
+    swapSubjectLeft() {
+        // TODO: restore this
+        //await words.swapWordsWithNeighbors(this.context.editor, "backwards");
     }
 
-    async swapSubjectRight() {
-        await words.swapWordsWithNeighbors(this.context.editor, "forwards");
+    swapSubjectRight() {
+        // TODO: restore this
+        //await words.swapWordsWithNeighbors(this.context.editor, "forwards");
     }
 
-    async firstSubjectInScope() {
-        if (true) {
-            await vscode.commands.executeCommand("cursorHome");
-        }
+    firstSubjectInScope() {
+        this.context.dispatch({
+            kind: "vscodeCommand",
+            command: "cursorHome",
+        });
     }
 
-    async lastSubjectInScope(): Promise<void> {
-        await vscode.commands.executeCommand("cursorEnd");
+    lastSubjectInScope() {
+        this.context.dispatch({
+            kind: "vscodeCommand",
+            command: "cursorEnd",
+        });
     }
 
-    async deleteSubject() {
-        for (const selection of this.context.editor.selections) {
-            await this.context.editor.edit((e) => {
-                words.deleteWord(this.context.editor.document, e, selection);
-            });
-        }
+    deleteSubject() {
+        this.context.dispatch({
+            kind: "customEditPerSelection",
+            edit: (textEdit, selection) => {
+                words.deleteWord(
+                    this.context.editor.document,
+                    textEdit,
+                    selection
+                );
+            },
+        });
     }
 
-    async duplicateSubject(): Promise<void> {
-        for (const selection of this.context.editor.selections) {
-            await this.context.editor.edit((e) => {
-                words.duplicateWord(this.context.editor.document, e, selection);
-            });
-        }
+    duplicateSubject() {
+        this.context.dispatch({
+            kind: "customEditPerSelection",
+            edit: (textEdit, selection) =>
+                words.duplicateWord(
+                    this.context.editor.document,
+                    textEdit,
+                    selection
+                ),
+        });
     }
 
-    async search(target: common.Char) {
-        selections.tryMap(this.context.editor, (selection) =>
-            words.search(this.context.editor, selection.end, target, "forwards")
-        );
+    search(target: common.Char) {
+        this.context.dispatch({
+            kind: "mapEditorSelections",
+            decorationType: WordSubject.decorationType,
+            mapper: (selection) =>
+                words.search(
+                    this.context.editor,
+                    selection.end,
+                    target,
+                    "forwards"
+                ),
+        });
     }
 
-    async searchBackwards(target: common.Char) {
-        selections.tryMap(this.context.editor, (selection) =>
-            words.search(
-                this.context.editor,
-                selection.start,
-                target,
-                "backwards"
-            )
-        );
+    searchBackwards(target: common.Char) {
+        this.context.dispatch({
+            kind: "mapEditorSelections",
+            decorationType: WordSubject.decorationType,
+            mapper: (selection) =>
+                words.search(
+                    this.context.editor,
+                    selection.start,
+                    target,
+                    "backwards"
+                ),
+        });
     }
 
     iterAll(direction: common.Direction): common.Linqish<vscode.Range> {

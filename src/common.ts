@@ -1,5 +1,6 @@
 import { Config } from "./config";
 import * as vscode from "vscode";
+import { EditorModeType } from "./modes/modes";
 
 export type DirectionOrNearest = Direction | "nearest";
 
@@ -27,6 +28,7 @@ export type ExtensionContext = {
     statusBar: vscode.StatusBarItem;
     config: Config;
     editor: vscode.TextEditor;
+    dispatch: Dispatcher;
 };
 
 export type Char = string & { length: 1 };
@@ -44,6 +46,43 @@ export function directionToDelta(direction: Direction) {
         ? (x: number) => x + 1
         : (x: number) => x - 1;
 }
+
+export type MsgName = Msg["kind"];
+
+export type Dispatcher = (...messages: Msg[]) => void;
+
+export type Msg =
+    | { kind: "changeMode"; newMode: EditorModeType }
+    | { kind: "vscodeCommand"; command: string }
+    | {
+          kind: "mapEditorSelections";
+          decorationType: vscode.TextEditorDecorationType;
+          mapper: (
+              selection: vscode.Selection
+          ) => vscode.Selection | vscode.Range | undefined;
+      }
+    | {
+          kind: "setEditorDecorations";
+          decorationType: vscode.TextEditorDecorationType;
+          targets: readonly vscode.DecorationOptions[];
+      }
+    | {
+          kind: "clearEditorDecorations";
+          decorationType: vscode.TextEditorDecorationType;
+      }
+    | {
+          kind: "setStatusBarText";
+          text: string;
+      }
+    | { kind: "scrollEditor"; revealRange: vscode.Range }
+    | { kind: "customEdit"; edit: (edit: vscode.TextEditorEdit) => void }
+    | {
+          kind: "customEditPerSelection";
+          edit: (
+              edit: vscode.TextEditorEdit,
+              selection: vscode.Selection
+          ) => void;
+      };
 
 export class Cache<TArgs extends any[], TValue> implements Iterable<TValue> {
     private _cache: Record<string, TValue> = {};

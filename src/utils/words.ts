@@ -271,7 +271,7 @@ function splitTextIntoSubWords(text: string): SubTextRange[] {
     return results;
 }
 
-export function expandSelectionToWords(
+export function expandRangeToWords(
     document: vscode.TextDocument,
     selection: vscode.Selection
 ): vscode.Range | undefined {

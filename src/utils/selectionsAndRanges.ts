@@ -24,23 +24,18 @@ export function collapseSelections(
 export function tryMap(
     editor: vscode.TextEditor,
     mapper: (selection: vscode.Selection) => vscode.Range | undefined
-) {
-    if (editor) {
-        editor.selections = editor.selections.map((selection) => {
-            const newSelection = mapper(selection);
+): vscode.Selection[] {
+    return editor.selections.map((selection) => {
+        const newSelection = mapper(selection);
 
-            if (!newSelection) {
-                return selection;
-            } else if (newSelection instanceof vscode.Selection) {
-                return newSelection;
-            } else {
-                return new vscode.Selection(
-                    newSelection.start,
-                    newSelection.end
-                );
-            }
-        });
-    }
+        if (!newSelection) {
+            return selection;
+        } else if (newSelection instanceof vscode.Selection) {
+            return newSelection;
+        } else {
+            return new vscode.Selection(newSelection.start, newSelection.end);
+        }
+    });
 }
 
 export function flatMap(

@@ -25,7 +25,6 @@ export abstract class NumHandler {
     abstract get statusText(): string | undefined;
     constructor(protected context: common.ExtensionContext) {}
 
-    abstract init(): void;
     abstract change(): NumHandler;
     abstract handleNumKey(number: number): Promise<void>;
     abstract handleCommandExecution(
@@ -47,8 +46,6 @@ export class QuickJumpNumHandler extends NumHandler {
 
     private forwardRanges: vscode.Range[] | undefined;
     private backwardRanges: vscode.Range[] | undefined;
-
-    init() {}
 
     change() {
         return new CommandMultiplierNumHandler(this.context);
@@ -87,11 +84,18 @@ export class QuickJumpNumHandler extends NumHandler {
             })
             .toArray();
 
-        this.context.editor.setDecorations(this.decorationType, decorations);
+        this.context.dispatch({
+            kind: "setEditorDecorations",
+            decorationType: this.decorationType,
+            targets: decorations,
+        });
     }
 
     clear() {
-        this.context.editor.setDecorations(this.decorationType, []);
+        this.context.dispatch({
+            kind: "clearEditorDecorations",
+            decorationType: this.decorationType,
+        });
     }
 
     async handleCommandExecution(
@@ -112,15 +116,13 @@ export class CommandMultiplierNumHandler extends NumHandler {
         }
     }
 
-    init(): void {
-        throw new Error("Method not implemented.");
-    }
-
     change(): NumHandler {
         return new QuickJumpNumHandler(this.context);
     }
 
-    clear(): void {}
+    clear() {
+        return undefined;
+    }
 
     async handleNumKey(number: number) {
         if (number < 0 || number > 9) {
@@ -153,5 +155,7 @@ export class CommandMultiplierNumHandler extends NumHandler {
     setRanges(
         forwardRanges: common.Linqish<vscode.Range>,
         backwardRanges: common.Linqish<vscode.Range>
-    ): void {}
+    ) {
+        return undefined;
+    }
 }
