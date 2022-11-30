@@ -165,14 +165,14 @@ export default class NavigateMode extends modes.EditorMode {
     }
 
     onCharTyped(typed: { text: string }): modes.EditorMode {
-        const parsed = parseInt(typed.text, 10);
+        const parsed = this.tryParseNumber(typed.text);
 
-        if (isNaN(parsed)) {
+        if (!parsed) {
             vscode.commands.executeCommand("default:type", typed);
             return this;
         }
 
-        this.numHandler.handleNumKey(parsed);
+        this.numHandler.handleNumKey(parsed.number, parsed.shifted);
 
         return this;
     }
@@ -188,5 +188,27 @@ export default class NavigateMode extends modes.EditorMode {
 
     async dispose() {
         this.subject.dispose();
+    }
+
+    private tryParseNumber(
+        text: string
+    ): { number: number; shifted: boolean } | undefined {
+        if (text.length !== 1) {
+            return undefined;
+        }
+
+        const regularNums = "0123456789";
+        const shiftedNums = ")!@#$%^&*(";
+
+        const regularIndex = regularNums.indexOf(text);
+        const shiftedIndex = shiftedNums.indexOf(text);
+
+        if (regularIndex !== -1) {
+            return { number: regularIndex, shifted: false };
+        }
+
+        if (shiftedIndex !== -1) {
+            return { number: shiftedIndex, shifted: true };
+        }
     }
 }

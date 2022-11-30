@@ -27,7 +27,7 @@ export abstract class NumHandler {
 
     abstract init(): void;
     abstract change(): NumHandler;
-    abstract handleNumKey(number: number): Promise<void>;
+    abstract handleNumKey(number: number, shifted: boolean): Promise<void>;
     abstract handleCommandExecution(
         command: () => Promise<void>
     ): Promise<{ needsUiRefresh: boolean }>;
@@ -54,12 +54,22 @@ export class QuickJumpNumHandler extends NumHandler {
         return new CommandMultiplierNumHandler(this.context);
     }
 
-    async handleNumKey(number: number): Promise<void> {
-        if (!this.forwardRanges) {
-            return;
-        }
+    async handleNumKey(number: number, shifted: boolean): Promise<void> {
+        let range;
 
-        const range = this.forwardRanges[number];
+        if (!shifted) {
+            if (!this.forwardRanges) {
+                return;
+            }
+
+            range = this.forwardRanges[number];
+        } else {
+            if (!this.backwardRanges) {
+                return;
+            }
+
+            range = this.backwardRanges[(number + 9) % 10];
+        }
 
         if (range) {
             this.context.editor.selection = ranges.rangeToSelection(range);

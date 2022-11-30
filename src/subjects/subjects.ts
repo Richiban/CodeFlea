@@ -448,6 +448,8 @@ export class BlockSubject extends Subject {
     }
 
     async deleteSubject() {
+        
+        
         for (const selection of this.context.editor.selections) {
             const prevBlock = blocks.getNextBlockInScope(
                 selection.start,
