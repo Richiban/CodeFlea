@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as common from "../common";
 import { defaultNumHandler } from "../handlers/NumHandler";
-import { SubjectActions } from "../subjects/subjects";
+import { SubjectActions } from "../subjects/SubjectActions";
 import ExtendMode from "./ExtendMode";
 import { EditorMode, EditorModeType } from "./modes";
 import NavigateMode from "./NavigateMode";

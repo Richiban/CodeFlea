@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import * as subjects from "../subjects/subjects";
+import * as subjects from "../utils/subjects";
 import EditMode from "./EditMode";
 import ExtendMode from "./ExtendMode";
 import * as modes from "./modes";
@@ -7,11 +7,13 @@ import * as editor from "../utils/editor";
 import * as selections from "../utils/selectionsAndRanges";
 import * as common from "../common";
 import { NumHandler } from "../handlers/NumHandler";
+import { Subject } from "../subjects/Subject";
+import { SubjectActions } from "../subjects/SubjectActions";
 
 export default class NavigateMode extends modes.EditorMode {
     constructor(
         private readonly context: common.ExtensionContext,
-        public readonly subject: subjects.Subject,
+        public readonly subject: Subject,
         private readonly numHandler: NumHandler
     ) {
         super();
@@ -27,7 +29,7 @@ export default class NavigateMode extends modes.EditorMode {
     with(
         args: Partial<{
             context: common.ExtensionContext;
-            subject: subjects.Subject;
+            subject: Subject;
             numHandler: NumHandler;
         }>
     ) {
@@ -118,7 +120,7 @@ export default class NavigateMode extends modes.EditorMode {
         this.fixSelection();
     }
 
-    async executeSubjectCommand(command: keyof subjects.SubjectActions) {
+    async executeSubjectCommand(command: keyof SubjectActions) {
         if (this.subject[command].length > 1) {
             throw new Error(
                 "Functions with multiple arguments are not supported"

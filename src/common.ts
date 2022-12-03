@@ -7,12 +7,16 @@ export type Change = "greaterThan" | "lessThan";
 
 export type Direction = "forwards" | "backwards";
 
-export type Indentation =
+export type RelativeIndentation =
     | "more-indentation"
     | "less-indentation"
-    | "same-indentation";
+    | "same-indentation"
+    | "no-indentation";
 
-export type IndentationRequest = Indentation | "any-indentation";
+export type IndentationRequest =
+    | RelativeIndentation
+    | "same-indentation-current-scope"
+    | "any-indentation";
 
 export type JumpLocations = JumpLocation[];
 
@@ -334,16 +338,26 @@ export class Linqish<T> implements Iterable<T> {
         );
     }
 
-    toArray() {
+    toArray(): T[] {
         return Array.from(this.iter);
     }
 
-    tryFirst() {
+    tryFirst(): T | undefined {
         let result = undefined;
 
         for (const x of this.iter) {
             result = x;
             break;
+        }
+
+        return result;
+    }
+
+    tryLast(): T | undefined {
+        let result = undefined;
+
+        for (const x of this.iter) {
+            result = x;
         }
 
         return result;

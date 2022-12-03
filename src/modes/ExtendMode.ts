@@ -1,10 +1,11 @@
 import * as common from "../common";
 import * as vscode from "vscode";
-import * as subjects from "../subjects/subjects";
+import * as subjects from "../utils/subjects";
 import EditMode from "./EditMode";
 import { EditorMode, EditorModeType } from "./modes";
 import NavigateMode from "./NavigateMode";
 import { NumHandler } from "../handlers/NumHandler";
+import { SubjectActions } from "../subjects/SubjectActions";
 
 export default class ExtendMode extends EditorMode {
     private readonly wrappedMode: NavigateMode;
@@ -113,9 +114,7 @@ export default class ExtendMode extends EditorMode {
         this.wrappedMode.fixSelection();
     }
 
-    async executeSubjectCommand(
-        command: keyof subjects.SubjectActions
-    ): Promise<void> {
+    async executeSubjectCommand(command: keyof SubjectActions): Promise<void> {
         const existingSelections = new common.Linqish(
             this.context.editor.selections
         );
@@ -125,7 +124,8 @@ export default class ExtendMode extends EditorMode {
         const newSelections = existingSelections
             .zipWith(this.context.editor.selections)
             .map(([a, b]) => {
-                return new vscode.Selection(a.start, b.end);
+                const newRange = a.union(b);
+                return new vscode.Selection(newRange.end, newRange.start);
             })
             .toArray();
 

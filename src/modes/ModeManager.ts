@@ -6,7 +6,8 @@ import {
     SpaceCommands,
     ModifyCommands,
 } from "../utils/quickMenus";
-import { createFrom, SubjectActions } from "../subjects/subjects";
+import { createFrom } from "../utils/subjects";
+import { SubjectActions } from "../subjects/SubjectActions";
 import { EditorMode, EditorModeType } from "./modes";
 import { NullMode } from "./NullMode";
 import EditMode from "./EditMode";
@@ -54,10 +55,8 @@ export default class ModeManager {
 
         this.mode = await this.mode.changeTo(newMode);
 
-        if (!this.mode.equals(previousMode)) {
-            previousMode.clearUI();
-            this.mode.refreshUI();
-        }
+        previousMode.clearUI();
+        this.mode.refreshUI();
     }
 
     async changeNumHandler() {
@@ -109,7 +108,7 @@ export default class ModeManager {
                 );
             }
 
-            await goToLine(parsed);
+            await goToLine(this.editor, parsed);
         } else if (choice) {
             choice.execute();
         }

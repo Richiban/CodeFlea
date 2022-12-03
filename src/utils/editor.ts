@@ -95,25 +95,6 @@ export function scrollEditor(direction: "up" | "down", lines: number) {
     editor.revealRange(newRange);
 }
 
-export function moveCursorTo(
-    newPosition: vscode.Position,
-    scrollEditor = false
-) {
-    const editor = getEditor();
-    const currentPosition = editor.selection.active;
-
-    editor.selection = new vscode.Selection(
-        newPosition.line,
-        newPosition.character,
-        newPosition.line,
-        newPosition.character
-    );
-
-    if (scrollEditor) {
-        scrollToReveal(newPosition, currentPosition);
-    }
-}
-
 export function swap(
     document: vscode.TextDocument,
     edit: vscode.TextEditorEdit,
@@ -141,60 +122,11 @@ export function move(
     textEditorEdit.insert(newLocation, textToMove);
 }
 
-export function goToLine(lineNumber: number) {
-    const editor = getEditor();
-
+export function goToLine(editor: vscode.TextEditor, lineNumber: number) {
     editor.selection = new vscode.Selection(lineNumber, 0, lineNumber, 0);
 }
 
-export function scrollToReveal(
-    startPosition: vscode.Position,
-    endPosition: vscode.Position
-) {
-    const editor = getEditor();
-
-    editor.revealRange(
-        new vscode.Range(
-            startPosition.line,
-            startPosition.character,
-            endPosition.line,
-            endPosition.character
-        )
-    );
-}
-
-export function getEditor() {
-    const editor = vscode.window.activeTextEditor;
-
-    if (!editor) {
-        throw new Error("No active editor");
-    }
-
-    return editor;
-}
-
-export function select(fromPosition: vscode.Position, to: vscode.Position) {
-    const editor = getEditor();
-
-    editor.selection = new vscode.Selection(
-        fromPosition.line,
-        fromPosition.character,
-        to.line,
-        to.character
-    );
-
-    editor.revealRange(
-        new vscode.Range(
-            to.line,
-            to.character,
-            fromPosition.line,
-            fromPosition.character
-        )
-    );
-}
-
-export function scrollToCursorAtCenter() {
-    const editor = getEditor();
+export function scrollToCursorAtCenter(editor: vscode.TextEditor) {
     const cursorPosition = editor.selection.active;
 
     const viewportHeight =
@@ -213,15 +145,7 @@ export function scrollToCursorAtCenter() {
     editor.revealRange(rangeToReveal);
 }
 
-export function getNonActiveSelectionPoint() {
-    const editor = getEditor();
-
-    return editor.selection.anchor;
-}
-
-export function tryGetLineAt(lineNumber: number) {
-    const editor = getEditor();
-
+export function tryGetLineAt(editor: vscode.TextEditor, lineNumber: number) {
     if (lineNumber >= editor.document.lineCount) {
         return;
     }

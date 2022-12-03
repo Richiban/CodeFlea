@@ -1,8 +1,9 @@
-import * as blocks from "./utils/blocks";
+import * as vscode from "vscode";
 import { Config } from "./config";
 import * as editor from "./utils/editor";
 import { FleaJumper } from "./jump/fleajump";
 import type ModeManager from "./modes/ModeManager";
+import { collapseSelections } from "./utils/selectionsAndRanges";
 
 export abstract class ExtensionCommand {
     abstract id: string;
@@ -288,15 +289,6 @@ class NextBlockCommand extends ExtensionCommand {
 }
 
 @registerCommand()
-class ExtendBlockSelectionCommand extends ExtensionCommand {
-    id = "codeFlea.extendBlockSelection";
-
-    execute() {
-        blocks.extendBlockSelection("forwards", "same-indentation");
-    }
-}
-
-@registerCommand()
 class NextOuterBlockCommand extends ExtensionCommand {
     id = "codeFlea.nextOuterBlock";
 
@@ -351,15 +343,6 @@ class PrevInnerBlockCommand extends ExtensionCommand {
 }
 
 @registerCommand()
-class ExtendBlockSelectionBackwardsCommand extends ExtensionCommand {
-    id = "codeFlea.extendBlockSelectionBackwards";
-
-    execute() {
-        blocks.extendBlockSelection("backwards", "same-indentation");
-    }
-}
-
-@registerCommand()
 class JumpCommand extends ExtensionCommand {
     id = "codeFlea.jump";
 
@@ -373,7 +356,7 @@ class ScrollToCursorCommand extends ExtensionCommand {
     id = "codeFlea.scrollToCursor";
 
     execute() {
-        editor.scrollToCursorAtCenter();
+        editor.scrollToCursorAtCenter(this.container.manager.editor);
     }
 }
 
@@ -472,7 +455,7 @@ class AppendCommand extends ExtensionCommand {
     id = "codeFlea.changeToEditModeAppend";
 
     async execute() {
-        await await this.container.manager.executeSubjectCommand("append");
+        collapseSelections(this.container.manager.editor, "end");
         this.container.manager.changeMode({ kind: "EDIT" });
     }
 }
@@ -482,7 +465,7 @@ class PrependCommand extends ExtensionCommand {
     id = "codeFlea.changeToEditModePrepend";
 
     async execute() {
-        await await this.container.manager.executeSubjectCommand("prepend");
+        collapseSelections(this.container.manager.editor, "start");
         this.container.manager.changeMode({ kind: "EDIT" });
     }
 }
@@ -567,9 +550,9 @@ class CustomVsCodeCommand extends ExtensionCommand {
 class ChangeCommand extends ExtensionCommand {
     id = "codeFlea.change";
 
-    execute() {
-        this.container.manager.executeSubjectCommand("changeSubject");
-        this.container.manager.changeMode({ kind: "EDIT" });
+    async execute() {
+        await this.container.manager.changeMode({ kind: "EDIT" });
+        await vscode.commands.executeCommand("deleteLeft");
     }
 }
 
@@ -596,9 +579,10 @@ class NewLineBelow extends ExtensionCommand {
     id = "codeFlea.newLineBelow";
 
     async execute() {
-        await this.container.manager.executeSubjectCommand("append");
+        collapseSelections(this.container.manager.editor, "end");
         this.container.manager.changeMode({ kind: "EDIT" });
-        await this.container.manager.executeSubjectCommand("newLineBelow");
+
+        await vscode.commands.executeCommand("editor.action.insertLineAfter");
     }
 }
 
@@ -607,9 +591,9 @@ class NewLineAbove extends ExtensionCommand {
     id = "codeFlea.newLineAbove";
 
     async execute() {
-        await this.container.manager.executeSubjectCommand("prepend");
+        collapseSelections(this.container.manager.editor, "start");
         this.container.manager.changeMode({ kind: "EDIT" });
-        await this.container.manager.executeSubjectCommand("newLineAbove");
+        await vscode.commands.executeCommand("editor.action.insertLineBefore");
     }
 }
 

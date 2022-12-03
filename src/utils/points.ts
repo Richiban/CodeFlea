@@ -1,5 +1,4 @@
 import { Direction, linqish, Linqish } from "../common";
-import { getEditor, moveCursorTo } from "./editor";
 import { iterLines, lineIsStopLine } from "./lines";
 import * as vscode from "vscode";
 
@@ -60,22 +59,28 @@ function* getInterestingPointsInLine(
 const isOperator = '()[]{}=:/\\|^&+;<>!"'.includes;
 
 export async function nextInterestingPoint(
+    editor: vscode.TextEditor,
     startPosition: vscode.Position,
     direction: Direction = "forwards"
 ) {
-    for (const point of getInterestingPoints(startPosition, direction)) {
-        await moveCursorTo(point);
+    for (const point of getInterestingPoints(
+        editor,
+        startPosition,
+        direction
+    )) {
+        editor.selection = new vscode.Selection(point, point);
         return;
     }
 }
 
 export function getInterestingPoints(
+    editor: vscode.TextEditor,
     startPosition: vscode.Position,
     direction: Direction = "forwards"
 ): Linqish<vscode.Position> {
     return linqish(
         (function* () {
-            const document = getEditor()?.document;
+            const document = editor.document;
 
             if (!startPosition || !document) {
                 return;

@@ -1,10 +1,8 @@
 import { Config } from "../config";
 import { JumpInterface } from "./jump-interface";
 import * as vscode from "vscode";
-import { moveCursorTo } from "../utils/editor";
 import { JumpLocations, JumpLocation, getJumpCodes } from "../common";
 import { getInterestingPoints } from "../utils/points";
-import { getBlocksAround } from "../utils/blocks";
 
 export class FleaJumper {
     private config: Config;
@@ -93,7 +91,10 @@ export class FleaJumper {
         }
 
         if (chosenLine.tag === "Ok") {
-            moveCursorTo(chosenLine.userSelection.position);
+            editor.selection = new vscode.Selection(
+                chosenLine.userSelection.position,
+                chosenLine.userSelection.position
+            );
         }
     };
 
@@ -107,12 +108,18 @@ export class FleaJumper {
         );
 
         if (chosenPoint.tag === "Ok") {
-            moveCursorTo(chosenPoint.userSelection.position);
+            editor.selection = new vscode.Selection(
+                chosenPoint.userSelection.position,
+                chosenPoint.userSelection.position
+            );
         }
     };
 
     private findJumpPoints = (editor: vscode.TextEditor): JumpLocations => {
-        const interestingPoints = getInterestingPoints(editor.selection.active);
+        const interestingPoints = getInterestingPoints(
+            editor,
+            editor.selection.active
+        );
         const jumpCodes = getJumpCodes(this.config);
 
         const { start: viewportStart, end: viewportEnd } =
@@ -133,17 +140,12 @@ export class FleaJumper {
         const bounds = editor.visibleRanges[0];
         const jumpCodes = getJumpCodes(this.config);
         const cursorPosition = editor.selection.active;
+        throw new Error("Not implemented");
+        // const blocks = getBlocksAround(cursorPosition, "alternate", "forwards");
 
-        const blocks = getBlocksAround(
-            cursorPosition,
-            "alternate",
-            "forwards",
-            bounds
-        );
-
-        return blocks
-            .zipWith(jumpCodes)
-            .map(([p, c]) => ({ jumpCode: c, position: p.point }))
-            .toArray();
+        // return blocks
+        //     .zipWith(jumpCodes)
+        //     .map(([p, c]) => ({ jumpCode: c, position: p.point }))
+        //     .toArray();
     };
 }

@@ -75,7 +75,7 @@ export const GoToCommands: QuickCommand[] = [
         label: "go to type definition",
         execute: async () => {
             await vscode.commands.executeCommand(
-                "editor.}action.goToTypeDefinition"
+                "editor.action.goToTypeDefinition"
             );
         },
     },
@@ -104,7 +104,7 @@ export const SpaceCommands: QuickCommand[] = [
         quickKey: " ",
         label: "center editor",
         execute: async () => {
-            scrollToCursorAtCenter();
+            scrollToCursorAtCenter(vscode.window.activeTextEditor!);
         },
     },
     {

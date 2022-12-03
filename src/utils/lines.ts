@@ -1,12 +1,5 @@
 import * as vscode from "vscode";
-import {
-    Change,
-    Direction,
-    DirectionOrNearest,
-    Indentation,
-    Linqish,
-} from "../common";
-import { getEditor, moveCursorTo } from "./editor";
+import * as common from "../common";
 
 export type LineEnumerationPattern = "alternate" | "sequential";
 
@@ -17,14 +10,18 @@ export type LinePair =
 
 export type Bounds = { start: { line: number }; end: { line: number } };
 
-export function lineIsBlank(line: number) {
-    return getEditor().document.lineAt(line).isEmptyOrWhitespace;
+export function lineIsBlank(document: vscode.TextDocument, line: number) {
+    return document.lineAt(line).isEmptyOrWhitespace;
 }
 
 export function getRelativeIndentation(
     startingLine: vscode.TextLine,
     targetLine: vscode.TextLine
-): Indentation {
+): common.RelativeIndentation {
+    if (targetLine.isEmptyOrWhitespace) {
+        return "no-indentation";
+    }
+
     if (
         startingLine.firstNonWhitespaceCharacterIndex >
         targetLine.firstNonWhitespaceCharacterIndex
@@ -42,7 +39,7 @@ export function getRelativeIndentation(
     return "same-indentation";
 }
 
-function directionToDelta(direction: Direction) {
+function directionToDelta(direction: common.Direction) {
     return direction === "forwards"
         ? (x: number) => x + 1
         : (x: number) => x - 1;
@@ -51,7 +48,7 @@ function directionToDelta(direction: Direction) {
 export function* iterLinePairs(
     document: vscode.TextDocument,
     currentLineNumber: number,
-    direction: Direction,
+    direction: common.Direction,
     bounds: Bounds = { start: { line: 0 }, end: { line: document.lineCount } }
 ): Generator<LinePair> {
     const lines = iterLines(document, currentLineNumber, direction);
@@ -65,7 +62,7 @@ export function* iterLinePairs(
     }
 }
 
-function changeToDiff(change: Change) {
+function changeToDiff(change: common.Change) {
     if (change === "greaterThan") {
         return (x: number, y: number) => x > y;
     }
@@ -105,14 +102,14 @@ function* iterLinesOutwards(
 export function iterLines(
     document: vscode.TextDocument,
     currentLineNumber: number,
-    direction: Direction
-): Linqish<vscode.TextLine> {
+    direction: common.Direction
+): common.Linqish<vscode.TextLine> {
     const advance = directionToDelta(direction);
 
     const withinBounds = () =>
         currentLineNumber >= 0 && currentLineNumber < document.lineCount;
 
-    return new Linqish(
+    return new common.Linqish(
         (function* () {
             while (withinBounds()) {
                 yield document.lineAt(currentLineNumber);
@@ -126,7 +123,7 @@ export function iterLines(
 export function getNearestLineOfChangeOfIndentation(
     document: vscode.TextDocument,
     currentLine: vscode.TextLine,
-    change: Change
+    change: common.Change
 ) {
     const diff = changeToDiff(change);
 
@@ -159,8 +156,8 @@ export function getNearestLineOfChangeOfIndentation(
 }
 
 export function getNextLineOfChangeOfIndentation(
-    change: Change,
-    direction: Direction,
+    change: common.Change,
+    direction: common.Direction,
     document: vscode.TextDocument,
     currentLine: vscode.TextLine
 ) {
@@ -181,39 +178,38 @@ export function getNextLineOfChangeOfIndentation(
 }
 
 export function moveCursorToNextBlankLine(
+    editor: vscode.TextEditor,
     currentPosition: vscode.Position,
-    direction: Direction
+    direction: common.Direction
 ) {
-    const nextLine = iterLines(
-        getEditor().document,
-        currentPosition.line,
-        direction
-    )
+    const nextLine = iterLines(editor.document, currentPosition.line, direction)
         .skip(1)
         .filter((l) => l.isEmptyOrWhitespace)
         .tryFirst();
 
     if (nextLine) {
-        moveCursorTo(nextLine.range.start);
+        editor.selection = new vscode.Selection(
+            nextLine.range.start,
+            nextLine.range.start
+        );
     }
 }
 
 export function moveToChangeOfIndentation(
+    editor: vscode.TextEditor,
     cursorPosition: vscode.Position,
-    change: Change,
-    direction: DirectionOrNearest
+    change: common.Change,
+    direction: common.DirectionOrNearest
 ) {
-    const document = getEditor()?.document;
-
-    if (cursorPosition && document) {
+    if (cursorPosition && editor.document) {
         let line: vscode.TextLine | undefined;
-        const currentLine = document.lineAt(cursorPosition.line);
+        const currentLine = editor.document.lineAt(cursorPosition.line);
 
         switch (direction) {
             case "nearest": {
                 line = getNearestLineOfChangeOfIndentation(
-                    document,
-                    document.lineAt(cursorPosition.line),
+                    editor.document,
+                    editor.document.lineAt(cursorPosition.line),
                     change
                 );
                 break;
@@ -223,7 +219,7 @@ export function moveToChangeOfIndentation(
                 line = getNextLineOfChangeOfIndentation(
                     change,
                     direction,
-                    document,
+                    editor.document,
                     currentLine
                 );
                 break;
@@ -231,25 +227,27 @@ export function moveToChangeOfIndentation(
         }
 
         if (line) {
-            moveCursorTo(line.range.start);
+            editor.selection = new vscode.Selection(
+                line.range.start,
+                line.range.start
+            );
         }
     }
 }
 
 export function moveToNextLineSameLevel(
+    editor: vscode.TextEditor,
     cursorPosition: vscode.Position,
-    direction: Direction
+    direction: common.Direction
 ) {
-    const document = getEditor().document;
-
-    if (cursorPosition && document) {
+    if (cursorPosition && editor.document) {
         const documentLines = iterLines(
-            document,
+            editor.document,
             cursorPosition.line,
             direction
         );
 
-        const currentLine = document.lineAt(cursorPosition.line);
+        const currentLine = editor.document.lineAt(cursorPosition.line);
 
         for (const line of documentLines) {
             if (
@@ -257,7 +255,10 @@ export function moveToNextLineSameLevel(
                     line.firstNonWhitespaceCharacterIndex &&
                 !line.isEmptyOrWhitespace
             ) {
-                moveCursorTo(line.range.start);
+                editor.selection = new vscode.Selection(
+                    line.range.start,
+                    line.range.start
+                );
                 break;
             }
         }
@@ -277,7 +278,7 @@ export function lineIsSignificant(line: vscode.TextLine) {
 export function getNextSignificantLine(
     document: vscode.TextDocument,
     position: vscode.Position,
-    direction: Direction
+    direction: common.Direction
 ): vscode.TextLine | undefined {
     for (const line of iterLines(document, position.line, direction).skip(1)) {
         if (lineIsSignificant(line)) {
@@ -293,9 +294,9 @@ export function swapLineSideways(
     direction: "left" | "right"
 ): vscode.Range | undefined {
     const sourceLine = document.lineAt(position.line);
-    const targetIndentation: Change =
+    const targetIndentation: common.Change =
         direction === "right" ? "greaterThan" : "lessThan";
-    const lineDirection: Direction =
+    const lineDirection: common.Direction =
         direction === "right" ? "forwards" : "backwards";
 
     const targetLine = getNextLineOfChangeOfIndentation(
@@ -348,4 +349,58 @@ export function duplicate(
     );
 
     textEdit.insert(startLine.range.start, linesToDuplicate);
+}
+
+export function search(
+    editor: vscode.TextEditor,
+    startingPosition: vscode.Position,
+    targetChar: common.Char,
+    direction: common.Direction
+): vscode.Range | undefined {
+    const searchLines = iterLines(
+        editor.document,
+        startingPosition.line,
+        direction
+    ).skip(1);
+
+    for (const line of searchLines) {
+        const char = editor.document.getText(line.range)[
+            line.firstNonWhitespaceCharacterIndex
+        ];
+
+        if (char === targetChar) {
+            return line.range;
+        }
+    }
+}
+
+export function iterHorizontally(
+    editor: vscode.TextEditor,
+    options: {
+        fromPosition: vscode.Position;
+        direction: common.Direction;
+    }
+): common.Linqish<vscode.TextLine> {
+    return common.linqish(
+        (function* () {
+            let currentLine = editor.document.lineAt(options.fromPosition);
+            let indentation: common.Change =
+                options.direction === "forwards" ? "greaterThan" : "lessThan";
+
+            while (true) {
+                const nextLine = getNextLineOfChangeOfIndentation(
+                    indentation,
+                    options.direction,
+                    editor.document,
+                    currentLine
+                );
+
+                if (nextLine) {
+                    yield nextLine;
+                } else {
+                    break;
+                }
+            }
+        })()
+    );
 }

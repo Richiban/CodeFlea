@@ -1,13 +1,14 @@
 import * as vscode from "vscode";
-import * as subjects from "../subjects/subjects";
+import { SubjectActions } from "../subjects/SubjectActions";
+import { SubjectType } from "../subjects/SubjectType";
 
 export type EditorModeType =
     | { kind: "EDIT" }
-    | { kind: "NAVIGATE" | "EXTEND"; subjectName: subjects.SubjectType };
+    | { kind: "NAVIGATE" | "EXTEND"; subjectName: SubjectType };
 
 export abstract class EditorMode implements vscode.Disposable {
     protected lastCommand:
-        | { commandName: keyof subjects.SubjectActions; args: string[] }
+        | { commandName: keyof SubjectActions; args: string[] }
         | undefined;
 
     abstract equals(previousMode: EditorMode): boolean;
@@ -25,7 +26,7 @@ export abstract class EditorMode implements vscode.Disposable {
     }
 
     abstract executeSubjectCommand(
-        command: keyof subjects.SubjectActions
+        command: keyof SubjectActions
     ): Promise<void>;
 
     abstract repeatSubjectCommand(): Promise<void>;
