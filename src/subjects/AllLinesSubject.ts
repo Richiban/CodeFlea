@@ -1,10 +1,15 @@
 import * as vscode from "vscode";
-import * as lines from "../utils/lines";
+import * as lines from "../readers/lines";
 import * as selections from "../utils/selectionsAndRanges";
 import * as common from "../common";
 import { Subject } from "./Subject";
+import allLinesReader from "../readers/allLines";
+import allLinesWriter from "../writers/allLines";
 
 export class AllLinesSubject extends Subject {
+    protected subjectReader = allLinesReader;
+    protected subjectWriter = allLinesWriter;
+    protected decorationType = AllLinesSubject.decorationType;
     readonly name = "ALL_LINES";
 
     public static decorationType = vscode.window.createTextEditorDecorationType(
@@ -76,15 +81,5 @@ export class AllLinesSubject extends Subject {
 
     async deleteSubject() {
         await vscode.commands.executeCommand("editor.action.deleteLines");
-    }
-
-    iterAll(direction: common.Direction): common.Linqish<vscode.Range> {
-        return lines
-            .iterLines(
-                this.context.editor.document,
-                this.context.editor.selection.start.line,
-                direction
-            )
-            .map((line) => line.range);
     }
 }

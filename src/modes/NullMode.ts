@@ -1,4 +1,4 @@
-import { createFrom } from "../utils/subjects";
+import { createFrom } from "../subjects/subjects";
 import EditMode from "./EditMode";
 import ExtendMode from "./ExtendMode";
 import * as common from "../common";

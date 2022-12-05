@@ -1,6 +1,6 @@
 import { Direction, linqish, Linqish } from "../common";
-import { iterLines, lineIsStopLine } from "./lines";
 import * as vscode from "vscode";
+import { iterLines, lineIsStopLine } from "./lines";
 
 const interestingChars = new Set(
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"

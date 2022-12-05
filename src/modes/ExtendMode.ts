@@ -1,6 +1,6 @@
 import * as common from "../common";
 import * as vscode from "vscode";
-import * as subjects from "../utils/subjects";
+import * as subjects from "../subjects/subjects";
 import EditMode from "./EditMode";
 import { EditorMode, EditorModeType } from "./modes";
 import NavigateMode from "./NavigateMode";

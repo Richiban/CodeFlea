@@ -3,6 +3,8 @@ import * as vscode from "vscode";
 
 export type DirectionOrNearest = Direction | "nearest";
 
+export type Bounds = { start: { line: number }; end: { line: number } };
+
 export type Change = "greaterThan" | "lessThan";
 
 export type Direction = "forwards" | "backwards";
@@ -17,6 +19,58 @@ export type IndentationRequest =
     | RelativeIndentation
     | "same-indentation-current-scope"
     | "any-indentation";
+export type SubjectReader = {
+    getContainingRangeAt(
+        document: vscode.TextDocument,
+        position: vscode.Position
+    ): vscode.Range | undefined;
+    iterAll(
+        document: vscode.TextDocument,
+        fromPosition: vscode.Position,
+        direction: Direction
+    ): Linqish<vscode.Range>;
+    iterHorizontally(
+        document: vscode.TextDocument,
+        fromPosition: vscode.Position,
+        direction: Direction
+    ): Linqish<vscode.Range>;
+    iterVertically(
+        document: vscode.TextDocument,
+        fromPosition: vscode.Position,
+        direction: Direction
+    ): Linqish<vscode.Range>;
+    search(
+        document: vscode.TextDocument,
+        startingPosition: vscode.Position,
+        targetChar: Char,
+        direction: Direction
+    ): vscode.Range | undefined;
+};
+
+export type SubjectWriter = {
+    delete_(
+        document: vscode.TextDocument,
+        edit: vscode.TextEditorEdit,
+        range: vscode.Range
+    ): vscode.Range;
+    duplicate(
+        document: vscode.TextDocument,
+        edit: vscode.TextEditorEdit,
+        range: vscode.Range
+    ): vscode.Range;
+    swapVertically(
+        document: vscode.TextDocument,
+        edit: vscode.TextEditorEdit,
+        range: vscode.Range,
+        direction: Direction
+    ): vscode.Range;
+    swapHorizontally(
+        document: vscode.TextDocument,
+        edit: vscode.TextEditorEdit,
+        range: vscode.Range,
+        direction: Direction
+    ): vscode.Range;
+};
 
 export type JumpLocations = JumpLocation[];
 

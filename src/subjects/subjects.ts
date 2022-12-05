@@ -1,11 +1,11 @@
 import * as common from "../common";
-import { SubjectType } from "../subjects/SubjectType";
-import { Subject } from "../subjects/Subject";
-import { BlockSubject } from "../subjects/BlockSubject";
-import { LineSubject } from "../subjects/LineSubject";
-import { SubWordSubject } from "../subjects/SubWordSubject";
-import { WordSubject } from "../subjects/WordSubject";
-import { AllLinesSubject } from "../subjects/AllLinesSubject";
+import { SubjectType } from "./SubjectType";
+import { Subject } from "./Subject";
+import { BlockSubject } from "./BlockSubject";
+import { LineSubject } from "./LineSubject";
+import { SubwordSubject } from "./SubWordSubject";
+import { WordSubject } from "./WordSubject";
+import { AllLinesSubject } from "./AllLinesSubject";
 
 export function createFrom(
     context: common.ExtensionContext,
@@ -19,7 +19,7 @@ export function createFrom(
         case "ALL_LINES":
             return new AllLinesSubject(context);
         case "SUBWORD":
-            return new SubWordSubject(context);
+            return new SubwordSubject(context);
         case "BLOCK":
             return new BlockSubject(context);
     }

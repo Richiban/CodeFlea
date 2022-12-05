@@ -6,7 +6,7 @@ import {
     SpaceCommands,
     ModifyCommands,
 } from "../utils/quickMenus";
-import { createFrom } from "../utils/subjects";
+import { createFrom } from "../subjects/subjects";
 import { SubjectActions } from "../subjects/SubjectActions";
 import { EditorMode, EditorModeType } from "./modes";
 import { NullMode } from "./NullMode";

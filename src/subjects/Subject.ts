@@ -4,15 +4,39 @@ import * as common from "../common";
 import { SubjectActions } from "./SubjectActions";
 import { SubjectType } from "./SubjectType";
 
-export abstract class Subject implements SubjectActions, vscode.Disposable {
+export abstract class Subject implements SubjectActions {
     constructor(protected context: common.ExtensionContext) {}
 
-    dispose() {}
+    protected abstract subjectReader: common.SubjectReader;
+    protected abstract subjectWriter: common.SubjectWriter;
+    protected abstract decorationType: vscode.TextEditorDecorationType;
+    public abstract name: SubjectType;
 
-    async nextSubjectDown() {}
+    async nextSubjectDown() {
+        selections.tryMap(this.context.editor, (selection) =>
+            this.subjectReader
+                .iterHorizontally(
+                    this.context.editor.document,
+                    selection.start,
+                    "backwards"
+                )
+                .tryFirst()
+        );
+    }
+
+    async nextSubjectRight() {
+        selections.tryMap(this.context.editor, (selection) =>
+            this.subjectReader
+                .iterHorizontally(
+                    this.context.editor.document,
+                    selection.end,
+                    "forwards"
+                )
+                .tryFirst()
+        );
+    }
     async nextSubjectUp() {}
     async nextSubjectLeft() {}
-    async nextSubjectRight() {}
     async addSubjectDown() {}
     async addSubjectUp() {}
     async addSubjectLeft() {}
@@ -54,10 +78,57 @@ export abstract class Subject implements SubjectActions, vscode.Disposable {
             this.context.editor.selections.concat(existingSelections);
     }
 
-    async swapSubjectDown() {}
-    async swapSubjectUp() {}
-    async swapSubjectLeft() {}
-    async swapSubjectRight() {}
+    async swapSubjectDown() {
+        this.context.editor.edit((e) => {
+            selections.tryMap(this.context.editor, (selection) =>
+                this.subjectWriter.swapVertically(
+                    this.context.editor.document,
+                    e,
+                    selection,
+                    "forwards"
+                )
+            );
+        });
+    }
+    async swapSubjectUp() {
+        this.context.editor.edit((e) => {
+            selections.tryMap(this.context.editor, (selection) =>
+                this.subjectWriter.swapVertically(
+                    this.context.editor.document,
+                    e,
+                    selection,
+                    "backwards"
+                )
+            );
+        });
+    }
+
+    async swapSubjectLeft() {
+        this.context.editor.edit((e) => {
+            selections.tryMap(this.context.editor, (selection) =>
+                this.subjectWriter.swapHorizontally(
+                    this.context.editor.document,
+                    e,
+                    selection,
+                    "backwards"
+                )
+            );
+        });
+    }
+
+    async swapSubjectRight() {
+        this.context.editor.edit((e) => {
+            selections.tryMap(this.context.editor, (selection) =>
+                this.subjectWriter.swapHorizontally(
+                    this.context.editor.document,
+                    e,
+                    selection,
+                    "forwards"
+                )
+            );
+        });
+    }
+
     async deleteSubject() {
         await vscode.commands.executeCommand("deleteLeft");
     }
@@ -71,10 +142,31 @@ export abstract class Subject implements SubjectActions, vscode.Disposable {
     async changeSubject() {
         await vscode.commands.executeCommand("deleteLeft");
     }
+
     async firstSubjectInScope() {}
     async lastSubjectInScope() {}
-    async search(target: string) {}
-    async searchBackwards(target: string) {}
+
+    async search(target: common.Char) {
+        selections.tryMap(this.context.editor, (selection) =>
+            this.subjectReader.search(
+                this.context.editor.document,
+                selection.end,
+                target,
+                "forwards"
+            )
+        );
+    }
+
+    async searchBackwards(target: common.Char) {
+        selections.tryMap(this.context.editor, (selection) =>
+            this.subjectReader.search(
+                this.context.editor.document,
+                selection.start,
+                target,
+                "backwards"
+            )
+        );
+    }
 
     async nextSubjectMatch() {
         await vscode.commands.executeCommand(
@@ -100,13 +192,47 @@ export abstract class Subject implements SubjectActions, vscode.Disposable {
         );
     }
 
-    abstract name: SubjectType;
-    abstract fixSelection(): Promise<void>;
-    abstract clearUI(): void;
+    async fixSelection(): Promise<void> {
+        selections.tryMap(this.context.editor, (selection) => {
+            const startRange = this.subjectReader.getContainingRangeAt(
+                this.context.editor.document,
+                selection.start
+            );
+
+            const endRange = this.subjectReader.getContainingRangeAt(
+                this.context.editor.document,
+                selection.end
+            );
+
+            const fixedRange =
+                startRange && endRange
+                    ? startRange.union(endRange)
+                    : startRange
+                    ? startRange
+                    : endRange;
+
+            return fixedRange ?? selection;
+        });
+
+        this.context.editor.setDecorations(
+            this.decorationType,
+            this.context.editor.selections
+        );
+    }
+
+    clearUI(): void {
+        this.context.editor.setDecorations(this.decorationType, []);
+    }
 
     equals(other: Subject) {
         return this.name === other.name;
     }
 
-    abstract iterAll(direction: common.Direction): common.Linqish<vscode.Range>;
+    iterAll(direction: common.Direction): common.Linqish<vscode.Range> {
+        return this.subjectReader.iterAll(
+            this.context.editor.document,
+            this.context.editor.selection.start,
+            direction
+        );
+    }
 }

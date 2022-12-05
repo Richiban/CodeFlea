@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import * as subjects from "../utils/subjects";
+import * as subjects from "../subjects/subjects";
 import EditMode from "./EditMode";
 import ExtendMode from "./ExtendMode";
 import * as modes from "./modes";
@@ -186,10 +186,6 @@ export default class NavigateMode extends modes.EditorMode {
             this.subject.iterAll("forwards"),
             this.subject.iterAll("backwards")
         );
-    }
-
-    async dispose() {
-        this.subject.dispose();
     }
 
     private tryParseNumber(
