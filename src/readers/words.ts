@@ -1,16 +1,23 @@
 import * as vscode from "vscode";
-import { Char, Direction, Linqish, SubjectReader } from "../common";
+import * as common from "../common";
 import * as positions from "../utils/positions";
 import * as lineUtils from "../utils/lines";
+import {
+    positionToRange,
+    wordRangeToPosition,
+} from "../utils/selectionsAndRanges";
 
 function iterVertically(
     document: vscode.TextDocument,
-    currentPosition: vscode.Position,
-    direction: Direction
-): Linqish<vscode.Range> {
-    return new Linqish(
+    options: common.IterationOptions
+): common.Linqish<vscode.Range> {
+    return new common.Linqish(
         (function* () {
             let cont = true;
+            let currentPosition = wordRangeToPosition(
+                options.startingPosition,
+                options.direction
+            );
 
             while (cont) {
                 cont = false;
@@ -18,7 +25,7 @@ function iterVertically(
                 const nextLine = lineUtils.getNextSignificantLine(
                     document,
                     currentPosition,
-                    direction
+                    options.direction
                 );
 
                 if (nextLine) {
@@ -30,7 +37,7 @@ function iterVertically(
                     if (wordRange) {
                         yield wordRange;
 
-                        currentPosition = newPosition;
+                        options.startingPosition = positionToRange(newPosition);
                         cont = true;
                     }
                 }
@@ -41,14 +48,17 @@ function iterVertically(
 
 function iterHorizontally(
     document: vscode.TextDocument,
-    currentPosition: vscode.Position,
-    direction: Direction
-): Linqish<vscode.Range> {
-    return new Linqish(
+    options: common.IterationOptions
+): common.Linqish<vscode.Range> {
+    return new common.Linqish(
         (function* () {
             let wordRange = undefined;
-            let newPosition: vscode.Position | undefined = currentPosition;
-            const diff = direction === "forwards" ? 2 : -2;
+            let newPosition: vscode.Position | undefined = wordRangeToPosition(
+                options.startingPosition,
+                options.direction
+            );
+
+            const diff = options.direction === "forwards" ? 2 : -2;
 
             do {
                 const nextPosition = positions.translateWithWrap(
@@ -110,9 +120,15 @@ function findWordClosestTo(
     document: vscode.TextDocument,
     position: vscode.Position
 ): vscode.Range {
-    const wordRange = new Linqish([
-        iterHorizontally(document, position, "backwards").tryFirst(),
-        iterHorizontally(document, position, "forwards").tryFirst(),
+    const wordRange = new common.Linqish([
+        iterHorizontally(document, {
+            startingPosition: position,
+            direction: "backwards",
+        }).tryFirst(),
+        iterHorizontally(document, {
+            startingPosition: position,
+            direction: "forwards",
+        }).tryFirst(),
     ]).minBy((w) => Math.abs(w!.end.line - position.line));
 
     return wordRange ?? new vscode.Range(position, position);
@@ -120,15 +136,10 @@ function findWordClosestTo(
 
 function search(
     document: vscode.TextDocument,
-    startingPosition: vscode.Position,
-    targetChar: Char,
-    direction: Direction
+    targetChar: common.Char,
+    options: common.IterationOptions
 ): vscode.Range | undefined {
-    for (const wordRange of iterHorizontally(
-        document,
-        startingPosition,
-        direction
-    )) {
+    for (const wordRange of iterHorizontally(document, options)) {
         const charRange = new vscode.Range(
             wordRange.start,
             wordRange.start.translate(undefined, 1)
@@ -156,7 +167,7 @@ function getClosestRangeAt(
     return findWordClosestTo(document, position);
 }
 
-const reader: SubjectReader = {
+const reader: common.SubjectReader = {
     getContainingRangeAt,
     getClosestRangeTo: getClosestRangeAt,
     iterAll: iterHorizontally,

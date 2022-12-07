@@ -3,8 +3,6 @@ import * as vscode from "vscode";
 
 export type DirectionOrNearest = Direction | "nearest";
 
-export type Bounds = { start: { line: number }; end: { line: number } };
-
 export type Change = "greaterThan" | "lessThan";
 
 export const Direction = {
@@ -25,6 +23,14 @@ export type IndentationRequest =
     | "same-indentation-current-scope"
     | "any-indentation";
 
+export type IterationOptions = {
+    startingPosition: vscode.Range | vscode.Position;
+    direction: Direction;
+    currentInclusive?: boolean;
+    restrictToCurrentScope?: boolean;
+    bounds?: vscode.Range;
+};
+
 export type SubjectReader = {
     getContainingRangeAt(
         document: vscode.TextDocument,
@@ -36,24 +42,20 @@ export type SubjectReader = {
     ): vscode.Range;
     iterAll(
         document: vscode.TextDocument,
-        fromPosition: vscode.Position,
-        direction: Direction
+        options: IterationOptions
     ): Linqish<vscode.Range>;
     iterHorizontally(
         document: vscode.TextDocument,
-        fromPosition: vscode.Position,
-        direction: Direction
+        options: IterationOptions
     ): Linqish<vscode.Range>;
     iterVertically(
         document: vscode.TextDocument,
-        fromPosition: vscode.Position,
-        direction: Direction
+        options: IterationOptions
     ): Linqish<vscode.Range>;
     search(
         document: vscode.TextDocument,
-        startingPosition: vscode.Position,
         targetChar: Char,
-        direction: Direction
+        options: IterationOptions
     ): vscode.Range | undefined;
 };
 

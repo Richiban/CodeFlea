@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as common from "../common";
-import blockReader, { iterBlocksInCurrentScope } from "../readers/blocks";
+import blockReader from "../readers/blocks";
 import * as editor from "../utils/editor";
 
 function delete_(
@@ -8,20 +8,26 @@ function delete_(
     edit: vscode.TextEditorEdit,
     blockRange: vscode.Range
 ): vscode.Range {
-    const prevBlock = iterBlocksInCurrentScope(document, {
-        fromPosition: blockRange.start,
-        direction: "backwards",
-    }).tryFirst();
+    const prevBlock = blockReader
+        .iterVertically(document, {
+            startingPosition: blockRange.start,
+            direction: "backwards",
+            restrictToCurrentScope: true,
+        })
+        .tryFirst();
 
     if (prevBlock) {
         edit.delete(new vscode.Range(prevBlock.end, blockRange.end));
         return blockRange;
     }
 
-    const nextBlock = iterBlocksInCurrentScope(document, {
-        fromPosition: blockRange.end,
-        direction: "forwards",
-    }).tryFirst();
+    const nextBlock = blockReader
+        .iterVertically(document, {
+            startingPosition: blockRange.end,
+            direction: "forwards",
+            restrictToCurrentScope: true,
+        })
+        .tryFirst();
 
     if (nextBlock) {
         edit.delete(new vscode.Range(blockRange.start, nextBlock.start));
@@ -65,7 +71,10 @@ function swapVertically(
     );
 
     const nextBlock = blockReader
-        .iterVertically(document, blockRange.start, direction)
+        .iterVertically(document, {
+            startingPosition: blockRange.start,
+            direction,
+        })
         .tryFirst();
 
     if (!nextBlock || !thisBlock) {
@@ -90,7 +99,10 @@ function swapHorizontally(
     }
 
     const targetBlock = blockReader
-        .iterHorizontally(document, range.start, direction)
+        .iterHorizontally(document, {
+            startingPosition: range.start,
+            direction,
+        })
         .tryFirst();
 
     if (!targetBlock) {

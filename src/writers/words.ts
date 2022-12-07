@@ -10,11 +10,17 @@ function getSeparatingTextRange(
     wordRange: vscode.Range
 ): vscode.Range | undefined {
     const wordBefore = wordReader
-        .iterAll(document, wordRange.start, "backwards")
+        .iterAll(document, {
+            startingPosition: wordRange,
+            direction: "backwards",
+        })
         .tryFirst();
 
     const wordAfter = wordReader
-        .iterAll(document, wordRange.end, "forwards")
+        .iterAll(document, {
+            startingPosition: wordRange,
+            direction: "forwards",
+        })
         .tryFirst();
 
     const separatingTextRangeBefore =
@@ -95,11 +101,11 @@ export function swapHorizontally(
     range: vscode.Range,
     direction: common.Direction
 ): vscode.Range {
-    const getEnd: keyof vscode.Range =
-        direction === "forwards" ? "end" : "start";
-
     const targetWordRange = wordReader
-        .iterHorizontally(document, range[getEnd], direction)
+        .iterHorizontally(document, {
+            startingPosition: range,
+            direction,
+        })
         .tryFirst();
 
     if (targetWordRange) {
@@ -117,11 +123,11 @@ export function swapVertically(
     range: vscode.Range,
     direction: common.Direction
 ): vscode.Range {
-    const getEnd: keyof vscode.Range =
-        direction === "forwards" ? "end" : "start";
-
     const targetWordRange = wordReader
-        .iterVertically(document, range[getEnd], direction)
+        .iterVertically(document, {
+            startingPosition: range,
+            direction,
+        })
         .tryFirst();
 
     if (targetWordRange) {

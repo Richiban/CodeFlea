@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import * as common from "../common";
 
 export type SelectionEndType = keyof Pick<vscode.Selection, "start" | "end">;
 
@@ -76,10 +77,19 @@ export function expandToIncludeBlankLines(
     );
 }
 
-export function pointToRange(point: vscode.Position): any {
+export function positionToRange(point: vscode.Position): vscode.Range {
     return new vscode.Range(point, point);
 }
 
 export function rangeToSelection(range: vscode.Range): vscode.Selection {
     return new vscode.Selection(range.start, range.end);
+}
+
+export function wordRangeToPosition(
+    startingPosition: vscode.Range | vscode.Position,
+    direction: common.Direction
+): vscode.Position {
+    return startingPosition instanceof vscode.Range
+        ? startingPosition[direction === "forwards" ? "end" : "start"]
+        : startingPosition;
 }

@@ -1,21 +1,16 @@
 import * as vscode from "vscode";
 import * as common from "../common";
 import * as lineUtils from "../utils/lines";
+import { wordRangeToPosition } from "../utils/selectionsAndRanges";
 
 export type LineEnumerationPattern = "alternate" | "sequential";
 
 function search(
     document: vscode.TextDocument,
-    startingPosition: vscode.Position,
     targetChar: common.Char,
-    direction: common.Direction
+    options: common.IterationOptions
 ): vscode.Range | undefined {
-    const searchLines = lineUtils.iterLines(
-        document,
-        startingPosition.line,
-        direction,
-        { currentInclusive: false }
-    );
+    const searchLines = lineUtils.iterLines(document, options);
 
     for (const line of searchLines) {
         const char = document.getText(line.range)[
@@ -30,19 +25,20 @@ function search(
 
 function iterHorizontally(
     document: vscode.TextDocument,
-    fromPosition: vscode.Position,
-    direction: common.Direction
+    options: common.IterationOptions
 ): common.Linqish<vscode.Range> {
     return common.linqish(
         (function* () {
-            let currentLine = document.lineAt(fromPosition);
+            let currentLine = document.lineAt(
+                wordRangeToPosition(options.startingPosition, options.direction)
+            );
             let indentation: common.Change =
-                direction === "forwards" ? "greaterThan" : "lessThan";
+                options.direction === "forwards" ? "greaterThan" : "lessThan";
 
             while (true) {
                 const nextLine = lineUtils.getNextLineOfChangeOfIndentation(
                     indentation,
-                    direction,
+                    options.direction,
                     document,
                     currentLine
                 );
@@ -73,13 +69,10 @@ function getClosestRangeAt(
 
 function iterVertically(
     document: vscode.TextDocument,
-    fromPosition: vscode.Position,
-    direction: common.Direction
+    options: common.IterationOptions
 ): common.Linqish<vscode.Range> {
     return lineUtils
-        .iterLines(document, fromPosition.line, direction, {
-            currentInclusive: false,
-        })
+        .iterLines(document, options)
         .filter(lineUtils.lineIsSignificant)
         .map(lineUtils.rangeWithoutIndentation);
 }

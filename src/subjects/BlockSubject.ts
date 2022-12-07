@@ -1,4 +1,4 @@
-import * as blocks from "../readers/blocks";
+import * as common from "../common";
 import * as vscode from "vscode";
 import * as selections from "../utils/selectionsAndRanges";
 import { Subject } from "./Subject";
@@ -19,10 +19,11 @@ export class BlockSubject extends Subject {
 
     async firstSubjectInScope() {
         selections.tryMap(this.context.editor, (selection) =>
-            blocks
-                .iterBlocksInCurrentScope(this.context.editor.document, {
-                    fromPosition: selection.start,
-                    direction: "backwards",
+            blockReader
+                .iterVertically(this.context.editor.document, {
+                    startingPosition: selection.start,
+                    direction: common.Direction.backwards,
+                    restrictToCurrentScope: true,
                 })
                 .tryLast()
         );
@@ -30,10 +31,11 @@ export class BlockSubject extends Subject {
 
     async lastSubjectInScope() {
         selections.tryMap(this.context.editor, (selection) =>
-            blocks
-                .iterBlocksInCurrentScope(this.context.editor.document, {
-                    fromPosition: selection.start,
-                    direction: "forwards",
+            blockReader
+                .iterVertically(this.context.editor.document, {
+                    startingPosition: selection.start,
+                    direction: common.Direction.forwards,
+                    restrictToCurrentScope: true,
                 })
                 .tryLast()
         );

@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import * as common from "../common";
 import * as lineUtils from "../utils/lines";
+import { wordRangeToPosition as rangeToPosition } from "../utils/selectionsAndRanges";
 
 function getContainingRangeAt(
     document: vscode.TextDocument,
@@ -13,57 +14,48 @@ function getContainingRangeAt(
 
 function iterAll(
     document: vscode.TextDocument,
-    fromPosition: vscode.Position,
-    direction: common.Direction
+    options: common.IterationOptions
 ): common.Linqish<vscode.Range> {
-    return lineUtils
-        .iterLines(document, fromPosition.line, direction, {
-            currentInclusive: false,
-        })
-        .map((l) => l.range);
+    return lineUtils.iterLines(document, options).map((l) => l.range);
 }
 
 function iterHorizontally(
     document: vscode.TextDocument,
-    fromPosition: vscode.Position,
-    direction: common.Direction
+    options: common.IterationOptions
 ): common.Linqish<vscode.Range> {
     return common.linqish(
         (function* () {
-            let currentLine = document.lineAt(fromPosition);
-            let indentation: common.Change =
-                direction === "forwards" ? "greaterThan" : "lessThan";
+            let currentLine: vscode.TextLine | undefined = document.lineAt(
+                rangeToPosition(options.startingPosition, options.direction)
+            );
+            const indentation: common.Change =
+                options.direction === "forwards" ? "greaterThan" : "lessThan";
+            let first = true;
 
-            while (true) {
-                const nextLine = lineUtils.getNextLineOfChangeOfIndentation(
+            do {
+                if (currentLine && (!first || options.currentInclusive)) {
+                    yield currentLine.range;
+                }
+
+                currentLine = lineUtils.getNextLineOfChangeOfIndentation(
                     indentation,
-                    direction,
+                    options.direction,
                     document,
                     currentLine
                 );
 
-                if (nextLine) {
-                    yield nextLine.range;
-                } else {
-                    break;
-                }
-            }
+                first = false;
+            } while (currentLine);
         })()
     );
 }
 
 function search(
     document: vscode.TextDocument,
-    startingPosition: vscode.Position,
     searchString: common.Char,
-    direction: common.Direction
+    options: common.IterationOptions
 ): vscode.Range | undefined {
-    const allLines = lineUtils.iterLines(
-        document,
-        startingPosition.line,
-        direction,
-        { currentInclusive: false }
-    );
+    const allLines = lineUtils.iterLines(document, options);
 
     return allLines
         .filterMap((line) => {

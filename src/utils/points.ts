@@ -86,7 +86,9 @@ export function getInterestingPoints(
                 return;
             }
 
-            for (const l of iterLines(document, startPosition.line, direction, {
+            for (const l of iterLines(document, {
+                startingPosition: startPosition,
+                direction,
                 currentInclusive: true,
             })) {
                 if (lineIsStopLine(l)) {

@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import * as common from "../common";
 import * as lineUtils from "../utils/lines";
+import { wordRangeToPosition } from "./selectionsAndRanges";
 
 export type LinePair =
     | { prev: undefined; current: vscode.TextLine }
@@ -53,7 +54,9 @@ export function getNextLineOfChangeOfIndentation(
 ) {
     const diff = changeToDiff(change);
 
-    for (const line of iterLines(document, currentLine.lineNumber, direction, {
+    for (const line of iterLines(document, {
+        startingPosition: currentLine.range.start,
+        direction,
         currentInclusive: false,
     })) {
         if (
@@ -95,17 +98,12 @@ export function getRelativeIndentation(
 
 export function iterLinePairs(
     document: vscode.TextDocument,
-    currentLineNumber: number,
-    direction: common.Direction,
-    options: {
-        currentInclusive?: boolean;
-        bounds?: common.Bounds;
-    } = {}
+    options: common.IterationOptions
 ): common.Linqish<LinePair> {
-    return iterLines(document, currentLineNumber, direction, options)
+    return iterLines(document, { ...options, currentInclusive: true })
         .pairwise()
         .map(([a, b]) =>
-            direction === "forwards"
+            options.direction === "forwards"
                 ? { prev: a, current: b }
                 : { prev: b, current: a }
         );
@@ -116,7 +114,9 @@ export function getNextSignificantLine(
     position: vscode.Position,
     direction: common.Direction
 ): vscode.TextLine | undefined {
-    for (const line of iterLines(document, position.line, direction, {
+    for (const line of iterLines(document, {
+        startingPosition: position,
+        direction,
         currentInclusive: false,
     })) {
         if (lineIsSignificant(line)) {
@@ -183,14 +183,19 @@ function directionToDelta(direction: common.Direction) {
 
 export function iterLines(
     document: vscode.TextDocument,
-    currentLineNumber: number,
-    direction: common.Direction,
-    options: { bounds?: common.Bounds; currentInclusive?: boolean }
+    options: common.IterationOptions
 ): common.Linqish<vscode.TextLine> {
-    const advance = directionToDelta(direction);
+    const advance = directionToDelta(options.direction);
+    let currentLineNumber = wordRangeToPosition(
+        options.startingPosition,
+        options.direction
+    ).line;
 
     const withinBounds = () =>
-        currentLineNumber >= 0 && currentLineNumber < document.lineCount;
+        currentLineNumber >= 0 &&
+        (!options.bounds || currentLineNumber >= options.bounds.start.line) &&
+        (!options.bounds || currentLineNumber <= options.bounds.end.line) &&
+        currentLineNumber < document.lineCount;
 
     return new common.Linqish(
         (function* () {

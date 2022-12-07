@@ -1,6 +1,10 @@
 import * as vscode from "vscode";
-import { Char, Direction, Linqish, SubjectReader } from "../common";
+import * as common from "../common";
 import * as lineUtils from "../utils/lines";
+import {
+    positionToRange,
+    wordRangeToPosition,
+} from "../utils/selectionsAndRanges";
 
 type SubTextRange = {
     text: string;
@@ -103,31 +107,29 @@ function getSubwordRangeAtPosition(
 }
 function iterSubwords(
     document: vscode.TextDocument,
-    fromPosition: vscode.Position,
-    direction: Direction
-): Linqish<vscode.Range> {
-    return new Linqish<vscode.Range>(
+    options: common.IterationOptions
+): common.Linqish<vscode.Range> {
+    return new common.Linqish<vscode.Range>(
         (function* () {
             let isFirstLine = true;
+            const startingPosition = wordRangeToPosition(
+                options.startingPosition,
+                options.direction
+            );
 
-            for (const line of lineUtils.iterLines(
-                document,
-                fromPosition.line,
-                direction,
-                { currentInclusive: true }
-            )) {
+            for (const line of lineUtils.iterLines(document, options)) {
                 const subwords =
-                    direction === "forwards"
+                    options.direction === "forwards"
                         ? splitTextIntoSubWords(line.text).filter(
                               (sw) =>
                                   !isFirstLine ||
-                                  sw.range.start >= fromPosition.character
+                                  sw.range.start >= startingPosition.character
                           )
                         : splitTextIntoSubWords(line.text)
                               .filter(
                                   (sw) =>
                                       !isFirstLine ||
-                                      sw.range.end <= fromPosition.character
+                                      sw.range.end <= startingPosition.character
                               )
                               .reverse();
 
@@ -147,15 +149,10 @@ function iterSubwords(
 }
 function search(
     document: vscode.TextDocument,
-    startingPosition: vscode.Position,
-    targetChar: Char,
-    direction: Direction
+    targetChar: common.Char,
+    options: common.IterationOptions
 ): vscode.Range | undefined {
-    for (const wordRange of iterSubwords(
-        document,
-        startingPosition,
-        direction
-    )) {
+    for (const wordRange of iterSubwords(document, options)) {
         const charRange = new vscode.Range(
             wordRange.start,
             wordRange.start.translate(undefined, 1)
@@ -209,31 +206,29 @@ function expandSelectionToSubwords(
 
 function iterVertically(
     document: vscode.TextDocument,
-    fromPosition: vscode.Position,
-    direction: Direction
-): Linqish<vscode.Range> {
-    return new Linqish<vscode.Range>(
+    options: common.IterationOptions
+): common.Linqish<vscode.Range> {
+    return new common.Linqish<vscode.Range>(
         (function* () {
             let isFirstLine = true;
+            const startingPosition = wordRangeToPosition(
+                options.startingPosition,
+                options.direction
+            );
 
-            for (const line of lineUtils.iterLines(
-                document,
-                fromPosition.line,
-                direction,
-                { currentInclusive: false }
-            )) {
+            for (const line of lineUtils.iterLines(document, options)) {
                 const subwords =
-                    direction === "forwards"
+                    options.direction === "forwards"
                         ? splitTextIntoSubWords(line.text).filter(
                               (sw) =>
                                   !isFirstLine ||
-                                  sw.range.start >= fromPosition.character
+                                  sw.range.start >= startingPosition.character
                           )
                         : splitTextIntoSubWords(line.text)
                               .filter(
                                   (sw) =>
                                       !isFirstLine ||
-                                      sw.range.end <= fromPosition.character
+                                      sw.range.end <= startingPosition.character
                               )
                               .reverse();
 
@@ -252,21 +247,21 @@ function iterVertically(
     );
 }
 
-function closer(
+function closerOf(
     startingPosition: vscode.Position,
     a: vscode.Range,
     b: vscode.Range
 ): vscode.Range {
     if (a.start.line !== b.start.line) {
         return (
-            new Linqish([a, b]).minBy((r) =>
+            new common.Linqish([a, b]).minBy((r) =>
                 Math.abs(startingPosition.line - r.start.line)
             ) ?? a
         );
     }
 
     return (
-        new Linqish([a, b]).minBy((r) =>
+        new common.Linqish([a, b]).minBy((r) =>
             Math.abs(startingPosition.character - r.start.character)
         ) ?? a
     );
@@ -282,20 +277,18 @@ function getClosestRangeAt(
         return currentRange;
     }
 
-    const subwordBackwards = iterSubwords(
-        document,
-        position,
-        "backwards"
-    ).tryFirst();
+    const subwordBackwards = iterSubwords(document, {
+        startingPosition: positionToRange(position),
+        direction: common.Direction.backwards,
+    }).tryFirst();
 
-    const subwordForwards = iterSubwords(
-        document,
-        position,
-        "forwards"
-    ).tryFirst();
+    const subwordForwards = iterSubwords(document, {
+        startingPosition: positionToRange(position),
+        direction: common.Direction.forwards,
+    }).tryFirst();
 
     if (subwordBackwards && subwordForwards) {
-        return closer(position, subwordBackwards, subwordForwards);
+        return closerOf(position, subwordBackwards, subwordForwards);
     }
 
     if (subwordBackwards) {
@@ -309,7 +302,7 @@ function getClosestRangeAt(
     return new vscode.Range(position, position);
 }
 
-const subjectReader: SubjectReader = {
+const subjectReader: common.SubjectReader = {
     getContainingRangeAt: getSubwordRangeAtPosition,
     getClosestRangeTo: getClosestRangeAt,
     iterAll: iterSubwords,

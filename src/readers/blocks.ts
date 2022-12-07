@@ -2,11 +2,14 @@ import * as vscode from "vscode";
 import * as common from "../common";
 import * as lines from "./lines";
 import * as lineUtils from "../utils/lines";
+import {
+    positionToRange,
+    wordRangeToPosition,
+} from "../utils/selectionsAndRanges";
 
-type BlockBoundary = Readonly<{
-    kind: "block-end" | "block-start";
-    point: vscode.Position;
-}>;
+type BlockIterationOptions = common.IterationOptions & {
+    indentationLevel?: common.IndentationRequest;
+};
 
 function lineIsBlockStart(
     prevLine: vscode.TextLine | undefined,
@@ -56,50 +59,47 @@ function lineIsBlockEnd(
 
 function iterBlockStarts(
     document: vscode.TextDocument,
-    options: {
-        fromPosition: vscode.Position;
-        direction?: common.Direction;
-        indentationLevel?: common.IndentationRequest;
-        currentInclusive?: boolean;
-    }
+    options: BlockIterationOptions
 ): common.Linqish<vscode.Position> {
     return new common.Linqish(
         (function* () {
-            const finalOptions: Required<typeof options> = {
-                direction: "forwards",
+            options = <typeof options>{
                 indentationLevel: "same-indentation",
                 currentInclusive: false,
+                restrictToCurrentScope: false,
                 ...options,
             };
 
-            const documentLines = lineUtils.iterLinePairs(
-                document,
-                options.fromPosition.line,
-                finalOptions.direction,
-                { currentInclusive: finalOptions.currentInclusive }
+            const documentLines = lineUtils.iterLinePairs(document, options);
+            const startLine = document.lineAt(
+                options.startingPosition instanceof vscode.Range
+                    ? options.startingPosition.start
+                    : options.startingPosition
             );
 
             for (const { prev, current } of documentLines) {
+                if (
+                    !options.currentInclusive &&
+                    current?.lineNumber === startLine.lineNumber
+                ) {
+                    continue;
+                }
+
                 let candidateLine: vscode.TextLine | undefined;
-                let kind: BlockBoundary["kind"] | undefined;
 
                 if (current && lineIsBlockStart(prev, current)) {
                     candidateLine = current;
-                    kind = "block-start";
-                } else if (prev && lineIsBlockEnd(prev, current)) {
-                    candidateLine = prev;
-                    kind = "block-end";
                 }
 
-                if (candidateLine && kind) {
+                if (candidateLine) {
                     const relativeIndentation =
                         lineUtils.getRelativeIndentation(
-                            document.lineAt(options.fromPosition.line),
+                            startLine,
                             candidateLine
                         );
 
                     if (
-                        finalOptions.indentationLevel ===
+                        options.indentationLevel ===
                             "same-indentation-current-scope" &&
                         relativeIndentation === "less-indentation"
                     ) {
@@ -107,80 +107,22 @@ function iterBlockStarts(
                     }
 
                     if (
-                        finalOptions.indentationLevel === "any-indentation" ||
-                        relativeIndentation === finalOptions.indentationLevel
+                        options.indentationLevel === "any-indentation" ||
+                        relativeIndentation === options.indentationLevel
                     ) {
-                        switch (kind) {
-                            case "block-start":
-                                const point = new vscode.Position(
-                                    candidateLine.lineNumber,
-                                    candidateLine.firstNonWhitespaceCharacterIndex
-                                );
+                        const point = new vscode.Position(
+                            candidateLine.lineNumber,
+                            candidateLine.firstNonWhitespaceCharacterIndex
+                        );
 
-                                yield { kind, point };
-                                break;
-                            case "block-end":
-                                yield {
-                                    kind: kind,
-                                    point: candidateLine.range.end,
-                                };
-                                break;
-                        }
+                        yield point;
+                        break;
                     }
                 }
             }
 
-            if (finalOptions.direction === "backwards") {
-                yield {
-                    kind: "block-start",
-                    point: new vscode.Position(0, 0),
-                };
-            }
-        })()
-    );
-}
-
-export function iterBlocksInCurrentScope(
-    document: vscode.TextDocument,
-    options: {
-        fromPosition: vscode.Position;
-        direction?: common.Direction;
-    }
-): common.Linqish<vscode.Range> {
-    return new common.Linqish(
-        (function* () {
-            const boundaries = iterBlockBoundaries(document, {
-                indentationLevel: "same-indentation-current-scope",
-                ...options,
-            });
-
-            let currentlyOpenBlock: BlockBoundary | undefined = undefined;
-
-            for (const boundary of boundaries) {
-                if (boundary.point.isEqual(options.fromPosition)) {
-                    continue;
-                }
-
-                if (!currentlyOpenBlock) {
-                    if (
-                        boundary.kind ===
-                        (options.direction === "forwards"
-                            ? "block-start"
-                            : "block-end")
-                    ) {
-                        currentlyOpenBlock = boundary;
-                        continue;
-                    } else {
-                        return;
-                    }
-                }
-
-                yield new vscode.Range(
-                    currentlyOpenBlock.point,
-                    boundary.point
-                );
-
-                currentlyOpenBlock = undefined;
+            if (options.direction === "backwards") {
+                yield new vscode.Position(0, 0);
             }
         })()
     );
@@ -188,22 +130,14 @@ export function iterBlocksInCurrentScope(
 
 function findContainingBlockStart(
     document: vscode.TextDocument,
-    positionInBlock: vscode.Position
-): vscode.TextLine {
+    positionInBlock: vscode.Range | vscode.Position
+): vscode.Position {
     return (
-        lineUtils
-            .iterLinePairs(
-                document,
-                positionInBlock.line,
-                common.Direction.backwards,
-                { currentInclusive: true }
-            )
-            .filterMap(({ prev, current }) => {
-                if (current && lineIsBlockStart(prev, current)) {
-                    return current;
-                }
-            })
-            .tryFirst() ?? document.lineAt(0)
+        iterBlockStarts(document, {
+            startingPosition: positionInBlock,
+            direction: common.Direction.backwards,
+            currentInclusive: true,
+        }).tryFirst() ?? new vscode.Position(0, 0)
     );
 }
 
@@ -214,12 +148,11 @@ function findCorrespondingBlockEnd(
     let startingLine = document.lineAt(blockStart.line);
     let candidate = startingLine;
 
-    for (const { prev, current } of lineUtils.iterLinePairs(
-        document,
-        blockStart.line,
-        "forwards",
-        { currentInclusive: true }
-    )) {
+    for (const { prev, current } of lineUtils.iterLinePairs(document, {
+        startingPosition: new vscode.Range(blockStart, blockStart),
+        direction: "forwards",
+        currentInclusive: true,
+    })) {
         if (!current || !prev) {
             break;
         }
@@ -262,82 +195,55 @@ function findCorrespondingBlockEnd(
 
 function getContainingBlock(
     document: vscode.TextDocument,
-    positionInBlock: vscode.Position
+    positionInBlock: vscode.Range | vscode.Position
 ): vscode.Range {
     const blockStart = findContainingBlockStart(document, positionInBlock);
-    const blockEnd = findCorrespondingBlockEnd(
-        document,
-        blockStart.range.start
-    );
+    const blockEnd = findCorrespondingBlockEnd(document, blockStart);
 
-    return new vscode.Range(blockStart.range.start, blockEnd);
+    return new vscode.Range(blockStart, blockEnd);
 }
 
 function iterVertically(
     document: vscode.TextDocument,
-    fromPosition: vscode.Position,
-    direction: common.Direction
+    options: common.IterationOptions
 ): common.Linqish<vscode.Range> {
-    return iterBlockBoundaries(document, {
-        fromPosition: fromPosition,
-        direction: direction,
+    return iterBlockStarts(document, {
+        ...options,
         indentationLevel: "same-indentation",
-    }).filterMap(({ kind, point }) => {
-        if (kind === "block-start") {
-            return getContainingBlock(document, point);
-        }
-    });
+    }).map((point) => getContainingBlock(document, positionToRange(point)));
 }
 
 function iterHorizontally(
     document: vscode.TextDocument,
-    fromPosition: vscode.Position,
-    direction: common.Direction
+    options: common.IterationOptions
 ): common.Linqish<vscode.Range> {
     const indentation =
-        direction === common.Direction.forwards
+        options.direction === common.Direction.forwards
             ? "more-indentation"
             : "less-indentation";
 
-    return iterBlockBoundaries(document, {
-        fromPosition,
-        direction,
+    return iterBlockStarts(document, {
+        ...options,
         indentationLevel: indentation,
-        currentInclusive: false,
-    }).filterMap(({ kind, point }) => {
-        if (kind === "block-start") {
-            return getContainingBlock(document, point);
-        }
-    });
+    }).map((point) => getContainingBlock(document, positionToRange(point)));
 }
 
 function iterAll(
     document: vscode.TextDocument,
-    fromPosition: vscode.Position,
-    direction: common.Direction
+    options: common.IterationOptions
 ): common.Linqish<vscode.Range> {
-    const finalOptions = {
-        fromPosition,
-        direction,
+    return iterBlockStarts(document, {
+        ...options,
         indentationLevel: "any-indentation",
-    } as const;
-
-    return iterBlockBoundaries(document, finalOptions).filterMap(
-        ({ kind, point }) => {
-            if (kind === "block-start") {
-                return getContainingBlock(document, point);
-            }
-        }
-    );
+    }).map((point) => getContainingBlock(document, positionToRange(point)));
 }
 
 function search(
     document: vscode.TextDocument,
-    startingPosition: vscode.Position,
     targetChar: common.Char,
-    direction: common.Direction
+    options: common.IterationOptions
 ): vscode.Range | undefined {
-    const blockPoints = iterAll(document, startingPosition, direction);
+    const blockPoints = iterAll(document, options);
 
     for (const { start } of blockPoints) {
         const charRange = new vscode.Range(
@@ -352,7 +258,7 @@ function search(
         }
     }
 
-    return getContainingBlock(document, startingPosition);
+    return getContainingBlock(document, options.startingPosition);
 }
 
 function getClosestContainingBlock(
@@ -361,11 +267,18 @@ function getClosestContainingBlock(
 ): vscode.Range {
     const nearestLine = lineUtils.getNearestSignificantLine(document, position);
 
-    return getContainingBlock(document, nearestLine.range.start);
+    return getContainingBlock(document, nearestLine.range);
+}
+
+function getContainingRangeAt(
+    document: vscode.TextDocument,
+    position: vscode.Position
+): vscode.Range {
+    return getContainingBlock(document, positionToRange(position));
 }
 
 const reader: common.SubjectReader = {
-    getContainingRangeAt: getContainingBlock,
+    getContainingRangeAt,
     getClosestRangeTo: getClosestContainingBlock,
     iterAll,
     iterHorizontally,

@@ -15,11 +15,10 @@ export abstract class Subject implements SubjectActions {
     async nextSubjectDown() {
         selections.tryMap(this.context.editor, (selection) =>
             this.subjectReader
-                .iterVertically(
-                    this.context.editor.document,
-                    selection.start,
-                    "forwards"
-                )
+                .iterVertically(this.context.editor.document, {
+                    startingPosition: selection.start,
+                    direction: "forwards",
+                })
                 .tryFirst()
         );
     }
@@ -27,11 +26,10 @@ export abstract class Subject implements SubjectActions {
     async nextSubjectRight() {
         selections.tryMap(this.context.editor, (selection) =>
             this.subjectReader
-                .iterHorizontally(
-                    this.context.editor.document,
-                    selection.end,
-                    "forwards"
-                )
+                .iterHorizontally(this.context.editor.document, {
+                    startingPosition: selection.start,
+                    direction: "forwards",
+                })
                 .tryFirst()
         );
     }
@@ -39,11 +37,10 @@ export abstract class Subject implements SubjectActions {
     async nextSubjectUp() {
         selections.tryMap(this.context.editor, (selection) =>
             this.subjectReader
-                .iterVertically(
-                    this.context.editor.document,
-                    selection.start,
-                    "backwards"
-                )
+                .iterVertically(this.context.editor.document, {
+                    startingPosition: selection.start,
+                    direction: "backwards",
+                })
                 .tryFirst()
         );
     }
@@ -51,11 +48,10 @@ export abstract class Subject implements SubjectActions {
     async nextSubjectLeft() {
         selections.tryMap(this.context.editor, (selection) =>
             this.subjectReader
-                .iterHorizontally(
-                    this.context.editor.document,
-                    selection.start,
-                    "backwards"
-                )
+                .iterHorizontally(this.context.editor.document, {
+                    startingPosition: selection.start,
+                    direction: "backwards",
+                })
                 .tryFirst()
         );
     }
@@ -176,23 +172,19 @@ export abstract class Subject implements SubjectActions {
 
     async search(target: common.Char) {
         selections.tryMap(this.context.editor, (selection) =>
-            this.subjectReader.search(
-                this.context.editor.document,
-                selection.end,
-                target,
-                "forwards"
-            )
+            this.subjectReader.search(this.context.editor.document, target, {
+                startingPosition: selection.end,
+                direction: "forwards",
+            })
         );
     }
 
     async searchBackwards(target: common.Char) {
         selections.tryMap(this.context.editor, (selection) =>
-            this.subjectReader.search(
-                this.context.editor.document,
-                selection.start,
-                target,
-                "backwards"
-            )
+            this.subjectReader.search(this.context.editor.document, target, {
+                startingPosition: selection.start,
+                direction: "backwards",
+            })
         );
     }
 
@@ -264,10 +256,9 @@ export abstract class Subject implements SubjectActions {
     }
 
     iterAll(direction: common.Direction): common.Linqish<vscode.Range> {
-        return this.subjectReader.iterAll(
-            this.context.editor.document,
-            this.context.editor.selection.start,
-            direction
-        );
+        return this.subjectReader.iterAll(this.context.editor.document, {
+            startingPosition: this.context.editor.selection.start,
+            direction,
+        });
     }
 }
