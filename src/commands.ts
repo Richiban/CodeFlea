@@ -74,40 +74,38 @@ class SwapSubjectRight extends ExtensionCommand {
 }
 
 @registerCommand()
-class ExtendSubjectUp extends ExtensionCommand {
-    id = "codeFlea.extendSubjectUp";
+class addSubjectUp extends ExtensionCommand {
+    id = "codeFlea.addSubjectUp";
 
     async execute() {
-        await this.container.manager.executeSubjectCommand("extendSubjectUp");
+        await this.container.manager.executeSubjectCommand("addSubjectUp");
     }
 }
 
 @registerCommand()
-class ExtendSubjectDown extends ExtensionCommand {
-    id = "codeFlea.extendSubjectDown";
+class addSubjectDown extends ExtensionCommand {
+    id = "codeFlea.addSubjectDown";
 
     async execute() {
-        await this.container.manager.executeSubjectCommand("extendSubjectDown");
+        await this.container.manager.executeSubjectCommand("addSubjectDown");
     }
 }
 
 @registerCommand()
-class ExtendSubjectLeft extends ExtensionCommand {
-    id = "codeFlea.extendSubjectLeft";
+class addSubjectLeft extends ExtensionCommand {
+    id = "codeFlea.addSubjectLeft";
 
     async execute() {
-        await this.container.manager.executeSubjectCommand("extendSubjectLeft");
+        await this.container.manager.executeSubjectCommand("addSubjectLeft");
     }
 }
 
 @registerCommand()
-class ExtendSubjectRight extends ExtensionCommand {
-    id = "codeFlea.extendSubjectRight";
+class addSubjectRight extends ExtensionCommand {
+    id = "codeFlea.addSubjectRight";
 
     async execute() {
-        await this.container.manager.executeSubjectCommand(
-            "extendSubjectRight"
-        );
+        await this.container.manager.executeSubjectCommand("addSubjectRight");
     }
 }
 

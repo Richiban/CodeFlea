@@ -9,16 +9,16 @@ export abstract class Subject implements SubjectActions {
 
     protected abstract subjectReader: common.SubjectReader;
     protected abstract subjectWriter: common.SubjectWriter;
-    protected abstract decorationType: vscode.TextEditorDecorationType;
+    public abstract decorationType: vscode.TextEditorDecorationType;
     public abstract name: SubjectType;
 
     async nextSubjectDown() {
         selections.tryMap(this.context.editor, (selection) =>
             this.subjectReader
-                .iterHorizontally(
+                .iterVertically(
                     this.context.editor.document,
                     selection.start,
-                    "backwards"
+                    "forwards"
                 )
                 .tryFirst()
         );
@@ -35,14 +35,32 @@ export abstract class Subject implements SubjectActions {
                 .tryFirst()
         );
     }
-    async nextSubjectUp() {}
-    async nextSubjectLeft() {}
-    async addSubjectDown() {}
-    async addSubjectUp() {}
-    async addSubjectLeft() {}
-    async addSubjectRight() {}
 
-    async extendSubjectUp(): Promise<void> {
+    async nextSubjectUp() {
+        selections.tryMap(this.context.editor, (selection) =>
+            this.subjectReader
+                .iterVertically(
+                    this.context.editor.document,
+                    selection.start,
+                    "backwards"
+                )
+                .tryFirst()
+        );
+    }
+
+    async nextSubjectLeft() {
+        selections.tryMap(this.context.editor, (selection) =>
+            this.subjectReader
+                .iterHorizontally(
+                    this.context.editor.document,
+                    selection.start,
+                    "backwards"
+                )
+                .tryFirst()
+        );
+    }
+
+    async addSubjectUp(): Promise<void> {
         const existingSelections = this.context.editor.selections;
 
         await this.nextSubjectUp();
@@ -51,7 +69,7 @@ export abstract class Subject implements SubjectActions {
             this.context.editor.selections.concat(existingSelections);
     }
 
-    async extendSubjectDown() {
+    async addSubjectDown() {
         const existingSelections = this.context.editor.selections;
 
         await this.nextSubjectDown();
@@ -60,7 +78,7 @@ export abstract class Subject implements SubjectActions {
             this.context.editor.selections.concat(existingSelections);
     }
 
-    async extendSubjectLeft(): Promise<void> {
+    async addSubjectLeft(): Promise<void> {
         const existingSelections = this.context.editor.selections;
 
         await this.nextSubjectLeft();
@@ -69,7 +87,7 @@ export abstract class Subject implements SubjectActions {
             this.context.editor.selections.concat(existingSelections);
     }
 
-    async extendSubjectRight() {
+    async addSubjectRight() {
         const existingSelections = this.context.editor.selections;
 
         await this.nextSubjectRight();
@@ -130,17 +148,27 @@ export abstract class Subject implements SubjectActions {
     }
 
     async deleteSubject() {
-        await vscode.commands.executeCommand("deleteLeft");
+        this.context.editor.edit((e) => {
+            selections.tryMap(this.context.editor, (selection) =>
+                this.subjectWriter.delete_(
+                    this.context.editor.document,
+                    e,
+                    selection
+                )
+            );
+        });
     }
 
     async duplicateSubject() {
-        await vscode.commands.executeCommand(
-            "editor.action.duplicateSelection"
-        );
-    }
-
-    async changeSubject() {
-        await vscode.commands.executeCommand("deleteLeft");
+        this.context.editor.edit((e) => {
+            selections.tryMap(this.context.editor, (selection) =>
+                this.subjectWriter.duplicate(
+                    this.context.editor.document,
+                    e,
+                    selection
+                )
+            );
+        });
     }
 
     async firstSubjectInScope() {}
@@ -211,7 +239,14 @@ export abstract class Subject implements SubjectActions {
                     ? startRange
                     : endRange;
 
-            return fixedRange ?? selection;
+            if (fixedRange && !fixedRange.isEmpty) {
+                return new vscode.Selection(fixedRange.end, fixedRange.start);
+            }
+
+            return this.subjectReader.getClosestRangeTo(
+                this.context.editor.document,
+                selection.start
+            );
         });
 
         this.context.editor.setDecorations(

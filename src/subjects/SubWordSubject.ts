@@ -5,7 +5,7 @@ import { Subject } from "./Subject";
 
 export class SubwordSubject extends Subject {
     readonly name = "SUBWORD";
-    protected decorationType = SubwordSubject.decorationType;
+    public decorationType = SubwordSubject.decorationType;
     protected readonly subjectReader = subwordReader;
     protected readonly subjectWriter = subwordWriter;
 

@@ -10,9 +10,12 @@ function search(
     targetChar: common.Char,
     direction: common.Direction
 ): vscode.Range | undefined {
-    const searchLines = lineUtils
-        .iterLines(document, startingPosition.line, direction)
-        .skip(1);
+    const searchLines = lineUtils.iterLines(
+        document,
+        startingPosition.line,
+        direction,
+        { currentInclusive: false }
+    );
 
     for (const line of searchLines) {
         const char = document.getText(line.range)[
@@ -45,7 +48,7 @@ function iterHorizontally(
                 );
 
                 if (nextLine) {
-                    yield nextLine.range;
+                    yield lineUtils.rangeWithoutIndentation(nextLine);
                 } else {
                     break;
                 }
@@ -58,24 +61,35 @@ function getContainingRangeAt(
     document: vscode.TextDocument,
     position: vscode.Position
 ): vscode.Range | undefined {
-    return document.lineAt(position.line).range;
+    return lineUtils.rangeWithoutIndentation(document.lineAt(position.line));
 }
 
-function iterAll(
+function getClosestRangeAt(
+    document: vscode.TextDocument,
+    position: vscode.Position
+): vscode.Range {
+    return lineUtils.getNearestSignificantLine(document, position).range;
+}
+
+function iterVertically(
     document: vscode.TextDocument,
     fromPosition: vscode.Position,
     direction: common.Direction
 ): common.Linqish<vscode.Range> {
     return lineUtils
-        .iterLines(document, fromPosition.line, direction)
-        .map((l) => l.range);
+        .iterLines(document, fromPosition.line, direction, {
+            currentInclusive: false,
+        })
+        .filter(lineUtils.lineIsSignificant)
+        .map(lineUtils.rangeWithoutIndentation);
 }
 
 const subjectReader: common.SubjectReader = {
     getContainingRangeAt,
-    iterAll,
+    getClosestRangeTo: getClosestRangeAt,
+    iterAll: iterVertically,
     iterHorizontally,
-    iterVertically: iterAll,
+    iterVertically,
     search,
 };
 

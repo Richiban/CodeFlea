@@ -11,11 +11,6 @@ export type SubjectActions = {
     addSubjectLeft(): Promise<void>;
     addSubjectRight(): Promise<void>;
 
-    extendSubjectDown(): Promise<void>;
-    extendSubjectUp(): Promise<void>;
-    extendSubjectLeft(): Promise<void>;
-    extendSubjectRight(): Promise<void>;
-
     swapSubjectDown(): Promise<void>;
     swapSubjectUp(): Promise<void>;
     swapSubjectLeft(): Promise<void>;
@@ -30,7 +25,6 @@ export type SubjectActions = {
     lastSubjectInScope(): Promise<void>;
 
     deleteSubject(): Promise<void>;
-    changeSubject(): Promise<void>;
     duplicateSubject(): Promise<void>;
 
     search(target: common.Char): Promise<void>;

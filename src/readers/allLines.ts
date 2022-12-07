@@ -17,7 +17,9 @@ function iterAll(
     direction: common.Direction
 ): common.Linqish<vscode.Range> {
     return lineUtils
-        .iterLines(document, fromPosition.line, direction)
+        .iterLines(document, fromPosition.line, direction, {
+            currentInclusive: false,
+        })
         .map((l) => l.range);
 }
 
@@ -59,7 +61,8 @@ function search(
     const allLines = lineUtils.iterLines(
         document,
         startingPosition.line,
-        direction
+        direction,
+        { currentInclusive: false }
     );
 
     return allLines
@@ -75,8 +78,16 @@ function search(
         .tryFirst();
 }
 
+function getClosestRangeAt(
+    document: vscode.TextDocument,
+    position: vscode.Position
+): vscode.Range {
+    return document.lineAt(position.line).range;
+}
+
 const subjectReader: common.SubjectReader = {
     getContainingRangeAt,
+    getClosestRangeTo: getClosestRangeAt,
     iterAll,
     iterHorizontally,
     iterVertically: iterAll,

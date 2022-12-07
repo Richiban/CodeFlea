@@ -5,7 +5,7 @@ import * as editor from "../utils/editor";
 
 const separationCharacters = " ,.:=+-*/%\r\n".split("");
 
-function getSeparatingText(
+function getSeparatingTextRange(
     document: vscode.TextDocument,
     wordRange: vscode.Range
 ): vscode.Range | undefined {
@@ -53,15 +53,15 @@ function getSeparatingText(
 
 export function deleteWord(
     document: vscode.TextDocument,
-    e: vscode.TextEditorEdit,
+    edit: vscode.TextEditorEdit,
     selection: vscode.Selection
 ): vscode.Range {
-    e.delete(selection);
+    edit.delete(selection);
 
-    const separationText = getSeparatingText(document, selection);
+    const separatingTextRange = getSeparatingTextRange(document, selection);
 
-    if (separationText) {
-        e.delete(separationText);
+    if (separatingTextRange) {
+        edit.delete(separatingTextRange);
     }
 
     return selection;
@@ -72,7 +72,7 @@ export function duplicateWord(
     textEdit: vscode.TextEditorEdit,
     selection: vscode.Selection
 ): vscode.Range {
-    const separationTextRange = getSeparatingText(document, selection);
+    const separationTextRange = getSeparatingTextRange(document, selection);
 
     if (separationTextRange) {
         const separationText = document.getText(separationTextRange);

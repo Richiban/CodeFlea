@@ -3,7 +3,7 @@ import * as common from "../common";
 import * as lines from "./lines";
 import * as lineUtils from "../utils/lines";
 
-export type BlockBoundary = Readonly<{
+type BlockBoundary = Readonly<{
     kind: "block-end" | "block-start";
     point: vscode.Position;
 }>;
@@ -54,26 +54,29 @@ function lineIsBlockEnd(
     return false;
 }
 
-function iterBlockBoundaries(
+function iterBlockStarts(
     document: vscode.TextDocument,
     options: {
         fromPosition: vscode.Position;
         direction?: common.Direction;
         indentationLevel?: common.IndentationRequest;
+        currentInclusive?: boolean;
     }
-): common.Linqish<BlockBoundary> {
+): common.Linqish<vscode.Position> {
     return new common.Linqish(
         (function* () {
             const finalOptions: Required<typeof options> = {
                 direction: "forwards",
                 indentationLevel: "same-indentation",
+                currentInclusive: false,
                 ...options,
             };
 
             const documentLines = lineUtils.iterLinePairs(
                 document,
                 options.fromPosition.line,
-                finalOptions.direction
+                finalOptions.direction,
+                { currentInclusive: finalOptions.currentInclusive }
             );
 
             for (const { prev, current } of documentLines) {
@@ -187,21 +190,21 @@ function findContainingBlockStart(
     document: vscode.TextDocument,
     positionInBlock: vscode.Position
 ): vscode.TextLine {
-    for (const { prev, current } of lineUtils.iterLinePairs(
-        document,
-        positionInBlock.line,
-        "backwards"
-    )) {
-        if (!current) {
-            continue;
-        }
-
-        if (lineIsBlockStart(prev, current)) {
-            return current;
-        }
-    }
-
-    return document.lineAt(0);
+    return (
+        lineUtils
+            .iterLinePairs(
+                document,
+                positionInBlock.line,
+                common.Direction.backwards,
+                { currentInclusive: true }
+            )
+            .filterMap(({ prev, current }) => {
+                if (current && lineIsBlockStart(prev, current)) {
+                    return current;
+                }
+            })
+            .tryFirst() ?? document.lineAt(0)
+    );
 }
 
 function findCorrespondingBlockEnd(
@@ -214,7 +217,8 @@ function findCorrespondingBlockEnd(
     for (const { prev, current } of lineUtils.iterLinePairs(
         document,
         blockStart.line,
-        "forwards"
+        "forwards",
+        { currentInclusive: true }
     )) {
         if (!current || !prev) {
             break;
@@ -291,12 +295,15 @@ function iterHorizontally(
     direction: common.Direction
 ): common.Linqish<vscode.Range> {
     const indentation =
-        direction === "backwards" ? "less-indentation" : "more-indentation";
+        direction === common.Direction.forwards
+            ? "more-indentation"
+            : "less-indentation";
 
     return iterBlockBoundaries(document, {
         fromPosition,
         direction,
         indentationLevel: indentation,
+        currentInclusive: false,
     }).filterMap(({ kind, point }) => {
         if (kind === "block-start") {
             return getContainingBlock(document, point);
@@ -348,8 +355,18 @@ function search(
     return getContainingBlock(document, startingPosition);
 }
 
+function getClosestContainingBlock(
+    document: vscode.TextDocument,
+    position: vscode.Position
+): vscode.Range {
+    const nearestLine = lineUtils.getNearestSignificantLine(document, position);
+
+    return getContainingBlock(document, nearestLine.range.start);
+}
+
 const reader: common.SubjectReader = {
     getContainingRangeAt: getContainingBlock,
+    getClosestRangeTo: getClosestContainingBlock,
     iterAll,
     iterHorizontally,
     iterVertically,

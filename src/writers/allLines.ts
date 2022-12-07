@@ -117,7 +117,9 @@ function swapVertically(
 ): vscode.Range {
     const sourceLine = document.lineAt(range.start.line);
     const targetLine = lineUtils
-        .iterLines(document, sourceLine.lineNumber, direction)
+        .iterLines(document, sourceLine.lineNumber, direction, {
+            currentInclusive: false,
+        })
         .tryFirst();
 
     if (targetLine) {

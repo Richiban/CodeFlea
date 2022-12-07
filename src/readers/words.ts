@@ -1,17 +1,7 @@
 import * as vscode from "vscode";
 import { Char, Direction, Linqish, SubjectReader } from "../common";
-import { swap } from "../utils/editor";
 import * as positions from "../utils/positions";
-import * as selections from "../utils/selectionsAndRanges";
 import * as lineUtils from "../utils/lines";
-
-function iterAll(
-    document: vscode.TextDocument,
-    currentPosition: vscode.Position,
-    direction: Direction
-): Linqish<vscode.Range> {
-    return iterHorizontally(document, currentPosition, direction);
-}
 
 function iterVertically(
     document: vscode.TextDocument,
@@ -119,13 +109,13 @@ function expandSelectionToWords(
 function findWordClosestTo(
     document: vscode.TextDocument,
     position: vscode.Position
-) {
+): vscode.Range {
     const wordRange = new Linqish([
         iterHorizontally(document, position, "backwards").tryFirst(),
         iterHorizontally(document, position, "forwards").tryFirst(),
     ]).minBy((w) => Math.abs(w!.end.line - position.line));
 
-    return wordRange;
+    return wordRange ?? new vscode.Range(position, position);
 }
 
 function search(
@@ -134,7 +124,11 @@ function search(
     targetChar: Char,
     direction: Direction
 ): vscode.Range | undefined {
-    for (const wordRange of iterAll(document, startingPosition, direction)) {
+    for (const wordRange of iterHorizontally(
+        document,
+        startingPosition,
+        direction
+    )) {
         const charRange = new vscode.Range(
             wordRange.start,
             wordRange.start.translate(undefined, 1)
@@ -151,16 +145,24 @@ function search(
 function getContainingRangeAt(
     document: vscode.TextDocument,
     position: vscode.Position
-) {
+): vscode.Range | undefined {
     return document.getWordRangeAtPosition(position);
+}
+
+function getClosestRangeAt(
+    document: vscode.TextDocument,
+    position: vscode.Position
+): vscode.Range {
+    return findWordClosestTo(document, position);
 }
 
 const reader: SubjectReader = {
     getContainingRangeAt,
-    iterAll: iterAll,
-    iterHorizontally: iterHorizontally,
+    getClosestRangeTo: getClosestRangeAt,
+    iterAll: iterHorizontally,
+    iterHorizontally,
     iterVertically,
-    search: search,
+    search,
 };
 
 export default reader;

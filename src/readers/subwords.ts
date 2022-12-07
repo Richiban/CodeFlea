@@ -113,7 +113,8 @@ function iterSubwords(
             for (const line of lineUtils.iterLines(
                 document,
                 fromPosition.line,
-                direction
+                direction,
+                { currentInclusive: true }
             )) {
                 const subwords =
                     direction === "forwards"
@@ -218,7 +219,8 @@ function iterVertically(
             for (const line of lineUtils.iterLines(
                 document,
                 fromPosition.line,
-                direction
+                direction,
+                { currentInclusive: false }
             )) {
                 const subwords =
                     direction === "forwards"
@@ -250,8 +252,66 @@ function iterVertically(
     );
 }
 
+function closer(
+    startingPosition: vscode.Position,
+    a: vscode.Range,
+    b: vscode.Range
+): vscode.Range {
+    if (a.start.line !== b.start.line) {
+        return (
+            new Linqish([a, b]).minBy((r) =>
+                Math.abs(startingPosition.line - r.start.line)
+            ) ?? a
+        );
+    }
+
+    return (
+        new Linqish([a, b]).minBy((r) =>
+            Math.abs(startingPosition.character - r.start.character)
+        ) ?? a
+    );
+}
+
+function getClosestRangeAt(
+    document: vscode.TextDocument,
+    position: vscode.Position
+) {
+    const currentRange = getSubwordRangeAtPosition(document, position);
+
+    if (currentRange) {
+        return currentRange;
+    }
+
+    const subwordBackwards = iterSubwords(
+        document,
+        position,
+        "backwards"
+    ).tryFirst();
+
+    const subwordForwards = iterSubwords(
+        document,
+        position,
+        "forwards"
+    ).tryFirst();
+
+    if (subwordBackwards && subwordForwards) {
+        return closer(position, subwordBackwards, subwordForwards);
+    }
+
+    if (subwordBackwards) {
+        return subwordBackwards;
+    }
+
+    if (subwordForwards) {
+        return subwordForwards;
+    }
+
+    return new vscode.Range(position, position);
+}
+
 const subjectReader: SubjectReader = {
     getContainingRangeAt: getSubwordRangeAtPosition,
+    getClosestRangeTo: getClosestRangeAt,
     iterAll: iterSubwords,
     iterHorizontally: iterSubwords,
     iterVertically,

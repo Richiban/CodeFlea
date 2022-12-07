@@ -10,3 +10,5 @@
 # TODO
 
 -   Add tests
+-   Add jump interface for subjects
+-   Add slash to edit at mid-point of selection

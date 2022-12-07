@@ -6,7 +6,7 @@ import wordReader from "../readers/words";
 export class WordSubject extends Subject {
     protected subjectReader = wordReader;
     protected subjectWriter = wordWriter;
-    protected decorationType = WordSubject.decorationType;
+    public decorationType = WordSubject.decorationType;
     readonly name = "WORD";
 
     public static decorationType = vscode.window.createTextEditorDecorationType(
@@ -17,14 +17,6 @@ export class WordSubject extends Subject {
 
     public static quickNumberDecoration =
         vscode.window.createTextEditorDecorationType({});
-
-    async nextSubjectDown() {
-        await vscode.commands.executeCommand("cursorDown");
-    }
-
-    async nextSubjectUp() {
-        await vscode.commands.executeCommand("cursorUp");
-    }
 
     async firstSubjectInScope() {
         await vscode.commands.executeCommand("cursorHome");

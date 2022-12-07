@@ -186,6 +186,13 @@ export default class NavigateMode extends modes.EditorMode {
             this.subject.iterAll("forwards"),
             this.subject.iterAll("backwards")
         );
+
+        this.context.editor.setDecorations(
+            this.subject.decorationType,
+            this.context.editor.selections
+        );
+
+        this.context.editor.revealRange(this.context.editor.selection);
     }
 
     private tryParseNumber(

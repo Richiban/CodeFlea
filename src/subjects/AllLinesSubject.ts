@@ -9,7 +9,7 @@ import allLinesWriter from "../writers/allLines";
 export class AllLinesSubject extends Subject {
     protected subjectReader = allLinesReader;
     protected subjectWriter = allLinesWriter;
-    protected decorationType = AllLinesSubject.decorationType;
+    public decorationType = AllLinesSubject.decorationType;
     readonly name = "ALL_LINES";
 
     public static decorationType = vscode.window.createTextEditorDecorationType(
@@ -67,11 +67,11 @@ export class AllLinesSubject extends Subject {
         await vscode.commands.executeCommand("cursorDown");
     }
 
-    async extendSubjectDown() {
+    async addSubjectDown() {
         await vscode.commands.executeCommand("editor.action.insertCursorBelow");
     }
 
-    async extendSubjectUp() {
+    async addSubjectUp() {
         await vscode.commands.executeCommand("editor.action.insertCursorAbove");
     }
 

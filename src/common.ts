@@ -7,7 +7,12 @@ export type Bounds = { start: { line: number }; end: { line: number } };
 
 export type Change = "greaterThan" | "lessThan";
 
-export type Direction = "forwards" | "backwards";
+export const Direction = {
+    backwards: "backwards",
+    forwards: "forwards",
+};
+
+export type Direction = typeof Direction[keyof typeof Direction];
 
 export type RelativeIndentation =
     | "more-indentation"
@@ -19,11 +24,16 @@ export type IndentationRequest =
     | RelativeIndentation
     | "same-indentation-current-scope"
     | "any-indentation";
+
 export type SubjectReader = {
     getContainingRangeAt(
         document: vscode.TextDocument,
         position: vscode.Position
     ): vscode.Range | undefined;
+    getClosestRangeTo(
+        document: vscode.TextDocument,
+        position: vscode.Position
+    ): vscode.Range;
     iterAll(
         document: vscode.TextDocument,
         fromPosition: vscode.Position,
@@ -215,21 +225,19 @@ export class Linqish<T> implements Iterable<T> {
         );
     }
 
-    pairwise(): Linqish<[undefined, T] | [T, undefined] | [T, T]> {
+    pairwise(): Linqish<readonly [T, T]> {
         const iter = this.iter;
 
         return new Linqish(
             (function* () {
-                const iterator = iter[Symbol.iterator]();
+                let previous = undefined;
 
-                let r = iterator.next();
-                let prev = r.value;
+                for (const current of iter) {
+                    if (previous !== undefined) {
+                        yield [previous, current] as const;
+                    }
 
-                while (!r.done) {
-                    yield [prev, r.value] as [T, T];
-                    prev = r.value;
-
-                    r = iterator.next();
+                    previous = current;
                 }
             })()
         );
@@ -275,9 +283,9 @@ export class Linqish<T> implements Iterable<T> {
 
                     if (lResult.done || rResult.done) {
                         return;
-                    } else {
-                        yield [lResult.value, rResult.value] as const;
                     }
+
+                    yield [lResult.value, rResult.value] as const;
                 }
             })()
         );
@@ -291,6 +299,7 @@ export class Linqish<T> implements Iterable<T> {
                 for (const item of iter) {
                     yield item;
                 }
+
                 for (const item of iter2) {
                     yield item;
                 }

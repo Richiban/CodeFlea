@@ -6,7 +6,7 @@ import lineReader from "../readers/lines";
 export class LineSubject extends Subject {
     protected subjectReader = lineReader;
     protected subjectWriter = lineWriter;
-    protected decorationType = LineSubject.decorationType;
+    public decorationType = LineSubject.decorationType;
     readonly name = "LINE";
 
     public static decorationType = vscode.window.createTextEditorDecorationType(
