@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import * as common from "../common";
 import * as lineUtils from "../utils/lines";
+import Linqish, { linqish } from "../utils/Linqish";
 import { wordRangeToPosition as rangeToPosition } from "../utils/selectionsAndRanges";
 
 function getContainingRangeAt(
@@ -15,15 +16,15 @@ function getContainingRangeAt(
 function iterAll(
     document: vscode.TextDocument,
     options: common.IterationOptions
-): common.Linqish<vscode.Range> {
+): Linqish<vscode.Range> {
     return lineUtils.iterLines(document, options).map((l) => l.range);
 }
 
 function iterHorizontally(
     document: vscode.TextDocument,
     options: common.IterationOptions
-): common.Linqish<vscode.Range> {
-    return common.linqish(function* () {
+): Linqish<vscode.Range> {
+    return linqish(function* () {
         let currentLine: vscode.TextLine | undefined = document.lineAt(
             rangeToPosition(options.startingPosition, options.direction)
         );

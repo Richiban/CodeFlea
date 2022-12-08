@@ -1,4 +1,5 @@
-import { Direction, linqish, Linqish } from "../common";
+import { Direction } from "../common";
+import Linqish, { linqish } from "./Linqish";
 import * as vscode from "vscode";
 import { iterLines, lineIsStopLine } from "./lines";
 

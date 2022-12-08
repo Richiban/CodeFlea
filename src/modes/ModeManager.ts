@@ -9,6 +9,7 @@ import {
 import { SubjectActions } from "../subjects/SubjectActions";
 import { EditorMode, EditorModeChangeRequest } from "./modes";
 import { NullMode } from "./NullMode";
+import EditMode from "./EditMode";
 
 export default class ModeManager {
     private mode: EditorMode;
@@ -74,17 +75,18 @@ export default class ModeManager {
     async onDidChangeTextEditorSelection(
         event: vscode.TextEditorSelectionChangeEvent
     ) {
+        if (this.mode instanceof EditMode) return;
+
         if (
             event.kind === vscode.TextEditorSelectionChangeKind.Mouse &&
-            event.selections.length === 1
+            event.selections.length === 1 &&
+            !event.selections[0].isEmpty
         ) {
-            if (event.selections[0].isEmpty) {
-                this.mode.fixSelection();
-            } else {
-                await this.changeMode({ kind: "EDIT" });
-            }
+            await this.changeMode({ kind: "EDIT" });
+            return;
         }
 
+        this.mode.fixSelection();
         this.mode.setUI();
     }
 

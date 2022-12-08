@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import * as common from "../common";
+import Linqish from "../utils/Linqish";
 import * as lines from "./lines";
 import * as lineUtils from "../utils/lines";
 import {
@@ -60,8 +61,8 @@ function lineIsBlockEnd(
 function iterBlockStarts(
     document: vscode.TextDocument,
     options: BlockIterationOptions
-): common.Linqish<vscode.Position> {
-    return new common.Linqish(
+): Linqish<vscode.Position> {
+    return new Linqish(
         (function* () {
             options = <typeof options>{
                 indentationLevel: "same-indentation",
@@ -213,7 +214,7 @@ function getContainingBlock(
 function iterVertically(
     document: vscode.TextDocument,
     options: common.IterationOptions
-): common.Linqish<vscode.Range> {
+): Linqish<vscode.Range> {
     return iterBlockStarts(document, {
         ...options,
         indentationLevel: "same-indentation",
@@ -223,7 +224,7 @@ function iterVertically(
 function iterHorizontally(
     document: vscode.TextDocument,
     options: common.IterationOptions
-): common.Linqish<vscode.Range> {
+): Linqish<vscode.Range> {
     const indentation =
         options.direction === common.Direction.forwards
             ? "more-indentation"
@@ -238,7 +239,7 @@ function iterHorizontally(
 function iterAll(
     document: vscode.TextDocument,
     options: common.IterationOptions
-): common.Linqish<vscode.Range> {
+): Linqish<vscode.Range> {
     return iterBlockStarts(document, {
         ...options,
         indentationLevel: "any-indentation",

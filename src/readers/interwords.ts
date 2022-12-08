@@ -1,11 +1,13 @@
 import * as vscode from "vscode";
 import * as common from "../common";
+import Linqish from "../utils/Linqish";
 import * as lineUtils from "../utils/lines";
 import {
     closerOf,
     positionToRange,
     wordRangeToPosition as rangeToPosition,
 } from "../utils/selectionsAndRanges";
+import { linqish } from "../utils/Linqish";
 
 type CharClass = "word" | "operator";
 
@@ -35,40 +37,39 @@ function getCharClass(char: string): CharClass | undefined {
 }
 
 function split(text: string, startingCharacter: number): common.SubTextRange[] {
-    return common
-        .linqish(function* () {
-            let prevCharClass: CharClass | undefined = undefined;
-            let current: { text: string; startIndex: number } | undefined;
+    return linqish(function* () {
+        let prevCharClass: CharClass | undefined = undefined;
+        let current: { text: string; startIndex: number } | undefined;
 
-            for (const [index, char] of enumerate(text)) {
-                if (index < startingCharacter) continue;
-                const charClass = getCharClass(char);
+        for (const [index, char] of enumerate(text)) {
+            if (index < startingCharacter) continue;
+            const charClass = getCharClass(char);
 
-                if (charClass === "word") {
+            if (charClass === "word") {
+                if (current) {
+                    yield current;
+                    current = undefined;
+                }
+                continue;
+            } else {
+                if (charClass === prevCharClass && current) {
+                    current.text += char;
+                } else {
                     if (current) {
                         yield current;
-                        current = undefined;
-                    }
-                    continue;
-                } else {
-                    if (charClass === prevCharClass && current) {
-                        current.text += char;
-                    } else {
-                        if (current) {
-                            yield current;
-                        }
-
-                        current = { text: char, startIndex: index };
                     }
 
-                    prevCharClass = charClass;
+                    current = { text: char, startIndex: index };
                 }
-            }
 
-            if (current) {
-                yield current;
+                prevCharClass = charClass;
             }
-        })
+        }
+
+        if (current) {
+            yield current;
+        }
+    })
         .map((r) => ({
             text: r.text,
             range: { start: r.startIndex, end: r.startIndex + r.text.length },
@@ -141,7 +142,7 @@ function iterAll(
     document: vscode.TextDocument,
     options: common.IterationOptions
 ) {
-    return common.linqish(function* () {
+    return linqish(function* () {
         let isFirstLine = true;
         const startingPosition = rangeToPosition(
             options.startingPosition,
@@ -206,8 +207,8 @@ function findBest(
 function iterVertically(
     document: vscode.TextDocument,
     options: common.IterationOptions
-): common.Linqish<vscode.Range> {
-    return new common.Linqish<vscode.Range>(
+): Linqish<vscode.Range> {
+    return new Linqish<vscode.Range>(
         (function* () {
             const startingPosition = rangeToPosition(
                 options.startingPosition,

@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import * as common from "../common";
+import Linqish from "../utils/Linqish";
 import Subject from "../subjects/Subject";
 import * as ranges from "../utils/selectionsAndRanges";
 
@@ -78,11 +79,11 @@ export class QuickJumpNumHandler extends NumHandler {
         this.forwardRanges = subject.iterAll("forwards").take(10).toArray();
         this.backwardRanges = subject.iterAll("backwards").take(10).toArray();
 
-        const decorations = new common.Linqish(this.forwardRanges)
+        const decorations = new Linqish(this.forwardRanges!)
             .skip(1)
             .zipWith([1, 2, 3, 4, 5, 6, 7, 8, 9, 0])
             .concat(
-                new common.Linqish(this.backwardRanges).zipWith([
+                new Linqish(this.backwardRanges!).zipWith([
                     1, 2, 3, 4, 5, 6, 7, 8, 9, 0,
                 ])
             )

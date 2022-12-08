@@ -1,4 +1,5 @@
 import * as common from "../common";
+import Linqish from "../utils/Linqish";
 import * as vscode from "vscode";
 import * as subjects from "../subjects/subjects";
 import EditMode from "./EditMode";
@@ -103,9 +104,7 @@ export default class ExtendMode extends EditorMode {
     }
 
     async executeSubjectCommand(command: keyof SubjectActions): Promise<void> {
-        const existingSelections = new common.Linqish(
-            this.context.editor.selections
-        );
+        const existingSelections = new Linqish(this.context.editor.selections);
 
         await this.wrappedMode.executeSubjectCommand(command);
 

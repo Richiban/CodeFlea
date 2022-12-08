@@ -3,6 +3,7 @@ import * as selections from "../utils/selectionsAndRanges";
 import * as common from "../common";
 import { SubjectActions } from "./SubjectActions";
 import { SubjectType } from "./SubjectType";
+import Linqish from "../utils/Linqish";
 
 export default abstract class Subject implements SubjectActions {
     constructor(protected context: common.ExtensionContext) {}
@@ -277,7 +278,7 @@ export default abstract class Subject implements SubjectActions {
         return this.name === other.name;
     }
 
-    iterAll(direction: common.Direction): common.Linqish<vscode.Range> {
+    iterAll(direction: common.Direction): Linqish<vscode.Range> {
         return this.subjectReader.iterAll(this.context.editor.document, {
             startingPosition: this.context.editor.selection,
             direction,

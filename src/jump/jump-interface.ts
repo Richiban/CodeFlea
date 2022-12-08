@@ -1,11 +1,7 @@
 import * as vscode from "vscode";
-import {
-    JumpLocations,
-    JumpLocation,
-    linqish,
-    Cache,
-    Linqish,
-} from "../common";
+import { JumpLocations, JumpLocation } from "../common";
+import Linqish from "../utils/Linqish";
+import { Cache } from "../utils/Cache";
 import { readKey } from "../inline-input";
 import { Config } from "../config";
 

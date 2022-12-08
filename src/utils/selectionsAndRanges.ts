@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import * as common from "../common";
+import Linqish from "./Linqish";
 
 export type SelectionEndType = "start" | "end" | "midpoint";
 
@@ -18,14 +19,14 @@ export function closerOf(
 ): vscode.Range {
     if (a.start.line !== b.start.line) {
         return (
-            new common.Linqish([a, b]).minBy((r) =>
+            new Linqish([a, b]).minBy((r) =>
                 Math.abs(startingPosition.line - r.start.line)
             ) ?? a
         );
     }
 
     return (
-        new common.Linqish([a, b]).minBy((r) =>
+        new Linqish([a, b]).minBy((r) =>
             Math.abs(startingPosition.character - r.start.character)
         ) ?? a
     );

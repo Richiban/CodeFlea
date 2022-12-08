@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import * as common from "../common";
+import Linqish from "../utils/Linqish";
 import * as positions from "../utils/positions";
 import * as lineUtils from "../utils/lines";
 import {
@@ -10,8 +11,8 @@ import {
 function iterVertically(
     document: vscode.TextDocument,
     options: common.IterationOptions
-): common.Linqish<vscode.Range> {
-    return new common.Linqish(
+): Linqish<vscode.Range> {
+    return new Linqish(
         (function* () {
             let cont = true;
             let currentPosition = wordRangeToPosition(
@@ -49,8 +50,8 @@ function iterVertically(
 function iterHorizontally(
     document: vscode.TextDocument,
     options: common.IterationOptions
-): common.Linqish<vscode.Range> {
-    return new common.Linqish(
+): Linqish<vscode.Range> {
+    return new Linqish(
         (function* () {
             let wordRange = undefined;
             let newPosition: vscode.Position | undefined = wordRangeToPosition(
@@ -120,7 +121,7 @@ function findWordClosestTo(
     document: vscode.TextDocument,
     position: vscode.Position
 ): vscode.Range {
-    const wordRange = new common.Linqish([
+    const wordRange = new Linqish([
         iterHorizontally(document, {
             startingPosition: position,
             direction: "backwards",
