@@ -132,7 +132,7 @@ function swapVertically(
 }
 
 const writer: common.SubjectWriter = {
-    delete_: delete_,
+    remove: delete_,
     duplicate: duplicate,
     swapHorizontally: swapHorizontally,
     swapVertically: swapVertically,

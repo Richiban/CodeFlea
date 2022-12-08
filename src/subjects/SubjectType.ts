@@ -1,1 +1,1 @@
-export type SubjectType = "WORD" | "LINE" | "SUBWORD" | "ALL_LINES" | "BLOCK";
+export type SubjectType = "WORD" | "LINE" | "SUBWORD" | "BLOCK" | "INTERWORD";

@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as common from "../common";
 
-export type SelectionEndType = keyof Pick<vscode.Selection, "start" | "end">;
+export type SelectionEndType = "start" | "end" | "midpoint";
 
 export function getMidPoint(range: vscode.Range): vscode.Position {
     return new vscode.Position(
@@ -11,14 +11,34 @@ export function getMidPoint(range: vscode.Range): vscode.Position {
     );
 }
 
+export function closerOf(
+    startingPosition: vscode.Position,
+    a: vscode.Range,
+    b: vscode.Range
+): vscode.Range {
+    if (a.start.line !== b.start.line) {
+        return (
+            new common.Linqish([a, b]).minBy((r) =>
+                Math.abs(startingPosition.line - r.start.line)
+            ) ?? a
+        );
+    }
+
+    return (
+        new common.Linqish([a, b]).minBy((r) =>
+            Math.abs(startingPosition.character - r.start.character)
+        ) ?? a
+    );
+}
+
 export function collapseSelections(
     editor: vscode.TextEditor,
     endType: SelectionEndType = "start"
 ) {
-    tryMap(
-        editor,
-        (selection) =>
-            new vscode.Selection(selection[endType], selection[endType])
+    tryMap(editor, (selection) =>
+        positionToRange(
+            endType === "midpoint" ? getMidPoint(selection) : selection[endType]
+        )
     );
 }
 
@@ -27,14 +47,17 @@ export function tryMap(
     mapper: (selection: vscode.Selection) => vscode.Range | undefined
 ) {
     editor.selections = editor.selections.map((selection) => {
-        const newSelection = mapper(selection);
+        const rangeOrSelection = mapper(selection);
 
-        if (!newSelection) {
+        if (!rangeOrSelection) {
             return selection;
-        } else if (newSelection instanceof vscode.Selection) {
-            return newSelection;
+        } else if (rangeOrSelection instanceof vscode.Selection) {
+            return rangeOrSelection;
         } else {
-            return new vscode.Selection(newSelection.start, newSelection.end);
+            return new vscode.Selection(
+                rangeOrSelection.end,
+                rangeOrSelection.start
+            );
         }
     });
 }

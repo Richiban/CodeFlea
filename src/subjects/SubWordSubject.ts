@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
 import subwordReader from "../readers/subwords";
 import subwordWriter from "../writers/subwords";
-import { Subject } from "./Subject";
+import Subject from "./Subject";
 
-export class SubwordSubject extends Subject {
+export default class SubwordSubject extends Subject {
     readonly name = "SUBWORD";
     public decorationType = SubwordSubject.decorationType;
     protected readonly subjectReader = subwordReader;
@@ -11,7 +11,7 @@ export class SubwordSubject extends Subject {
 
     public static decorationType = vscode.window.createTextEditorDecorationType(
         {
-            border: "2px dotted #964d4d;",
+            border: "1px solid #9900ff;",
         }
     );
 

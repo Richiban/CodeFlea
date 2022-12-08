@@ -74,7 +74,7 @@ class SwapSubjectRight extends ExtensionCommand {
 }
 
 @registerCommand()
-class addSubjectUp extends ExtensionCommand {
+class AddSubjectUp extends ExtensionCommand {
     id = "codeFlea.addSubjectUp";
 
     async execute() {
@@ -83,7 +83,7 @@ class addSubjectUp extends ExtensionCommand {
 }
 
 @registerCommand()
-class addSubjectDown extends ExtensionCommand {
+class AddSubjectDown extends ExtensionCommand {
     id = "codeFlea.addSubjectDown";
 
     async execute() {
@@ -92,7 +92,7 @@ class addSubjectDown extends ExtensionCommand {
 }
 
 @registerCommand()
-class addSubjectLeft extends ExtensionCommand {
+class AddSubjectLeft extends ExtensionCommand {
     id = "codeFlea.addSubjectLeft";
 
     async execute() {
@@ -101,7 +101,7 @@ class addSubjectLeft extends ExtensionCommand {
 }
 
 @registerCommand()
-class addSubjectRight extends ExtensionCommand {
+class AddSubjectRight extends ExtensionCommand {
     id = "codeFlea.addSubjectRight";
 
     async execute() {
@@ -192,6 +192,30 @@ class LineSubjectCommand extends ExtensionCommand {
         this.container.manager.changeMode({
             kind: "NAVIGATE",
             subjectName: "LINE",
+        });
+    }
+}
+
+@registerCommand()
+class InterwordSubjectCommand extends ExtensionCommand {
+    id = "codeFlea.changeToInterwordSubject";
+
+    execute(): void {
+        this.container.manager.changeMode({
+            kind: "NAVIGATE",
+            subjectName: "INTERWORD",
+        });
+    }
+}
+
+@registerCommand()
+class SubwordSubjectCommand extends ExtensionCommand {
+    id = "codeFlea.changeToSubwordSubject";
+
+    execute(): void {
+        this.container.manager.changeMode({
+            kind: "NAVIGATE",
+            subjectName: "SUBWORD",
         });
     }
 }
@@ -459,6 +483,16 @@ class AppendCommand extends ExtensionCommand {
 }
 
 @registerCommand()
+class EditMidPointCommand extends ExtensionCommand {
+    id = "codeFlea.changeToEditModeMidPoint";
+
+    async execute() {
+        collapseSelections(this.container.manager.editor, "midpoint");
+        this.container.manager.changeMode({ kind: "EDIT" });
+    }
+}
+
+@registerCommand()
 class PrependCommand extends ExtensionCommand {
     id = "codeFlea.changeToEditModePrepend";
 
@@ -651,10 +685,19 @@ class OpenModifyMenuCommand extends ExtensionCommand {
 
 @registerCommand()
 class UndoLastCommand extends ExtensionCommand {
-    id = "codeFlea.undoCommand";
+    id = "codeFlea.undoCursorCommand";
 
     async execute() {
         await this.container.manager.undoLastCommand();
+    }
+}
+
+@registerCommand()
+class UndoCommand extends ExtensionCommand {
+    id = "codeFlea.undoCommand";
+
+    async execute() {
+        await this.container.manager.undo();
     }
 }
 

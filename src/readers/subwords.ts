@@ -2,14 +2,10 @@ import * as vscode from "vscode";
 import * as common from "../common";
 import * as lineUtils from "../utils/lines";
 import {
+    closerOf,
     positionToRange,
     wordRangeToPosition,
 } from "../utils/selectionsAndRanges";
-
-type SubTextRange = {
-    text: string;
-    range: { start: number; end: number };
-};
 
 type CharClass = "wordStart" | "wordCont" | "operator" | "whitespace";
 
@@ -34,8 +30,8 @@ function getCharClass(char: string): CharClass | undefined {
     return "operator";
 }
 
-function splitTextIntoSubWords(text: string): SubTextRange[] {
-    const results: SubTextRange[] = [];
+function splitTextIntoSubWords(text: string): common.SubTextRange[] {
+    const results: common.SubTextRange[] = [];
 
     let prevCharClass: CharClass | undefined = undefined;
     let currentWord = "";
@@ -244,26 +240,6 @@ function iterVertically(
                 isFirstLine = false;
             }
         })()
-    );
-}
-
-function closerOf(
-    startingPosition: vscode.Position,
-    a: vscode.Range,
-    b: vscode.Range
-): vscode.Range {
-    if (a.start.line !== b.start.line) {
-        return (
-            new common.Linqish([a, b]).minBy((r) =>
-                Math.abs(startingPosition.line - r.start.line)
-            ) ?? a
-        );
-    }
-
-    return (
-        new common.Linqish([a, b]).minBy((r) =>
-            Math.abs(startingPosition.character - r.start.character)
-        ) ?? a
     );
 }
 

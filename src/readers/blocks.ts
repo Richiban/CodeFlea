@@ -4,7 +4,7 @@ import * as lines from "./lines";
 import * as lineUtils from "../utils/lines";
 import {
     positionToRange,
-    wordRangeToPosition,
+    wordRangeToPosition as rangeToPosition,
 } from "../utils/selectionsAndRanges";
 
 type BlockIterationOptions = common.IterationOptions & {
@@ -70,7 +70,14 @@ function iterBlockStarts(
                 ...options,
             };
 
-            const documentLines = lineUtils.iterLinePairs(document, options);
+            const documentLines = lineUtils.iterLinePairs(document, {
+                ...options,
+                startingPosition: rangeToPosition(
+                    options.startingPosition,
+                    "backwards"
+                ),
+            });
+
             const startLine = document.lineAt(
                 options.startingPosition instanceof vscode.Range
                     ? options.startingPosition.start
@@ -99,8 +106,7 @@ function iterBlockStarts(
                         );
 
                     if (
-                        options.indentationLevel ===
-                            "same-indentation-current-scope" &&
+                        options.restrictToCurrentScope &&
                         relativeIndentation === "less-indentation"
                     ) {
                         return;
@@ -137,6 +143,7 @@ function findContainingBlockStart(
             startingPosition: positionInBlock,
             direction: common.Direction.backwards,
             currentInclusive: true,
+            indentationLevel: "any-indentation",
         }).tryFirst() ?? new vscode.Position(0, 0)
     );
 }

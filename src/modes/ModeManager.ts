@@ -6,12 +6,9 @@ import {
     SpaceCommands,
     ModifyCommands,
 } from "../utils/quickMenus";
-import { createFrom } from "../subjects/subjects";
 import { SubjectActions } from "../subjects/SubjectActions";
-import { EditorMode, EditorModeType } from "./modes";
+import { EditorMode, EditorModeChangeRequest } from "./modes";
 import { NullMode } from "./NullMode";
-import EditMode from "./EditMode";
-import NavigateMode from "./NavigateMode";
 
 export default class ModeManager {
     private mode: EditorMode;
@@ -36,33 +33,33 @@ export default class ModeManager {
         if (!editor) {
             this.mode = new NullMode(this);
             return;
-        } else {
-            if (this.mode instanceof NullMode) {
-                await this.changeMode({
-                    kind: "NAVIGATE",
-                    subjectName: "WORD",
-                });
-            }
         }
 
         this.editor = editor;
 
-        this.mode.refreshUI();
+        if (this.mode instanceof NullMode) {
+            await this.changeMode({
+                kind: "NAVIGATE",
+                subjectName: "WORD",
+            });
+        }
+
+        this.mode.setUI();
     }
 
-    async changeMode(newMode: EditorModeType) {
-        const previousMode = this.mode;
+    async changeMode(newMode: EditorModeChangeRequest) {
+        this.mode.clearUI();
 
         this.mode = await this.mode.changeTo(newMode);
 
-        previousMode.clearUI();
-        this.mode.refreshUI();
+        this.mode.setUI();
+        this.mode.fixSelection();
     }
 
     async changeNumHandler() {
         this.mode.clearUI();
         this.mode = this.mode.changeNumHandler();
-        this.mode.refreshUI();
+        this.mode.setUI();
     }
 
     async executeSubjectCommand(command: keyof SubjectActions) {
@@ -74,14 +71,32 @@ export default class ModeManager {
         await this.mode.repeatSubjectCommand();
     }
 
-    async fixSelection() {
-        await this.mode.fixSelection();
+    async onDidChangeTextEditorSelection(
+        event: vscode.TextEditorSelectionChangeEvent
+    ) {
+        if (
+            event.kind === vscode.TextEditorSelectionChangeKind.Mouse &&
+            event.selections.length === 1
+        ) {
+            if (event.selections[0].isEmpty) {
+                this.mode.fixSelection();
+            } else {
+                await this.changeMode({ kind: "EDIT" });
+            }
+        }
+
+        this.mode.setUI();
     }
 
     onCharTyped(typed: { text: string }) {
-        this.mode = this.mode.onCharTyped(typed);
+        const newMode = this.mode.onCharTyped(typed);
 
-        this.mode.refreshUI();
+        if (newMode) {
+            this.mode.clearUI();
+            this.mode = newMode;
+            this.mode.setUI();
+            this.mode.fixSelection();
+        }
     }
 
     async openSpaceMenu() {
@@ -142,6 +157,12 @@ export default class ModeManager {
 
     async undoLastCommand() {
         await vscode.commands.executeCommand("cursorUndo");
+
+        this.mode.fixSelection();
+    }
+
+    async undo() {
+        await vscode.commands.executeCommand("undo");
 
         this.mode.fixSelection();
     }

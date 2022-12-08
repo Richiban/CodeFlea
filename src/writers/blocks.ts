@@ -2,25 +2,13 @@ import * as vscode from "vscode";
 import * as common from "../common";
 import blockReader from "../readers/blocks";
 import * as editor from "../utils/editor";
+import { positionToRange } from "../utils/selectionsAndRanges";
 
 function delete_(
     document: vscode.TextDocument,
     edit: vscode.TextEditorEdit,
     blockRange: vscode.Range
 ): vscode.Range {
-    const prevBlock = blockReader
-        .iterVertically(document, {
-            startingPosition: blockRange.start,
-            direction: "backwards",
-            restrictToCurrentScope: true,
-        })
-        .tryFirst();
-
-    if (prevBlock) {
-        edit.delete(new vscode.Range(prevBlock.end, blockRange.end));
-        return blockRange;
-    }
-
     const nextBlock = blockReader
         .iterVertically(document, {
             startingPosition: blockRange.end,
@@ -31,12 +19,27 @@ function delete_(
 
     if (nextBlock) {
         edit.delete(new vscode.Range(blockRange.start, nextBlock.start));
-        return blockRange;
+
+        return positionToRange(blockRange.start);
+    }
+
+    const prevBlock = blockReader
+        .iterVertically(document, {
+            startingPosition: blockRange.start,
+            direction: "backwards",
+            restrictToCurrentScope: true,
+        })
+        .tryFirst();
+
+    if (prevBlock) {
+        edit.delete(new vscode.Range(prevBlock.end, blockRange.end));
+
+        return positionToRange(prevBlock.start);
     }
 
     edit.delete(blockRange);
 
-    return blockRange;
+    return positionToRange(blockRange.start);
 }
 
 export function duplicate(
@@ -119,7 +122,7 @@ function swapHorizontally(
 }
 
 const writer: common.SubjectWriter = {
-    delete_,
+    remove: delete_,
     duplicate,
     swapVertically,
     swapHorizontally,

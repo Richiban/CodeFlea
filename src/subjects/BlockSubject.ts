@@ -1,11 +1,11 @@
 import * as common from "../common";
 import * as vscode from "vscode";
 import * as selections from "../utils/selectionsAndRanges";
-import { Subject } from "./Subject";
+import Subject from "./Subject";
 import blockReader from "../readers/blocks";
 import blockWriter from "../writers/blocks";
 
-export class BlockSubject extends Subject {
+export default class BlockSubject extends Subject {
     protected subjectReader = blockReader;
     protected subjectWriter = blockWriter;
     public decorationType = BlockSubject.decorationType;

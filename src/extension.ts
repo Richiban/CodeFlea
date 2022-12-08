@@ -28,12 +28,8 @@ export function activate(context: vscode.ExtensionContext) {
         await modeManager.changeEditor(editor);
     });
 
-    vscode.window.onDidChangeTextEditorSelection((e) => {
-        if (e.kind === vscode.TextEditorSelectionChangeKind.Command) {
-            return;
-        }
-
-        modeManager.fixSelection();
+    vscode.window.onDidChangeTextEditorSelection(async (e) => {
+        await modeManager.onDidChangeTextEditorSelection(e);
     });
 
     for (const constructor of registeredCommands) {

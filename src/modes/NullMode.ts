@@ -2,7 +2,7 @@ import { createFrom } from "../subjects/subjects";
 import EditMode from "./EditMode";
 import ExtendMode from "./ExtendMode";
 import * as common from "../common";
-import { EditorMode, EditorModeType } from "./modes";
+import { EditorMode, EditorModeChangeRequest } from "./modes";
 import NavigateMode from "./NavigateMode";
 import { defaultNumHandler as createDefaultNumHandler } from "../handlers/NumHandler";
 
@@ -17,7 +17,7 @@ export class NullMode extends EditorMode {
         return previousMode instanceof NullMode;
     }
 
-    async changeTo(newMode: EditorModeType): Promise<EditorMode> {
+    async changeTo(newMode: EditorModeChangeRequest): Promise<EditorMode> {
         const defaultSubject = createFrom(this.context, "WORD");
         const defaultNumHandler = createDefaultNumHandler(this.context);
         const navigateMode = new NavigateMode(
@@ -46,7 +46,7 @@ export class NullMode extends EditorMode {
         return this;
     }
 
-    refreshUI() {
+    setUI() {
         this.context.statusBar.text = `Initializing...`;
     }
 

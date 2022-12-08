@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import * as common from "../common";
+import Subject from "../subjects/Subject";
 import * as ranges from "../utils/selectionsAndRanges";
 
 export function defaultNumHandler(context: common.ExtensionContext) {
@@ -31,12 +32,9 @@ export abstract class NumHandler {
     abstract handleCommandExecution(
         command: () => Promise<void>
     ): Promise<{ needsUiRefresh: boolean }>;
-    abstract clear(): void;
+    abstract clearUI(): void;
 
-    abstract setRanges(
-        forwardRanges: common.Linqish<vscode.Range>,
-        backwardRanges: common.Linqish<vscode.Range>
-    ): void;
+    abstract setUI(subject: Subject): void;
 }
 
 export class QuickJumpNumHandler extends NumHandler {
@@ -76,21 +74,17 @@ export class QuickJumpNumHandler extends NumHandler {
         }
     }
 
-    setRanges(
-        forwardRanges: common.Linqish<vscode.Range>,
-        backwardRanges: common.Linqish<vscode.Range>
-    ): void {
-        this.forwardRanges = forwardRanges.toArray();
-        this.backwardRanges = backwardRanges.toArray();
+    setUI(subject: Subject): void {
+        this.forwardRanges = subject.iterAll("forwards").take(10).toArray();
+        this.backwardRanges = subject.iterAll("backwards").take(10).toArray();
 
-        const decorations = common
-            .linqish(this.forwardRanges)
+        const decorations = new common.Linqish(this.forwardRanges)
             .skip(1)
             .zipWith([1, 2, 3, 4, 5, 6, 7, 8, 9, 0])
             .concat(
-                common
-                    .linqish(this.backwardRanges)
-                    .zipWith([1, 2, 3, 4, 5, 6, 7, 8, 9, 0])
+                new common.Linqish(this.backwardRanges).zipWith([
+                    1, 2, 3, 4, 5, 6, 7, 8, 9, 0,
+                ])
             )
             .map(([range, i]) => {
                 return make(ranges.positionToRange(range.start), i.toString());
@@ -100,7 +94,7 @@ export class QuickJumpNumHandler extends NumHandler {
         this.context.editor.setDecorations(this.decorationType, decorations);
     }
 
-    clear() {
+    clearUI() {
         this.context.editor.setDecorations(this.decorationType, []);
     }
 
@@ -130,7 +124,7 @@ export class CommandMultiplierNumHandler extends NumHandler {
         return new QuickJumpNumHandler(this.context);
     }
 
-    clear(): void {}
+    clearUI(): void {}
 
     async handleNumKey(number: number) {
         if (number < 0 || number > 9) {
@@ -160,8 +154,5 @@ export class CommandMultiplierNumHandler extends NumHandler {
         return { needsUiRefresh };
     }
 
-    setRanges(
-        forwardRanges: common.Linqish<vscode.Range>,
-        backwardRanges: common.Linqish<vscode.Range>
-    ): void {}
+    setUI(): void {}
 }

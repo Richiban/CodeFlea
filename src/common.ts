@@ -3,6 +3,11 @@ import * as vscode from "vscode";
 
 export type DirectionOrNearest = Direction | "nearest";
 
+export type SubTextRange = {
+    text: string;
+    range: { start: number; end: number };
+};
+
 export type Change = "greaterThan" | "lessThan";
 
 export const Direction = {
@@ -18,10 +23,7 @@ export type RelativeIndentation =
     | "same-indentation"
     | "no-indentation";
 
-export type IndentationRequest =
-    | RelativeIndentation
-    | "same-indentation-current-scope"
-    | "any-indentation";
+export type IndentationRequest = RelativeIndentation | "any-indentation";
 
 export type IterationOptions = {
     startingPosition: vscode.Range | vscode.Position;
@@ -60,11 +62,11 @@ export type SubjectReader = {
 };
 
 export type SubjectWriter = {
-    delete_(
+    remove(
         document: vscode.TextDocument,
         edit: vscode.TextEditorEdit,
         range: vscode.Range
-    ): vscode.Range;
+    ): void;
     duplicate(
         document: vscode.TextDocument,
         edit: vscode.TextEditorEdit,
@@ -429,8 +431,8 @@ export class Linqish<T> implements Iterable<T> {
     }
 }
 
-export function linqish<T>(i: Iterable<T>) {
-    return new Linqish(i);
+export function linqish<T>(f: () => Iterable<T>) {
+    return new Linqish(f());
 }
 
 linqish.empty = new Linqish((function* () {})());

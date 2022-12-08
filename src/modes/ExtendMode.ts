@@ -2,7 +2,7 @@ import * as common from "../common";
 import * as vscode from "vscode";
 import * as subjects from "../subjects/subjects";
 import EditMode from "./EditMode";
-import { EditorMode, EditorModeType } from "./modes";
+import { EditorMode, EditorModeChangeRequest } from "./modes";
 import NavigateMode from "./NavigateMode";
 import { NumHandler } from "../handlers/NumHandler";
 import { SubjectActions } from "../subjects/SubjectActions";
@@ -24,7 +24,7 @@ export default class ExtendMode extends EditorMode {
         await this.wrappedMode.fixSelection();
     }
 
-    async changeTo(newMode: EditorModeType): Promise<EditorMode> {
+    async changeTo(newMode: EditorModeChangeRequest): Promise<EditorMode> {
         switch (newMode.kind) {
             case "EDIT":
                 return new EditMode(this.context, this.wrappedMode);
@@ -42,12 +42,6 @@ export default class ExtendMode extends EditorMode {
                 }
 
                 switch (newMode.subjectName) {
-                    case "LINE":
-                        return new NavigateMode(
-                            this.context,
-                            subjects.createFrom(this.context, "ALL_LINES"),
-                            this.numHandler
-                        );
                     case "WORD":
                         return new NavigateMode(
                             this.context,
@@ -58,12 +52,6 @@ export default class ExtendMode extends EditorMode {
                         return new NavigateMode(
                             this.context,
                             subjects.createFrom(this.context, "WORD"),
-                            this.numHandler
-                        );
-                    case "ALL_LINES":
-                        return new NavigateMode(
-                            this.context,
-                            subjects.createFrom(this.context, "LINE"),
                             this.numHandler
                         );
                 }
@@ -94,7 +82,7 @@ export default class ExtendMode extends EditorMode {
         this.wrappedMode.clearUI();
     }
 
-    async refreshUI() {
+    async setUI() {
         this.context.statusBar.text = `Extend (${this.wrappedMode.subject?.name})`;
 
         if (this.context.editor) {

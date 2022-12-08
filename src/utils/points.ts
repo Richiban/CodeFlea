@@ -78,35 +78,33 @@ export function getInterestingPoints(
     startPosition: vscode.Position,
     direction: Direction = "forwards"
 ): Linqish<vscode.Position> {
-    return linqish(
-        (function* () {
-            const document = editor.document;
+    return linqish(function* () {
+        const document = editor.document;
 
-            if (!startPosition || !document) {
+        if (!startPosition || !document) {
+            return;
+        }
+
+        for (const l of iterLines(document, {
+            startingPosition: startPosition,
+            direction,
+            currentInclusive: true,
+        })) {
+            if (lineIsStopLine(l)) {
                 return;
             }
 
-            for (const l of iterLines(document, {
-                startingPosition: startPosition,
-                direction,
-                currentInclusive: true,
+            for (const c of getInterestingPointsInLine(l, {
+                direction: direction,
+                startingIndex: startPosition.character,
             })) {
-                if (lineIsStopLine(l)) {
-                    return;
-                }
-
-                for (const c of getInterestingPointsInLine(l, {
-                    direction: direction,
-                    startingIndex: startPosition.character,
-                })) {
-                    if (
-                        l.lineNumber !== startPosition.line ||
-                        c !== startPosition.character + 1
-                    ) {
-                        yield new vscode.Position(l.lineNumber, c);
-                    }
+                if (
+                    l.lineNumber !== startPosition.line ||
+                    c !== startPosition.character + 1
+                ) {
+                    yield new vscode.Position(l.lineNumber, c);
                 }
             }
-        })()
-    );
+        }
+    });
 }

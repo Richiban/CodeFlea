@@ -246,16 +246,6 @@
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
-                "key": "/",
-                "command": "editor.action.selectToBracket",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
-            },
-            {
-                "key": "shift+/",
-                "command": "codeFlea.prevOccurrenceOfChar",
-                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
-            },
-            {
                 "key": "z",
                 "command": "cursorUndo",
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
@@ -296,6 +286,11 @@
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
+                "key": "/",
+                "command": "codeFlea.changeToEditModeMidPoint",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
                 "key": "p",
                 "command": "codeFlea.changeToEditModePrepend",
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
@@ -307,6 +302,11 @@
             },
             {
                 "key": "shift+enter",
+                "command": "codeFlea.undoCursorCommand",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "cmd+z",
                 "command": "codeFlea.undoCommand",
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
@@ -322,7 +322,7 @@
             },
             {
                 "key": "q",
-                "command": "codeFlea.changeToCharacterSubject",
+                "command": "codeFlea.changeToSubwordSubject",
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
@@ -553,5 +553,5 @@
         "eslint": "^8.26.0",
         "typescript": "^4.8.4"
     },
-    "version": "2.0.0-preview4"
+    "version": "2.0.0-preview5"
 }

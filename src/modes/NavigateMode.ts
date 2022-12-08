@@ -7,7 +7,7 @@ import * as editor from "../utils/editor";
 import * as selections from "../utils/selectionsAndRanges";
 import * as common from "../common";
 import { NumHandler } from "../handlers/NumHandler";
-import { Subject } from "../subjects/Subject";
+import Subject from "../subjects/Subject";
 import { SubjectActions } from "../subjects/SubjectActions";
 
 export default class NavigateMode extends modes.EditorMode {
@@ -40,7 +40,9 @@ export default class NavigateMode extends modes.EditorMode {
         );
     }
 
-    async changeTo(newMode: modes.EditorModeType): Promise<modes.EditorMode> {
+    async changeTo(
+        newMode: modes.EditorModeChangeRequest
+    ): Promise<modes.EditorMode> {
         switch (newMode.kind) {
             case "EDIT":
                 return new EditMode(this.context, this);
@@ -63,27 +65,16 @@ export default class NavigateMode extends modes.EditorMode {
                 }
 
                 switch (newMode.subjectName) {
-                    case "LINE":
-                        return this.with({
-                            subject: subjects.createFrom(
-                                this.context,
-                                "ALL_LINES"
-                            ),
-                        });
                     case "WORD":
                         return this.with({
                             subject: subjects.createFrom(
                                 this.context,
-                                "SUBWORD"
+                                "INTERWORD"
                             ),
                         });
-                    case "SUBWORD":
+                    case "INTERWORD":
                         return this.with({
                             subject: subjects.createFrom(this.context, "WORD"),
-                        });
-                    case "ALL_LINES":
-                        return this.with({
-                            subject: subjects.createFrom(this.context, "LINE"),
                         });
                 }
 
@@ -97,10 +88,10 @@ export default class NavigateMode extends modes.EditorMode {
 
     clearUI() {
         this.subject.clearUI();
-        this.numHandler.clear();
+        this.numHandler.clearUI();
     }
 
-    refreshUI() {
+    setUI() {
         this.context.statusBar.text = `Navigate (${this.subject?.name})`;
 
         if (this.context.editor) {
@@ -117,7 +108,14 @@ export default class NavigateMode extends modes.EditorMode {
             "NAVIGATE"
         );
 
-        this.fixSelection();
+        this.numHandler.setUI(this.subject);
+
+        this.context.editor.setDecorations(
+            this.subject.decorationType,
+            this.context.editor.selections
+        );
+
+        this.context.editor.revealRange(this.context.editor.selection);
     }
 
     async executeSubjectCommand(command: keyof SubjectActions) {
@@ -141,11 +139,7 @@ export default class NavigateMode extends modes.EditorMode {
                 await (this.subject[command] as any)(...args);
             });
 
-        if (refreshNeeded) {
-            this.refreshUI();
-        } else {
-            this.fixSelection();
-        }
+        this.setUI();
     }
 
     async repeatSubjectCommand() {
@@ -181,18 +175,6 @@ export default class NavigateMode extends modes.EditorMode {
 
     async fixSelection() {
         await this.subject.fixSelection();
-
-        this.numHandler.setRanges(
-            this.subject.iterAll("forwards"),
-            this.subject.iterAll("backwards")
-        );
-
-        this.context.editor.setDecorations(
-            this.subject.decorationType,
-            this.context.editor.selections
-        );
-
-        this.context.editor.revealRange(this.context.editor.selection);
     }
 
     private tryParseNumber(

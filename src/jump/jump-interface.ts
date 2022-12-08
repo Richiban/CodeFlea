@@ -1,5 +1,11 @@
 import * as vscode from "vscode";
-import { JumpLocations, JumpLocation, linqish, Cache } from "../common";
+import {
+    JumpLocations,
+    JumpLocation,
+    linqish,
+    Cache,
+    Linqish,
+} from "../common";
 import { readKey } from "../inline-input";
 import { Config } from "../config";
 
@@ -46,7 +52,7 @@ export class JumpInterface {
         >(
             (charsToOffsetToLeft, type) => {
                 if (type === "primary") {
-                    const offset =
+                    const offset: number =
                         -1.0 * charsToOffsetToLeft * config.decoration.width;
 
                     return vscode.window.createTextEditorDecorationType({
@@ -113,7 +119,7 @@ export class JumpInterface {
         interfaceType: InterfaceType
     ) {
         const { _true: standardOptions, _false: optionsWithNoSpaceToLeft } =
-            linqish(jumpLocations)
+            new Linqish(jumpLocations)
                 .map((loc) =>
                     this.createDecorationOptions(
                         loc.position.line,

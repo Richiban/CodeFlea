@@ -4,7 +4,7 @@ import * as common from "../common";
 import { SubjectActions } from "./SubjectActions";
 import { SubjectType } from "./SubjectType";
 
-export abstract class Subject implements SubjectActions {
+export default abstract class Subject implements SubjectActions {
     constructor(protected context: common.ExtensionContext) {}
 
     protected abstract subjectReader: common.SubjectReader;
@@ -16,7 +16,7 @@ export abstract class Subject implements SubjectActions {
         selections.tryMap(this.context.editor, (selection) =>
             this.subjectReader
                 .iterVertically(this.context.editor.document, {
-                    startingPosition: selection.start,
+                    startingPosition: selection,
                     direction: "forwards",
                 })
                 .tryFirst()
@@ -27,7 +27,7 @@ export abstract class Subject implements SubjectActions {
         selections.tryMap(this.context.editor, (selection) =>
             this.subjectReader
                 .iterHorizontally(this.context.editor.document, {
-                    startingPosition: selection.start,
+                    startingPosition: selection,
                     direction: "forwards",
                 })
                 .tryFirst()
@@ -38,7 +38,7 @@ export abstract class Subject implements SubjectActions {
         selections.tryMap(this.context.editor, (selection) =>
             this.subjectReader
                 .iterVertically(this.context.editor.document, {
-                    startingPosition: selection.start,
+                    startingPosition: selection,
                     direction: "backwards",
                 })
                 .tryFirst()
@@ -49,7 +49,7 @@ export abstract class Subject implements SubjectActions {
         selections.tryMap(this.context.editor, (selection) =>
             this.subjectReader
                 .iterHorizontally(this.context.editor.document, {
-                    startingPosition: selection.start,
+                    startingPosition: selection,
                     direction: "backwards",
                 })
                 .tryFirst()
@@ -93,7 +93,7 @@ export abstract class Subject implements SubjectActions {
     }
 
     async swapSubjectDown() {
-        this.context.editor.edit((e) => {
+        await this.context.editor.edit((e) => {
             selections.tryMap(this.context.editor, (selection) =>
                 this.subjectWriter.swapVertically(
                     this.context.editor.document,
@@ -105,7 +105,7 @@ export abstract class Subject implements SubjectActions {
         });
     }
     async swapSubjectUp() {
-        this.context.editor.edit((e) => {
+        await this.context.editor.edit((e) => {
             selections.tryMap(this.context.editor, (selection) =>
                 this.subjectWriter.swapVertically(
                     this.context.editor.document,
@@ -118,7 +118,7 @@ export abstract class Subject implements SubjectActions {
     }
 
     async swapSubjectLeft() {
-        this.context.editor.edit((e) => {
+        await this.context.editor.edit((e) => {
             selections.tryMap(this.context.editor, (selection) =>
                 this.subjectWriter.swapHorizontally(
                     this.context.editor.document,
@@ -131,7 +131,7 @@ export abstract class Subject implements SubjectActions {
     }
 
     async swapSubjectRight() {
-        this.context.editor.edit((e) => {
+        await this.context.editor.edit((e) => {
             selections.tryMap(this.context.editor, (selection) =>
                 this.subjectWriter.swapHorizontally(
                     this.context.editor.document,
@@ -144,19 +144,21 @@ export abstract class Subject implements SubjectActions {
     }
 
     async deleteSubject() {
-        this.context.editor.edit((e) => {
-            selections.tryMap(this.context.editor, (selection) =>
-                this.subjectWriter.delete_(
+        await this.context.editor.edit((e) => {
+            for (const selection of this.context.editor.selections) {
+                this.subjectWriter.remove(
                     this.context.editor.document,
                     e,
                     selection
-                )
-            );
+                );
+            }
         });
+
+        this.fixSelection();
     }
 
     async duplicateSubject() {
-        this.context.editor.edit((e) => {
+        await this.context.editor.edit((e) => {
             selections.tryMap(this.context.editor, (selection) =>
                 this.subjectWriter.duplicate(
                     this.context.editor.document,
@@ -167,8 +169,28 @@ export abstract class Subject implements SubjectActions {
         });
     }
 
-    async firstSubjectInScope() {}
-    async lastSubjectInScope() {}
+    async firstSubjectInScope(): Promise<void> {
+        selections.tryMap(this.context.editor, (selection) =>
+            this.subjectReader
+                .iterAll(this.context.editor.document, {
+                    startingPosition: selection,
+                    direction: "backwards",
+                    restrictToCurrentScope: true,
+                })
+                .tryLast()
+        );
+    }
+    async lastSubjectInScope(): Promise<void> {
+        selections.tryMap(this.context.editor, (selection) =>
+            this.subjectReader
+                .iterAll(this.context.editor.document, {
+                    startingPosition: selection,
+                    direction: "forwards",
+                    restrictToCurrentScope: true,
+                })
+                .tryLast()
+        );
+    }
 
     async search(target: common.Char) {
         selections.tryMap(this.context.editor, (selection) =>
@@ -257,7 +279,7 @@ export abstract class Subject implements SubjectActions {
 
     iterAll(direction: common.Direction): common.Linqish<vscode.Range> {
         return this.subjectReader.iterAll(this.context.editor.document, {
-            startingPosition: this.context.editor.selection.start,
+            startingPosition: this.context.editor.selection,
             direction,
         });
     }

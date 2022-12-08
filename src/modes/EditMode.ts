@@ -3,7 +3,7 @@ import * as common from "../common";
 import { defaultNumHandler } from "../handlers/NumHandler";
 import { SubjectActions } from "../subjects/SubjectActions";
 import ExtendMode from "./ExtendMode";
-import { EditorMode, EditorModeType } from "./modes";
+import { EditorMode, EditorModeChangeRequest } from "./modes";
 import NavigateMode from "./NavigateMode";
 
 export default class EditMode extends EditorMode {
@@ -31,7 +31,7 @@ export default class EditMode extends EditorMode {
         return new EditMode(this.context, this.previousNavigateMode);
     }
 
-    async changeTo(newMode: EditorModeType): Promise<EditorMode> {
+    async changeTo(newMode: EditorModeChangeRequest): Promise<EditorMode> {
         switch (newMode.kind) {
             case "EDIT":
                 return this;
@@ -51,7 +51,7 @@ export default class EditMode extends EditorMode {
         return this;
     }
 
-    onCharTyped(typed: { text: string }): EditorMode {
+    onCharTyped(typed: { text: string }): EditorMode | undefined {
         if (this.keySequenceStarted) {
             if (
                 typed.text === this.context.config.modes.navigateKeySequence[1]
@@ -86,12 +86,12 @@ export default class EditMode extends EditorMode {
             }
         }
 
-        return this;
+        return undefined;
     }
 
     clearUI(): void {}
 
-    async refreshUI() {
+    async setUI() {
         this.context.statusBar.text = `Edit`;
 
         if (this.context.editor) {

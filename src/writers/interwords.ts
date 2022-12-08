@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import subwordReader from "../readers/words";
+import interwordReader from "../readers/interwords";
 import * as common from "../common";
 import * as editor from "../utils/editor";
 
@@ -9,14 +9,14 @@ function getSeparatingText(
     document: vscode.TextDocument,
     wordRange: vscode.Range
 ): vscode.Range | undefined {
-    const wordBefore = subwordReader
+    const wordBefore = interwordReader
         .iterAll(document, {
             startingPosition: wordRange.start,
             direction: "backwards",
         })
         .tryFirst();
 
-    const wordAfter = subwordReader
+    const wordAfter = interwordReader
         .iterAll(document, {
             startingPosition: wordRange.end,
             direction: "forwards",
@@ -57,7 +57,7 @@ function getSeparatingText(
     }
 }
 
-export function deleteWord(
+export function remove(
     document: vscode.TextDocument,
     e: vscode.TextEditorEdit,
     selection: vscode.Selection
@@ -73,7 +73,7 @@ export function deleteWord(
     return selection;
 }
 
-export function duplicateWord(
+export function duplicate(
     document: vscode.TextDocument,
     textEdit: vscode.TextEditorEdit,
     selection: vscode.Selection
@@ -104,7 +104,7 @@ export function swapHorizontally(
     const getEnd: keyof vscode.Range =
         direction === "forwards" ? "end" : "start";
 
-    const targetWordRange = subwordReader
+    const targetWordRange = interwordReader
         .iterHorizontally(document, {
             startingPosition: range[getEnd],
             direction,
@@ -129,7 +129,7 @@ export function swapVertically(
     const getEnd: keyof vscode.Range =
         direction === "forwards" ? "end" : "start";
 
-    const targetWordRange = subwordReader
+    const targetWordRange = interwordReader
         .iterVertically(document, {
             startingPosition: range[getEnd],
             direction,
@@ -146,8 +146,8 @@ export function swapVertically(
 }
 
 const writer: common.SubjectWriter = {
-    remove: deleteWord,
-    duplicate: duplicateWord,
+    remove,
+    duplicate,
     swapHorizontally,
     swapVertically,
 };

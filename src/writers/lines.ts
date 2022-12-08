@@ -69,7 +69,7 @@ export function duplicate(
 }
 
 const writer: common.SubjectWriter = {
-    delete_: () => {
+    remove: () => {
         throw new Error("Not supported: use VSCode command instead");
     },
     duplicate,

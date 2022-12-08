@@ -1,88 +1,86 @@
 import * as vscode from "vscode";
 import * as common from "../common";
 import * as lineUtils from "../utils/lines";
-import { wordRangeToPosition } from "../utils/selectionsAndRanges";
+import { wordRangeToPosition as rangeToPosition } from "../utils/selectionsAndRanges";
 
-export type LineEnumerationPattern = "alternate" | "sequential";
-
-function search(
+function getContainingRangeAt(
     document: vscode.TextDocument,
-    targetChar: common.Char,
-    options: common.IterationOptions
+    position: vscode.Position
 ): vscode.Range | undefined {
-    const searchLines = lineUtils.iterLines(document, options);
+    const line = document.lineAt(position.line);
 
-    for (const line of searchLines) {
-        const char = document.getText(line.range)[
-            line.firstNonWhitespaceCharacterIndex
-        ];
+    return line.range;
+}
 
-        if (char === targetChar) {
-            return line.range;
-        }
-    }
+function iterAll(
+    document: vscode.TextDocument,
+    options: common.IterationOptions
+): common.Linqish<vscode.Range> {
+    return lineUtils.iterLines(document, options).map((l) => l.range);
 }
 
 function iterHorizontally(
     document: vscode.TextDocument,
     options: common.IterationOptions
 ): common.Linqish<vscode.Range> {
-    return common.linqish(
-        (function* () {
-            let currentLine = document.lineAt(
-                wordRangeToPosition(options.startingPosition, options.direction)
-            );
-            let indentation: common.Change =
-                options.direction === "forwards" ? "greaterThan" : "lessThan";
+    return common.linqish(function* () {
+        let currentLine: vscode.TextLine | undefined = document.lineAt(
+            rangeToPosition(options.startingPosition, options.direction)
+        );
+        const indentation: common.Change =
+            options.direction === "forwards" ? "greaterThan" : "lessThan";
+        let first = true;
 
-            while (true) {
-                const nextLine = lineUtils.getNextLineOfChangeOfIndentation(
-                    indentation,
-                    options.direction,
-                    document,
-                    currentLine
-                );
-
-                if (nextLine) {
-                    yield lineUtils.rangeWithoutIndentation(nextLine);
-                } else {
-                    break;
-                }
+        do {
+            if (currentLine && (!first || options.currentInclusive)) {
+                yield lineUtils.rangeWithoutIndentation(currentLine);
             }
-        })()
-    );
+
+            currentLine = lineUtils.getNextLineOfChangeOfIndentation(
+                indentation,
+                options.direction,
+                document,
+                currentLine
+            );
+
+            first = false;
+        } while (currentLine);
+    });
 }
 
-function getContainingRangeAt(
+function search(
     document: vscode.TextDocument,
-    position: vscode.Position
+    searchString: common.Char,
+    options: common.IterationOptions
 ): vscode.Range | undefined {
-    return lineUtils.rangeWithoutIndentation(document.lineAt(position.line));
+    const allLines = lineUtils.iterLines(document, options);
+
+    return allLines
+        .filterMap((line) => {
+            if (
+                line.text
+                    .substring(line.firstNonWhitespaceCharacterIndex)
+                    .startsWith(searchString)
+            ) {
+                return line.range;
+            }
+        })
+        .tryFirst();
 }
 
 function getClosestRangeAt(
     document: vscode.TextDocument,
     position: vscode.Position
 ): vscode.Range {
-    return lineUtils.getNearestSignificantLine(document, position).range;
-}
-
-function iterVertically(
-    document: vscode.TextDocument,
-    options: common.IterationOptions
-): common.Linqish<vscode.Range> {
-    return lineUtils
-        .iterLines(document, options)
-        .filter(lineUtils.lineIsSignificant)
-        .map(lineUtils.rangeWithoutIndentation);
+    return document.lineAt(position.line).range;
 }
 
 const subjectReader: common.SubjectReader = {
     getContainingRangeAt,
     getClosestRangeTo: getClosestRangeAt,
-    iterAll: iterVertically,
+    iterAll,
     iterHorizontally,
-    iterVertically,
+    iterVertically: iterAll,
     search,
 };
 
