@@ -7,6 +7,7 @@ import {
     positionToRange,
     wordRangeToPosition,
 } from "../utils/selectionsAndRanges";
+import SubjectIOBase, { IterationOptions } from "./SubjectIOBase";
 
 type CharClass = "wordStart" | "wordCont" | "operator" | "whitespace";
 
@@ -104,7 +105,7 @@ function getSubwordRangeAtPosition(
 }
 function iterSubwords(
     document: vscode.TextDocument,
-    options: common.IterationOptions
+    options: IterationOptions
 ): Linqish<vscode.Range> {
     return new Linqish<vscode.Range>(
         (function* () {
@@ -147,7 +148,7 @@ function iterSubwords(
 function search(
     document: vscode.TextDocument,
     targetChar: common.Char,
-    options: common.IterationOptions
+    options: IterationOptions
 ): vscode.Range | undefined {
     for (const wordRange of iterSubwords(document, options)) {
         const charRange = new vscode.Range(
@@ -203,7 +204,7 @@ function expandSelectionToSubwords(
 
 function iterVertically(
     document: vscode.TextDocument,
-    options: common.IterationOptions
+    options: IterationOptions
 ): Linqish<vscode.Range> {
     return new Linqish<vscode.Range>(
         (function* () {
@@ -279,13 +280,12 @@ function getClosestRangeAt(
     return new vscode.Range(position, position);
 }
 
-const subjectReader: common.SubjectReader = {
-    getContainingRangeAt: getSubwordRangeAtPosition,
-    getClosestRangeTo: getClosestRangeAt,
-    iterAll: iterSubwords,
-    iterHorizontally: iterSubwords,
-    iterVertically,
-    search,
-};
+export default class SubwordIO extends SubjectIOBase {
+    deletableSeparators = /^[\s,.:=+\-*\/%]$/;
 
-export default subjectReader;
+    getContainingObjectAt = getSubwordRangeAtPosition;
+    getClosestObjectTo = getClosestRangeAt;
+    iterAll = iterSubwords;
+    iterHorizontally = iterSubwords;
+    iterVertically = iterVertically;
+}

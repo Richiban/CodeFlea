@@ -177,6 +177,10 @@ export default class Linqish<T> implements Iterable<T> {
         );
     }
 
+    filterUndefined() {
+        return this.filterMap((x) => x);
+    }
+
     filterMap<R>(f: (x: T) => R | undefined) {
         const iter = this.iter;
 

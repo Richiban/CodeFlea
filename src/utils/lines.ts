@@ -3,6 +3,7 @@ import * as common from "../common";
 import Linqish from "./Linqish";
 import * as lineUtils from "../utils/lines";
 import { wordRangeToPosition } from "./selectionsAndRanges";
+import { IterationOptions } from "../io/SubjectIOBase";
 
 export type LinePair =
     | { prev: undefined; current: vscode.TextLine }
@@ -99,7 +100,7 @@ export function getRelativeIndentation(
 
 export function iterLinePairs(
     document: vscode.TextDocument,
-    options: common.IterationOptions
+    options: IterationOptions
 ): Linqish<LinePair> {
     return iterLines(document, { ...options, currentInclusive: true })
         .pairwise()
@@ -184,7 +185,7 @@ function directionToDelta(direction: common.Direction) {
 
 export function iterLines(
     document: vscode.TextDocument,
-    options: common.IterationOptions
+    options: IterationOptions
 ): Linqish<vscode.TextLine> {
     const advance = directionToDelta(options.direction);
     let currentLineNumber = wordRangeToPosition(

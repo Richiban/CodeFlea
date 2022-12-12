@@ -1,6 +1,7 @@
 import { Config } from "./config";
 import * as vscode from "vscode";
-import Linqish from "./utils/Linqish";
+
+export type TextObject = vscode.Range;
 
 export type DirectionOrNearest = Direction | "nearest";
 
@@ -25,67 +26,6 @@ export type RelativeIndentation =
     | "no-indentation";
 
 export type IndentationRequest = RelativeIndentation | "any-indentation";
-
-export type IterationOptions = {
-    startingPosition: vscode.Range | vscode.Position;
-    direction: Direction;
-    currentInclusive?: boolean;
-    restrictToCurrentScope?: boolean;
-    bounds?: vscode.Range;
-};
-
-export type SubjectReader = {
-    getContainingRangeAt(
-        document: vscode.TextDocument,
-        position: vscode.Position
-    ): vscode.Range | undefined;
-    getClosestRangeTo(
-        document: vscode.TextDocument,
-        position: vscode.Position
-    ): vscode.Range;
-    iterAll(
-        document: vscode.TextDocument,
-        options: IterationOptions
-    ): Linqish<vscode.Range>;
-    iterHorizontally(
-        document: vscode.TextDocument,
-        options: IterationOptions
-    ): Linqish<vscode.Range>;
-    iterVertically(
-        document: vscode.TextDocument,
-        options: IterationOptions
-    ): Linqish<vscode.Range>;
-    search(
-        document: vscode.TextDocument,
-        targetChar: Char,
-        options: IterationOptions
-    ): vscode.Range | undefined;
-};
-
-export type SubjectWriter = {
-    remove(
-        document: vscode.TextDocument,
-        edit: vscode.TextEditorEdit,
-        range: vscode.Range
-    ): void;
-    duplicate(
-        document: vscode.TextDocument,
-        edit: vscode.TextEditorEdit,
-        range: vscode.Range
-    ): vscode.Range;
-    swapVertically(
-        document: vscode.TextDocument,
-        edit: vscode.TextEditorEdit,
-        range: vscode.Range,
-        direction: Direction
-    ): vscode.Range;
-    swapHorizontally(
-        document: vscode.TextDocument,
-        edit: vscode.TextEditorEdit,
-        range: vscode.Range,
-        direction: Direction
-    ): vscode.Range;
-};
 
 export type JumpLocations = JumpLocation[];
 

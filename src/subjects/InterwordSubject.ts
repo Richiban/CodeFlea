@@ -1,11 +1,9 @@
 import * as vscode from "vscode";
-import Subject from "./Subject";
-import interwordReader from "../readers/interwords";
-import interwordWriter from "../writers/interwords";
+import InterwordIO from "../io/InterwordIO";
+import SubjectBase from "./SubjectBase";
 
-export default class InterwordSubject extends Subject {
-    protected subjectReader = interwordReader;
-    protected subjectWriter = interwordWriter;
+export default class InterwordSubject extends SubjectBase {
+    protected subjectIO = new InterwordIO();
     public decorationType = InterwordSubject.decorationType;
     readonly name = "INTERWORD";
 

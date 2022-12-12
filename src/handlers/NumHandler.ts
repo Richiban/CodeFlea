@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as common from "../common";
 import Linqish from "../utils/Linqish";
-import Subject from "../subjects/Subject";
+import SubjectBase from "../subjects/SubjectBase";
 import * as ranges from "../utils/selectionsAndRanges";
 
 export function defaultNumHandler(context: common.ExtensionContext) {
@@ -35,7 +35,7 @@ export abstract class NumHandler {
     ): Promise<{ needsUiRefresh: boolean }>;
     abstract clearUI(): void;
 
-    abstract setUI(subject: Subject): void;
+    abstract setUI(subject: SubjectBase): void;
 }
 
 export class QuickJumpNumHandler extends NumHandler {
@@ -75,7 +75,7 @@ export class QuickJumpNumHandler extends NumHandler {
         }
     }
 
-    setUI(subject: Subject): void {
+    setUI(subject: SubjectBase): void {
         this.forwardRanges = subject.iterAll("forwards").take(10).toArray();
         this.backwardRanges = subject.iterAll("backwards").take(10).toArray();
 

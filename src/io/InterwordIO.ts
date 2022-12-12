@@ -8,6 +8,8 @@ import {
     wordRangeToPosition as rangeToPosition,
 } from "../utils/selectionsAndRanges";
 import { linqish } from "../utils/Linqish";
+import SubjectIOBase, { IterationOptions } from "./SubjectIOBase";
+import * as editor from "../utils/editor";
 
 type CharClass = "word" | "operator";
 
@@ -138,10 +140,7 @@ function getClosestRangeTo(
     return positionToRange(position);
 }
 
-function iterAll(
-    document: vscode.TextDocument,
-    options: common.IterationOptions
-) {
+function iterAll(document: vscode.TextDocument, options: IterationOptions) {
     return linqish(function* () {
         let isFirstLine = true;
         const startingPosition = rangeToPosition(
@@ -206,7 +205,7 @@ function findBest(
 
 function iterVertically(
     document: vscode.TextDocument,
-    options: common.IterationOptions
+    options: IterationOptions
 ): Linqish<vscode.Range> {
     return new Linqish<vscode.Range>(
         (function* () {
@@ -236,36 +235,62 @@ function iterVertically(
     );
 }
 
-function search(
+export function swapHorizontally(
     document: vscode.TextDocument,
-    targetChar: common.Char,
-    options: common.IterationOptions
-): vscode.Range | undefined {
-    for (const wordRange of iterAll(document, options)) {
-        const charRange = new vscode.Range(
-            wordRange.start,
-            wordRange.start.translate(undefined, 1)
-        );
+    edit: vscode.TextEditorEdit,
+    range: vscode.Range,
+    direction: common.Direction
+): vscode.Range {
+    const getEnd: keyof vscode.Range =
+        direction === "forwards" ? "end" : "start";
 
-        if (
-            document.getText(charRange).localeCompare(targetChar, undefined, {
-                sensitivity: "base",
-            }) === 0
-        ) {
-            return wordRange;
-        }
+    const targetWordRange = iterAll(document, {
+        startingPosition: range[getEnd],
+        direction,
+    }).tryFirst();
+
+    if (targetWordRange) {
+        editor.swap(document, edit, range, targetWordRange);
+
+        return targetWordRange;
     }
 
-    return undefined;
+    return range;
 }
 
-const reader: common.SubjectReader = {
-    getContainingRangeAt,
-    getClosestRangeTo,
-    iterAll,
-    iterVertically,
-    iterHorizontally: iterAll,
-    search,
-};
+export function swapVertically(
+    document: vscode.TextDocument,
+    edit: vscode.TextEditorEdit,
+    range: vscode.Range,
+    direction: common.Direction
+): vscode.Range {
+    const getEnd: keyof vscode.Range =
+        direction === "forwards" ? "end" : "start";
 
-export default reader;
+    const targetWordRange = iterVertically(document, {
+        startingPosition: range[getEnd],
+        direction,
+    }).tryFirst();
+
+    if (targetWordRange) {
+        editor.swap(document, edit, range, targetWordRange);
+
+        return targetWordRange;
+    }
+
+    return range;
+}
+
+export default class InterwordIO extends SubjectIOBase {
+    deletableSeparators = /^$/;
+
+    getContainingObjectAt = getContainingRangeAt;
+    getClosestObjectTo = getClosestRangeTo;
+    iterAll = iterAll;
+    iterVertically = iterVertically;
+    iterHorizontally = iterAll;
+
+    getSeparatingText() {
+        return undefined;
+    }
+}

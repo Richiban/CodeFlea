@@ -1,14 +1,15 @@
 import * as vscode from "vscode";
 import * as common from "../common";
 import Linqish from "../utils/Linqish";
-import * as lines from "./lines";
+import * as lines from "./LineIO";
 import * as lineUtils from "../utils/lines";
 import {
     positionToRange,
     wordRangeToPosition as rangeToPosition,
 } from "../utils/selectionsAndRanges";
+import SubjectIOBase, { IterationOptions } from "./SubjectIOBase";
 
-type BlockIterationOptions = common.IterationOptions & {
+type BlockIterationOptions = IterationOptions & {
     indentationLevel?: common.IndentationRequest;
 };
 
@@ -123,7 +124,6 @@ function iterBlockStarts(
                         );
 
                         yield point;
-                        break;
                     }
                 }
             }
@@ -213,7 +213,7 @@ function getContainingBlock(
 
 function iterVertically(
     document: vscode.TextDocument,
-    options: common.IterationOptions
+    options: IterationOptions
 ): Linqish<vscode.Range> {
     return iterBlockStarts(document, {
         ...options,
@@ -223,7 +223,7 @@ function iterVertically(
 
 function iterHorizontally(
     document: vscode.TextDocument,
-    options: common.IterationOptions
+    options: IterationOptions
 ): Linqish<vscode.Range> {
     const indentation =
         options.direction === common.Direction.forwards
@@ -238,35 +238,12 @@ function iterHorizontally(
 
 function iterAll(
     document: vscode.TextDocument,
-    options: common.IterationOptions
+    options: IterationOptions
 ): Linqish<vscode.Range> {
     return iterBlockStarts(document, {
         ...options,
         indentationLevel: "any-indentation",
     }).map((point) => getContainingBlock(document, positionToRange(point)));
-}
-
-function search(
-    document: vscode.TextDocument,
-    targetChar: common.Char,
-    options: common.IterationOptions
-): vscode.Range | undefined {
-    const blockPoints = iterAll(document, options);
-
-    for (const { start } of blockPoints) {
-        const charRange = new vscode.Range(
-            start,
-            start.translate({ characterDelta: 1 })
-        );
-
-        const char = document.getText(charRange);
-
-        if (char === targetChar) {
-            return new vscode.Selection(charRange.end, charRange.start);
-        }
-    }
-
-    return getContainingBlock(document, options.startingPosition);
 }
 
 function getClosestContainingBlock(
@@ -285,13 +262,69 @@ function getContainingRangeAt(
     return getContainingBlock(document, positionToRange(position));
 }
 
-const reader: common.SubjectReader = {
-    getContainingRangeAt,
-    getClosestRangeTo: getClosestContainingBlock,
-    iterAll,
-    iterHorizontally,
-    iterVertically,
-    search,
-};
+export function duplicate(
+    document: vscode.TextDocument,
+    textEdit: vscode.TextEditorEdit,
+    object: vscode.Range
+): vscode.Range {
+    const startLine = document.lineAt(object.start.line);
+    const endLine = document.lineAt(object.end.line);
 
-export default reader;
+    const linesToDuplicate = document.getText(
+        new vscode.Range(
+            startLine.range.start,
+            endLine.rangeIncludingLineBreak.end
+        )
+    );
+
+    textEdit.insert(startLine.range.start, linesToDuplicate);
+
+    return object;
+}
+
+function deleteBlock(
+    document: vscode.TextDocument,
+    textEdit: vscode.TextEditorEdit,
+    object: vscode.Range
+) {
+    const nextBlock = iterVertically(document, {
+        startingPosition: object.end,
+        direction: "forwards",
+        restrictToCurrentScope: true,
+    }).tryFirst();
+
+    if (nextBlock) {
+        textEdit.delete(new vscode.Range(object.start, nextBlock.start));
+
+        return positionToRange(object.start);
+    }
+
+    const prevBlock = iterVertically(document, {
+        startingPosition: object.start,
+        direction: "backwards",
+        restrictToCurrentScope: true,
+    }).tryFirst();
+
+    if (prevBlock) {
+        textEdit.delete(new vscode.Range(prevBlock.end, object.end));
+
+        return positionToRange(prevBlock.start);
+    }
+
+    textEdit.delete(object);
+
+    return positionToRange(object.start);
+}
+
+export default class BlockIO extends SubjectIOBase {
+    deletableSeparators = /.*/;
+
+    getContainingObjectAt = getContainingRangeAt;
+    getClosestObjectTo = getClosestContainingBlock;
+    iterAll = iterAll;
+    iterHorizontally = iterHorizontally;
+    iterVertically = iterVertically;
+    duplicate = duplicate;
+
+    deleteObject = deleteBlock;
+}

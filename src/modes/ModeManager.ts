@@ -75,6 +75,7 @@ export default class ModeManager {
     async onDidChangeTextEditorSelection(
         event: vscode.TextEditorSelectionChangeEvent
     ) {
+        if (event.kind === vscode.TextEditorSelectionChangeKind.Command) return;
         if (this.mode instanceof EditMode) return;
 
         if (

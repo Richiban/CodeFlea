@@ -1,11 +1,9 @@
 import * as vscode from "vscode";
-import wordWriter from "../writers/words";
-import Subject from "./Subject";
-import wordReader from "../readers/words";
+import WordIO from "../io/WordIO";
+import SubjectBase from "./SubjectBase";
 
-export default class WordSubject extends Subject {
-    protected subjectReader = wordReader;
-    protected subjectWriter = wordWriter;
+export default class WordSubject extends SubjectBase {
+    protected subjectIO = new WordIO();
     public decorationType = WordSubject.decorationType;
     readonly name = "WORD";
 

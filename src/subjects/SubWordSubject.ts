@@ -1,13 +1,11 @@
 import * as vscode from "vscode";
-import subwordReader from "../readers/subwords";
-import subwordWriter from "../writers/subwords";
-import Subject from "./Subject";
+import SubwordIO from "../io/SubwordIO";
+import SubjectBase from "./SubjectBase";
 
-export default class SubwordSubject extends Subject {
+export default class SubwordSubject extends SubjectBase {
     readonly name = "SUBWORD";
     public decorationType = SubwordSubject.decorationType;
-    protected readonly subjectReader = subwordReader;
-    protected readonly subjectWriter = subwordWriter;
+    protected readonly subjectIO = new SubwordIO();
 
     public static decorationType = vscode.window.createTextEditorDecorationType(
         {

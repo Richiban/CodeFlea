@@ -4,18 +4,18 @@ import * as common from "../common";
 import { SubjectActions } from "./SubjectActions";
 import { SubjectType } from "./SubjectType";
 import Linqish from "../utils/Linqish";
+import SubjectIOBase from "../io/SubjectIOBase";
 
-export default abstract class Subject implements SubjectActions {
+export default abstract class SubjectBase implements SubjectActions {
     constructor(protected context: common.ExtensionContext) {}
 
-    protected abstract subjectReader: common.SubjectReader;
-    protected abstract subjectWriter: common.SubjectWriter;
+    protected abstract subjectIO: SubjectIOBase;
     public abstract decorationType: vscode.TextEditorDecorationType;
     public abstract name: SubjectType;
 
     async nextSubjectDown() {
         selections.tryMap(this.context.editor, (selection) =>
-            this.subjectReader
+            this.subjectIO
                 .iterVertically(this.context.editor.document, {
                     startingPosition: selection,
                     direction: "forwards",
@@ -26,7 +26,7 @@ export default abstract class Subject implements SubjectActions {
 
     async nextSubjectRight() {
         selections.tryMap(this.context.editor, (selection) =>
-            this.subjectReader
+            this.subjectIO
                 .iterHorizontally(this.context.editor.document, {
                     startingPosition: selection,
                     direction: "forwards",
@@ -37,7 +37,7 @@ export default abstract class Subject implements SubjectActions {
 
     async nextSubjectUp() {
         selections.tryMap(this.context.editor, (selection) =>
-            this.subjectReader
+            this.subjectIO
                 .iterVertically(this.context.editor.document, {
                     startingPosition: selection,
                     direction: "backwards",
@@ -48,7 +48,7 @@ export default abstract class Subject implements SubjectActions {
 
     async nextSubjectLeft() {
         selections.tryMap(this.context.editor, (selection) =>
-            this.subjectReader
+            this.subjectIO
                 .iterHorizontally(this.context.editor.document, {
                     startingPosition: selection,
                     direction: "backwards",
@@ -96,7 +96,7 @@ export default abstract class Subject implements SubjectActions {
     async swapSubjectDown() {
         await this.context.editor.edit((e) => {
             selections.tryMap(this.context.editor, (selection) =>
-                this.subjectWriter.swapVertically(
+                this.subjectIO.swapVertically(
                     this.context.editor.document,
                     e,
                     selection,
@@ -108,7 +108,7 @@ export default abstract class Subject implements SubjectActions {
     async swapSubjectUp() {
         await this.context.editor.edit((e) => {
             selections.tryMap(this.context.editor, (selection) =>
-                this.subjectWriter.swapVertically(
+                this.subjectIO.swapVertically(
                     this.context.editor.document,
                     e,
                     selection,
@@ -121,7 +121,7 @@ export default abstract class Subject implements SubjectActions {
     async swapSubjectLeft() {
         await this.context.editor.edit((e) => {
             selections.tryMap(this.context.editor, (selection) =>
-                this.subjectWriter.swapHorizontally(
+                this.subjectIO.swapHorizontally(
                     this.context.editor.document,
                     e,
                     selection,
@@ -134,7 +134,7 @@ export default abstract class Subject implements SubjectActions {
     async swapSubjectRight() {
         await this.context.editor.edit((e) => {
             selections.tryMap(this.context.editor, (selection) =>
-                this.subjectWriter.swapHorizontally(
+                this.subjectIO.swapHorizontally(
                     this.context.editor.document,
                     e,
                     selection,
@@ -147,7 +147,7 @@ export default abstract class Subject implements SubjectActions {
     async deleteSubject() {
         await this.context.editor.edit((e) => {
             for (const selection of this.context.editor.selections) {
-                this.subjectWriter.remove(
+                this.subjectIO.deleteObject(
                     this.context.editor.document,
                     e,
                     selection
@@ -161,7 +161,7 @@ export default abstract class Subject implements SubjectActions {
     async duplicateSubject() {
         await this.context.editor.edit((e) => {
             selections.tryMap(this.context.editor, (selection) =>
-                this.subjectWriter.duplicate(
+                this.subjectIO.duplicate(
                     this.context.editor.document,
                     e,
                     selection
@@ -172,7 +172,7 @@ export default abstract class Subject implements SubjectActions {
 
     async firstSubjectInScope(): Promise<void> {
         selections.tryMap(this.context.editor, (selection) =>
-            this.subjectReader
+            this.subjectIO
                 .iterAll(this.context.editor.document, {
                     startingPosition: selection,
                     direction: "backwards",
@@ -183,7 +183,7 @@ export default abstract class Subject implements SubjectActions {
     }
     async lastSubjectInScope(): Promise<void> {
         selections.tryMap(this.context.editor, (selection) =>
-            this.subjectReader
+            this.subjectIO
                 .iterAll(this.context.editor.document, {
                     startingPosition: selection,
                     direction: "forwards",
@@ -195,7 +195,7 @@ export default abstract class Subject implements SubjectActions {
 
     async search(target: common.Char) {
         selections.tryMap(this.context.editor, (selection) =>
-            this.subjectReader.search(this.context.editor.document, target, {
+            this.subjectIO.search(this.context.editor.document, target, {
                 startingPosition: selection.end,
                 direction: "forwards",
             })
@@ -204,7 +204,7 @@ export default abstract class Subject implements SubjectActions {
 
     async searchBackwards(target: common.Char) {
         selections.tryMap(this.context.editor, (selection) =>
-            this.subjectReader.search(this.context.editor.document, target, {
+            this.subjectIO.search(this.context.editor.document, target, {
                 startingPosition: selection.start,
                 direction: "backwards",
             })
@@ -237,12 +237,12 @@ export default abstract class Subject implements SubjectActions {
 
     async fixSelection(): Promise<void> {
         selections.tryMap(this.context.editor, (selection) => {
-            const startRange = this.subjectReader.getContainingRangeAt(
+            const startRange = this.subjectIO.getContainingObjectAt(
                 this.context.editor.document,
                 selection.start
             );
 
-            const endRange = this.subjectReader.getContainingRangeAt(
+            const endRange = this.subjectIO.getContainingObjectAt(
                 this.context.editor.document,
                 selection.end
             );
@@ -258,7 +258,7 @@ export default abstract class Subject implements SubjectActions {
                 return new vscode.Selection(fixedRange.end, fixedRange.start);
             }
 
-            return this.subjectReader.getClosestRangeTo(
+            return this.subjectIO.getClosestObjectTo(
                 this.context.editor.document,
                 selection.start
             );
@@ -274,12 +274,12 @@ export default abstract class Subject implements SubjectActions {
         this.context.editor.setDecorations(this.decorationType, []);
     }
 
-    equals(other: Subject) {
+    equals(other: SubjectBase) {
         return this.name === other.name;
     }
 
     iterAll(direction: common.Direction): Linqish<vscode.Range> {
-        return this.subjectReader.iterAll(this.context.editor.document, {
+        return this.subjectIO.iterAll(this.context.editor.document, {
             startingPosition: this.context.editor.selection,
             direction,
         });

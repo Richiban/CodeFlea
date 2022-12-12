@@ -1,14 +1,10 @@
 import * as vscode from "vscode";
-import * as lines from "../readers/lines";
+import LineIO, * as lines from "../io/LineIO";
 import * as selections from "../utils/selectionsAndRanges";
-import * as common from "../common";
-import Subject from "./Subject";
-import allLinesReader from "../readers/lines";
-import allLinesWriter from "../writers/allLines";
+import SubjectBase from "./SubjectBase";
 
-export default class LineSubject extends Subject {
-    protected subjectReader = allLinesReader;
-    protected subjectWriter = allLinesWriter;
+export default class LineSubject extends SubjectBase {
+    protected subjectIO = new LineIO();
     public decorationType = LineSubject.decorationType;
     readonly name = "LINE";
 

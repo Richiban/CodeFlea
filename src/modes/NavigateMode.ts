@@ -7,13 +7,13 @@ import * as editor from "../utils/editor";
 import * as selections from "../utils/selectionsAndRanges";
 import * as common from "../common";
 import { NumHandler } from "../handlers/NumHandler";
-import Subject from "../subjects/Subject";
+import SubjectBase from "../subjects/SubjectBase";
 import { SubjectActions } from "../subjects/SubjectActions";
 
 export default class NavigateMode extends modes.EditorMode {
     constructor(
         private readonly context: common.ExtensionContext,
-        public readonly subject: Subject,
+        public readonly subject: SubjectBase,
         private readonly numHandler: NumHandler
     ) {
         super();
@@ -29,7 +29,7 @@ export default class NavigateMode extends modes.EditorMode {
     with(
         args: Partial<{
             context: common.ExtensionContext;
-            subject: Subject;
+            subject: SubjectBase;
             numHandler: NumHandler;
         }>
     ) {
