@@ -285,3 +285,7 @@ If you'd like to contribute
 
 -   Run `npm install` in your terminal to install dependencies
 -   In VS Code run the `Run Extension` target in the Debug View.
+
+## Packaging
+
+If you would like to make changes to the extension and then install install your dev version in your local VS Code instance, run `vsce package` in your terminal. This will create a `.vsix` file which you can install in VS Code.
