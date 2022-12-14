@@ -1,12 +1,12 @@
 import { createFrom } from "../subjects/subjects";
-import EditMode from "./EditMode";
+import InsertMode from "./InsertMode";
 import ExtendMode from "./ExtendMode";
 import * as common from "../common";
 import { EditorMode, EditorModeChangeRequest } from "./modes";
-import NavigateMode from "./NavigateMode";
+import FleaMode from "./FleaMode";
 import { defaultNumHandler as createDefaultNumHandler } from "../handlers/NumHandler";
 
-export class NullMode extends EditorMode {
+export default class NullMode extends EditorMode {
     constructor(private readonly context: common.ExtensionContext) {
         super();
     }
@@ -20,7 +20,7 @@ export class NullMode extends EditorMode {
     async changeTo(newMode: EditorModeChangeRequest): Promise<EditorMode> {
         const defaultSubject = createFrom(this.context, "WORD");
         const defaultNumHandler = createDefaultNumHandler(this.context);
-        const navigateMode = new NavigateMode(
+        const navigateMode = new FleaMode(
             this.context,
             defaultSubject,
             defaultNumHandler
@@ -28,7 +28,7 @@ export class NullMode extends EditorMode {
 
         switch (newMode.kind) {
             case "EDIT":
-                return new EditMode(this.context, navigateMode);
+                return new InsertMode(this.context, navigateMode);
 
             case "EXTEND":
                 return new ExtendMode(

@@ -2,12 +2,12 @@ import * as vscode from "vscode";
 import { Container, registeredCommands } from "./commands";
 import { loadConfig } from "./config";
 import { FleaJumper } from "./jump/fleajump";
-import ModeManager from "./modes/ModeManager";
+import CodeFleaManager from "./CodeFleaManager";
 
 export function activate(context: vscode.ExtensionContext) {
     const config = loadConfig();
     const fleaJumper = new FleaJumper(config);
-    const modeManager = new ModeManager(config);
+    const modeManager = new CodeFleaManager(config);
     const editor = vscode.window.activeTextEditor;
 
     if (editor) {

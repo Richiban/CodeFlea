@@ -1,17 +1,17 @@
 import * as vscode from "vscode";
-import { Config } from "../config";
-import { goToLine, quickCommandPicker } from "../utils/editor";
+import { Config } from "./config";
+import { goToLine, quickCommandPicker } from "./utils/editor";
 import {
     GoToCommands,
     SpaceCommands,
     ModifyCommands,
-} from "../utils/quickMenus";
-import { SubjectActions } from "../subjects/SubjectActions";
-import { EditorMode, EditorModeChangeRequest } from "./modes";
-import { NullMode } from "./NullMode";
-import EditMode from "./EditMode";
+} from "./utils/quickMenus";
+import { SubjectAction } from "./subjects/SubjectActions";
+import { EditorMode, EditorModeChangeRequest } from "./modes/modes";
+import NullMode from "./modes/NullMode";
+import InsertMode from "./modes/InsertMode";
 
-export default class ModeManager {
+export default class CodeFleaManager {
     private mode: EditorMode;
     public statusBar: vscode.StatusBarItem;
     public editor: vscode.TextEditor = undefined!;
@@ -63,7 +63,7 @@ export default class ModeManager {
         this.mode.setUI();
     }
 
-    async executeSubjectCommand(command: keyof SubjectActions) {
+    async executeSubjectCommand(command: SubjectAction) {
         console.log(`Executing subject command (${command})`);
         await this.mode.executeSubjectCommand(command);
     }
@@ -76,7 +76,7 @@ export default class ModeManager {
         event: vscode.TextEditorSelectionChangeEvent
     ) {
         if (event.kind === vscode.TextEditorSelectionChangeKind.Command) return;
-        if (this.mode instanceof EditMode) return;
+        if (this.mode instanceof InsertMode) return;
 
         if (
             event.kind === vscode.TextEditorSelectionChangeKind.Mouse &&

@@ -1,5 +1,7 @@
 import * as common from "../common";
 
+export type SubjectAction = keyof SubjectActions;
+
 export type SubjectActions = {
     nextSubjectDown(): Promise<void>;
     nextSubjectUp(): Promise<void>;

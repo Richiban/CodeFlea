@@ -1,12 +1,11 @@
 import * as vscode from "vscode";
 import * as common from "../common";
 import { defaultNumHandler } from "../handlers/NumHandler";
-import { SubjectActions } from "../subjects/SubjectActions";
 import ExtendMode from "./ExtendMode";
 import { EditorMode, EditorModeChangeRequest } from "./modes";
-import NavigateMode from "./NavigateMode";
+import FleaMode from "./FleaMode";
 
-export default class EditMode extends EditorMode {
+export default class InsertMode extends EditorMode {
     private keySequenceStarted: boolean = false;
 
     public static decorationType = vscode.window.createTextEditorDecorationType(
@@ -15,20 +14,16 @@ export default class EditMode extends EditorMode {
 
     constructor(
         private readonly context: common.ExtensionContext,
-        private previousNavigateMode: NavigateMode
+        private previousNavigateMode: FleaMode
     ) {
         super();
     }
 
     equals(previousMode: EditorMode): boolean {
         return (
-            previousMode instanceof EditMode &&
+            previousMode instanceof InsertMode &&
             previousMode.keySequenceStarted === this.keySequenceStarted
         );
-    }
-
-    copy(): EditorMode {
-        return new EditMode(this.context, this.previousNavigateMode);
     }
 
     async changeTo(newMode: EditorModeChangeRequest): Promise<EditorMode> {
@@ -108,7 +103,6 @@ export default class EditMode extends EditorMode {
         );
     }
 
-    async executeSubjectCommand(command: keyof SubjectActions) {}
-
+    async executeSubjectCommand() {}
     async repeatSubjectCommand() {}
 }

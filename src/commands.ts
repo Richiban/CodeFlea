@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { Config } from "./config";
 import * as editor from "./utils/editor";
 import { FleaJumper } from "./jump/fleajump";
-import type ModeManager from "./modes/ModeManager";
+import type CodeFleaManager from "./CodeFleaManager";
 import { collapseSelections } from "./utils/selectionsAndRanges";
 
 export abstract class ExtensionCommand {
@@ -19,7 +19,7 @@ export abstract class ExtensionCommand {
 }
 
 export type Container = {
-    manager: ModeManager;
+    manager: CodeFleaManager;
     fleaJumper: FleaJumper;
     config: Config;
 };
@@ -266,105 +266,6 @@ class ExtendModeCommand extends ExtensionCommand {
 }
 
 @registerCommand()
-class NextBlockEndCommand extends ExtensionCommand {
-    id = "codeFlea.nextBlockEnd";
-
-    execute() {
-        // blocks.nextBlockEnd("forwards", "any-indentation");
-    }
-}
-
-@registerCommand()
-class PrevBlockEndCommand extends ExtensionCommand {
-    id = "codeFlea.prevBlockEnd";
-
-    execute() {
-        // blocks.nextBlockEnd("backwards", "any-indentation");
-    }
-}
-
-@registerCommand()
-class SelectAllBlocksInCurrentScopeCommand extends ExtensionCommand {
-    id = "codeFlea.selectAllBlocksInCurrentScope";
-
-    execute() {
-        //blocks.selectAllBlocksInCurrentScope();
-    }
-}
-
-@registerCommand()
-class PrevBlockCommand extends ExtensionCommand {
-    id = "codeFlea.prevBlock";
-
-    execute() {
-        //blocks.moveToNextBlockStart("backwards", "any-indentation");
-    }
-}
-
-@registerCommand()
-class NextBlockCommand extends ExtensionCommand {
-    id = "codeFlea.nextBlock";
-
-    execute() {
-        //blocks.moveToNextBlockStart("forwards", "any-indentation");
-    }
-}
-
-@registerCommand()
-class NextOuterBlockCommand extends ExtensionCommand {
-    id = "codeFlea.nextOuterBlock";
-
-    execute() {
-        //blocks.moveToNextBlockStart("forwards", "less-indentation");
-    }
-}
-
-@registerCommand()
-class PrevOuterBlockCommand extends ExtensionCommand {
-    id = "codeFlea.prevOuterBlock";
-
-    execute() {
-        // blocks.moveToNextBlockStart("backwards", "less-indentation");
-    }
-}
-
-@registerCommand()
-class NextSameBlockCommand extends ExtensionCommand {
-    id = "codeFlea.nextSameBlock";
-
-    execute() {
-        // blocks.moveToNextBlockStart("forwards", "same-indentation");
-    }
-}
-
-@registerCommand()
-class PrevSameBlockCommand extends ExtensionCommand {
-    id = "codeFlea.prevSameBlock";
-
-    execute() {
-        // blocks.moveToNextBlockStart("backwards", "same-indentation");
-    }
-}
-
-@registerCommand()
-class NextInnerBlockCommand extends ExtensionCommand {
-    id = "codeFlea.nextInnerBlock";
-
-    execute() {
-        // blocks.moveToNextBlockStart("forwards", "more-indentation");
-    }
-}
-
-@registerCommand()
-class PrevInnerBlockCommand extends ExtensionCommand {
-    id = "codeFlea.prevInnerBlock";
-
-    execute() {
-        // blocks.moveToNextBlockStart("backwards", "more-indentation");
-    }
-}
-
-@registerCommand()
 class JumpCommand extends ExtensionCommand {
     id = "codeFlea.jump";
 
@@ -379,96 +280,6 @@ class ScrollToCursorCommand extends ExtensionCommand {
 
     execute() {
         editor.scrollToCursorAtCenter(this.container.manager.editor);
-    }
-}
-
-@registerCommand()
-class NearestInnerLineCommand extends ExtensionCommand {
-    id = "codeFlea.nearestInnerLine";
-
-    execute() {
-        // lines.moveToChangeOfIndentation("greaterThan", "nearest");
-    }
-}
-
-@registerCommand()
-class NearestOuterLineCommand extends ExtensionCommand {
-    id = "codeFlea.nearestOuterLine";
-
-    execute() {
-        // lines.moveToChangeOfIndentation("lessThan", "nearest");
-    }
-}
-
-@registerCommand()
-class NextInnerLineCommand extends ExtensionCommand {
-    id = "codeFlea.nextInnerLine";
-
-    execute() {
-        // lines.moveToChangeOfIndentation("greaterThan", "forwards");
-    }
-}
-
-@registerCommand()
-class PrevOuterLineCommand extends ExtensionCommand {
-    id = "codeFlea.prevOuterLine";
-
-    execute() {
-        // lines.moveToChangeOfIndentation("lessThan", "backwards");
-    }
-}
-
-@registerCommand()
-class NextSameLineCommand extends ExtensionCommand {
-    id = "codeFlea.nextSameLine";
-
-    execute() {
-        // lines.moveToNextLineSameLevel("forwards");
-    }
-}
-
-@registerCommand()
-class PrevSameLineCommand extends ExtensionCommand {
-    id = "codeFlea.prevSameLine";
-
-    execute() {
-        // lines.moveToNextLineSameLevel("backwards");
-    }
-}
-
-@registerCommand()
-class NextBlankLineCommand extends ExtensionCommand {
-    id = "codeFlea.nextBlankLine";
-
-    execute() {
-        // lines.moveCursorToNextBlankLine("forwards");
-    }
-}
-
-@registerCommand()
-class PrevBlankLineCommand extends ExtensionCommand {
-    id = "codeFlea.prevBlankLine";
-
-    execute() {
-        // lines.moveCursorToNextBlankLine("backwards");
-    }
-}
-
-@registerCommand()
-class PrevInterestingPointCommand extends ExtensionCommand {
-    id = "codeFlea.prevInterestingPoint";
-
-    execute() {
-        //points.nextInterestingPoint("backwards");
-    }
-}
-
-@registerCommand()
-class NextInterestingPointCommand extends ExtensionCommand {
-    id = "codeFlea.nextInterestingPoint";
-
-    execute() {
-        // points.nextInterestingPoint("forwards");
     }
 }
 

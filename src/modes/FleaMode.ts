@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as subjects from "../subjects/subjects";
-import EditMode from "./EditMode";
+import InsertMode from "./InsertMode";
 import ExtendMode from "./ExtendMode";
 import * as modes from "./modes";
 import * as editor from "../utils/editor";
@@ -8,9 +8,13 @@ import * as selections from "../utils/selectionsAndRanges";
 import * as common from "../common";
 import { NumHandler } from "../handlers/NumHandler";
 import SubjectBase from "../subjects/SubjectBase";
-import { SubjectActions } from "../subjects/SubjectActions";
+import { SubjectAction } from "../subjects/SubjectActions";
 
-export default class NavigateMode extends modes.EditorMode {
+export default class FleaMode extends modes.EditorMode {
+    private lastCommand:
+        | { commandName: SubjectAction; args: string[] }
+        | undefined;
+
     constructor(
         private readonly context: common.ExtensionContext,
         public readonly subject: SubjectBase,
@@ -21,7 +25,7 @@ export default class NavigateMode extends modes.EditorMode {
 
     equals(previousMode: modes.EditorMode): boolean {
         return (
-            previousMode instanceof NavigateMode &&
+            previousMode instanceof FleaMode &&
             previousMode.subject === this.subject
         );
     }
@@ -33,7 +37,7 @@ export default class NavigateMode extends modes.EditorMode {
             numHandler: NumHandler;
         }>
     ) {
-        return new NavigateMode(
+        return new FleaMode(
             args.context ?? this.context,
             args.subject ?? this.subject,
             args.numHandler ?? this.numHandler
@@ -45,7 +49,7 @@ export default class NavigateMode extends modes.EditorMode {
     ): Promise<modes.EditorMode> {
         switch (newMode.kind) {
             case "EDIT":
-                return new EditMode(this.context, this);
+                return new InsertMode(this.context, this);
 
             case "EXTEND":
                 return new ExtendMode(this.context, this, this.numHandler);
@@ -118,7 +122,7 @@ export default class NavigateMode extends modes.EditorMode {
         this.context.editor.revealRange(this.context.editor.selection);
     }
 
-    async executeSubjectCommand(command: keyof SubjectActions) {
+    async executeSubjectCommand(command: SubjectAction) {
         if (this.subject[command].length > 1) {
             throw new Error(
                 "Functions with multiple arguments are not supported"
