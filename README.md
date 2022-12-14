@@ -18,33 +18,19 @@ VS Code has excellent code navigation abilities for jumping to a particular file
 
 CodeFlea addresses this by giving simple, intuitive commands for moving the cursor around in a way that's applicable to any language, even written prose or Markdown! It accomplishes this by identifying and manipulating text objects such as words, lines and blocks in the file based on usage of indentation, whitespace and operators.
 
-![CodeFlea in action](https://raw.githubusercontent.com/Richiban/CodeFlea/main/docs/jump-interface.gif)
-
 # Basic operation
 
 CodeFlea is a modal extension (such as Vim or Helix), meaning that pressing a key will not enter text unless the editor is in **insert** mode.
 
-## Modes
-
 There are three modes in CodeFlea:
 
 -   **Flea** mode: the default mode. In this mode, the editor is in a state where it is ready to accept commands to move the cursor around.
--   **Insert** mode: in this mode, the editor is the "normal" VS Code state; it will accept text input and keyboard shortcuts as normal.
+-   **Insert** mode: in this mode the editor will accept text input and keyboard shortcuts as normal for VS Code.
 -   **Extend** mode: this is the same as **Flea** mode, except that each selection will be extended when a movement is made.
 
 ## Changing modes
 
-The default mode when opening a new file is **Flea** mode. The following table lists the various keybindings to enter insert mode:
-
-| Keybinding | Name      | Description                                              |
-| ---------- | --------- | -------------------------------------------------------- |
-| `a`        | `append`  | Insert at the end of each selection                      |
-| `p`        | `prepend` | Insert at the beginning of each selection                |
-| `,`        | `edit`    | Switch to **insert** mode, leaving each selection intact |
-| `/`        | `split`   | Insert at the midpoint of each selection                 |
-| `c`        | `change`  | Delete each selection and insert in its place            |
-
-Please note that, if the editor has multiple selections, these commands work for each selection simultaneously.
+The default mode when opening a new file is **Flea** mode. See the section on [keyboard shortcuts](#default-keybindings) for how to enter **Insert** mode.
 
 To return to **Flea** mode, press `,` then `.` in (very) quick succession.
 
@@ -68,6 +54,17 @@ Commands are available to:
 -   extend the selection to neighbouring objects
 -   swap neighbouring objects
 -   search for a particular object based on its first character
+-   jump to any visible object
+
+The editor will draw a border around the current selection(s) with a colour that corresponds to the current subject.
+
+| Subject | Colour                                                          | Border |
+| ------- | --------------------------------------------------------------- | ------ |
+| Line    | ![#8feb34](https://via.placeholder.com/15/8feb34/000000?text=+) | Solid  |
+| Word    | ![#964d4d](https://via.placeholder.com/15/964d4d/000000?text=+) | Solid  |
+| Inter   | ![#964d4d](https://via.placeholder.com/15/964d4d/000000?text=+) | Dotted |
+| Subword | ![#9900ff](https://via.placeholder.com/15/9900ff/000000?text=+) | Solid  |
+| Block   | ![#aba246](https://via.placeholder.com/15/aba246/000000?text=+) | Solid  |
 
 # Subjects in depth
 
@@ -121,9 +118,12 @@ Example 1: In the following example Typescript the beginning of each block has b
         }
 ```
 
-A block is defined as a sequence of lines that are either continuously joined to the block start (i.e. they are not separated by blank lines), or are indented further the first line of the block.
+A block is defined as a sequence of lines that are either:
 
-Due to the fact that CodeFlea is entirely based on whitespace and operators it should just work in any programming language, whether it's Javascript, C#, F#, Haskell, V, or Python:
+-   continuously joined to the block start (i.e. they are not separated by blank lines)
+-   indented further the block start
+
+Due to the fact that CodeFlea is entirely based on whitespace and operators it should just work in any programming language, whether it's Javascript, F#, Haskell, V, Python or others.
 
 Example 2, Python:
 
@@ -170,9 +170,11 @@ Example 3, Haskell:
 
 ```
 
-## Commands for navigating objects
+# Movements
 
-These movement commands are laid out on the QWERTY keyboard in the same layout as a normal arrow cluster:
+## Moving
+
+The basic movement commands are laid out on the QWERTY keyboard in the same way as a normal arrow cluster:
 
 ```
       ┌───┐                   ┌───┐
@@ -183,17 +185,52 @@ These movement commands are laid out on the QWERTY keyboard in the same layout a
 └───┘ └───┘ └───┘       └───┘ └───┘ └───┘
 ```
 
+## Searching
+
+By pressing `s` you will be prompted for the first character of the desired object. Once you have entered the first character, the selection will be moved to the first object that begins with that character. To search backwards the process is the same; just press `f` instead.
+
+## Jumping
+
+Pressing `t` will open the jump interface, allowing you to jump to any visible object. The jump interface is similar to EasyMotion in Vim, where each visible object will be given a _jump code_, and pressing the given key in the jump code will move the selection to that text object.
+
+![Jumping to a line](./docs/line_jump.gif)
+
+Words work a little differently; due to the sheer number of words that will be visible at any one time in the editor, jumping to a word is a two-step process. First, you will be asked for the first character of the desired word, and only once that character is entered will you be shown the jump codes for all the words that begin with that character.
+
+![Jumping to a word](./docs/word_jump.gif)
+
+# Editing
+
+## Deleting
+
+Press `d` to delete the current text object(s). This will remove the current selection(s) from the text document, as well as clean up any separating characters that are left behind.
+
+![Deleting a word](./docs/word_delete.gif)
+
+## Moving / swapping
+
+Text objects can be swapped with their neighbouring objects, meaning you can move text objects around without having to delete and re-insert them.
+
+In the case of words, this allows you to reorder arguments to a function or items in a list, for example:
+
+![Swapping words](./docs/word_swap.gif)
+
+By first changing the _subject_ to _Block_, we can reorder the methods of a class:
+
+![Swapping lines](./docs/block_swap.gif)
+
 # Default keybindings
 
 ## Changing modes
 
-| Default keybinding | Command ID | Description                                                  |
-| ------------------ | ---------- | ------------------------------------------------------------ |
-| `a`                | ``         | Insert at the end of the current selection                   |
-| `p`                | ``         | Insert at the beginning of the current selection             |
-| `,`                | ``         | Insert at the current position, leaving the selection intact |
-| `/`                | ``         | Insert at the midpoint of the current selection              |
-| `c`                | ``         | Delete the current selection and insert in its place         |
+| Default keybinding | Command ID                            | Description                                                  |
+| ------------------ | ------------------------------------- | ------------------------------------------------------------ |
+| `a`                | `codeFlea.changeToInsertModeAppend`   | Insert at the end of the current selection                   |
+| `p`                | `codeFlea.changeToInsertModePrepend`  | Insert at the beginning of the current selection             |
+| `,`                | `codeFlea.changeToInsertMode`         | Insert at the current position, leaving the selection intact |
+| `/`                | `codeFlea.changeToInsertModeMidPoint` | Insert at the midpoint of the current selection              |
+| `/`                | `codeFlea.changeToInsertModeSurround` | Insert at the midpoint of the current selection              |
+| `c`                | `codeFlea.changeToInsertModeAppend`   | Delete the current selection and insert in its place         |
 
 | Default keybinding          | Command ID | Description           |
 | --------------------------- | ---------- | --------------------- |
@@ -226,6 +263,7 @@ These movement commands are laid out on the QWERTY keyboard in the same layout a
 | `shift + ;`        |                                    | Go forwards                                           |
 | `s`                | `codeFlea.search`                  | Forward search of objects by their first character    |
 | `f`                | `codeFlea.searchBackwards`         | Backward search of objects by their first character   |
+| `t`                | `codeFlea.jump`                    | Jump to a particular object (see [Jumping](#jumping)) |
 | `l`                | `codeFlea.goToFirstSubjectInScope` | Move to the first object in current scope             |
 | `y`                | `codeFlea.goToLastSubjectInScope`  | Move to the last object in current scope              |
 | `j`                | `codeFlea.goToPrevOccurrence`      | Move to the next occurrence of the current object     |
@@ -274,7 +312,7 @@ These movement commands are laid out on the QWERTY keyboard in the same layout a
 -   The _split selection_ command is particularly useful for the _inter-word_ subject
 -   CodeFlea is compatible with the mouse. You can
     -   click on a text object to select it
-    -   drag to select (as normal) which will change the editor to **edit** mode
+    -   drag to select (as normal) which will change the editor to **insert** mode
 -   After conducting a _quick search_, you can press `enter` to repeat the search--moving the selection to the next search result
 
 # Development
