@@ -8,6 +8,7 @@ export default class BlockSubject extends SubjectBase {
     protected subjectIO = new BlockIO();
     public decorationType = BlockSubject.decorationType;
     readonly name = "BLOCK";
+    public readonly jumpPhaseType = "single-phase";
 
     public static decorationType = vscode.window.createTextEditorDecorationType(
         {

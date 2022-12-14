@@ -9,6 +9,7 @@ import * as common from "../common";
 import { NumHandler } from "../handlers/NumHandler";
 import SubjectBase from "../subjects/SubjectBase";
 import { SubjectAction } from "../subjects/SubjectActions";
+import JumpInterface from "../handlers/JumpInterface";
 
 export default class FleaMode extends modes.EditorMode {
     private lastCommand:
@@ -56,7 +57,7 @@ export default class FleaMode extends modes.EditorMode {
 
             case "NAVIGATE":
                 if (editor) {
-                    selections.collapseSelections(this.context.editor);
+                    selections.collapseSelections(this.context.editor, "start");
                 }
 
                 if (newMode.subjectName !== this.subject.name) {
@@ -101,9 +102,6 @@ export default class FleaMode extends modes.EditorMode {
         if (this.context.editor) {
             this.context.editor.options.cursorStyle =
                 vscode.TextEditorCursorStyle.UnderlineThin;
-
-            this.context.editor.options.lineNumbers =
-                vscode.TextEditorLineNumbersStyle.Relative;
         }
 
         vscode.commands.executeCommand(
@@ -200,6 +198,26 @@ export default class FleaMode extends modes.EditorMode {
 
         if (shiftedIndex !== -1) {
             return { number: shiftedIndex, shifted: true };
+        }
+    }
+
+    async jump(): Promise<void> {
+        const jumpLocations = this.subject
+            .iterAll(common.IterationDirection.alternate)
+            .map((range) => range.start);
+
+        const jumpInterface = new JumpInterface(this.context);
+
+        const jumpPosition = await jumpInterface.jump({
+            kind: this.subject.jumpPhaseType,
+            locations: jumpLocations,
+        });
+
+        if (jumpPosition) {
+            this.context.editor.selection =
+                selections.positionToSelection(jumpPosition);
+
+            await this.fixSelection();
         }
     }
 }

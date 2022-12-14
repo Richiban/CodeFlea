@@ -276,6 +276,28 @@ export default class Linqish<T> implements Iterable<T> {
         return result;
     }
 
+    find(f: (x: T) => boolean): T | undefined {
+        for (const x of this.iter) {
+            if (f(x)) {
+                return x;
+            }
+        }
+
+        return undefined;
+    }
+
+    findDefined<R>(f: (x: T) => R | undefined): R | undefined {
+        for (const x of this.iter) {
+            const y = f(x);
+
+            if (y) {
+                return y;
+            }
+        }
+
+        return undefined;
+    }
+
     tryLast(): T | undefined {
         let result = undefined;
 

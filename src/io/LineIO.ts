@@ -10,7 +10,9 @@ function iterAll(
     document: vscode.TextDocument,
     options: IterationOptions
 ): Linqish<vscode.Range> {
-    return lineUtils.iterLines(document, options).map((l) => l.range);
+    return lineUtils
+        .iterLines(document, options)
+        .map((l) => lineUtils.rangeWithoutIndentation(l));
 }
 
 function iterHorizontally(
@@ -42,32 +44,13 @@ function iterHorizontally(
     });
 }
 
-function search(
-    document: vscode.TextDocument,
-    searchString: common.Char,
-    options: IterationOptions
-): vscode.Range | undefined {
-    const allLines = lineUtils.iterLines(document, options);
-
-    return allLines
-        .filterMap((line) => {
-            if (
-                line.text
-                    .substring(line.firstNonWhitespaceCharacterIndex)
-                    .startsWith(searchString)
-            ) {
-                return line.range;
-            }
-        })
-        .tryFirst();
-}
-
 function getClosestRangeAt(
     document: vscode.TextDocument,
     position: vscode.Position
 ): vscode.Range {
     return document.lineAt(position.line).range;
 }
+
 export function swapHorizontally(
     document: vscode.TextDocument,
     edit: vscode.TextEditorEdit,

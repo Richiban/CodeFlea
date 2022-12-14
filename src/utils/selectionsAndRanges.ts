@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import * as common from "../common";
 import Linqish from "./Linqish";
 
-export type SelectionEndType = "start" | "end" | "midpoint";
+export type SelectionCollapsePoint = "start" | "end" | "midpoint" | "surround";
 
 export function getMidPoint(range: vscode.Range): vscode.Position {
     return new vscode.Position(
@@ -34,13 +34,22 @@ export function closerOf(
 
 export function collapseSelections(
     editor: vscode.TextEditor,
-    endType: SelectionEndType = "start"
+    endType: SelectionCollapsePoint
 ) {
-    tryMap(editor, (selection) =>
-        positionToRange(
-            endType === "midpoint" ? getMidPoint(selection) : selection[endType]
-        )
-    );
+    flatMap(editor, (selection) => {
+        if (endType === "surround") {
+            return [
+                positionToRange(selection.start),
+                positionToRange(selection.end),
+            ];
+        }
+
+        if (endType === "midpoint") {
+            return [positionToRange(getMidPoint(selection))];
+        }
+
+        return [positionToRange(selection[endType])];
+    });
 }
 
 export function tryMap(
@@ -65,9 +74,22 @@ export function tryMap(
 
 export function flatMap(
     editor: vscode.TextEditor,
-    mapper: (selection: vscode.Selection) => vscode.Selection[]
+    mapper: (selection: vscode.Selection) => (vscode.Selection | vscode.Range)[]
 ) {
-    editor.selections = editor.selections.flatMap(mapper);
+    editor.selections = editor.selections.flatMap((outerSelection) => {
+        return mapper(outerSelection).map((innerSelection) => {
+            if (!innerSelection) {
+                return outerSelection;
+            } else if (innerSelection instanceof vscode.Selection) {
+                return innerSelection;
+            } else {
+                return new vscode.Selection(
+                    innerSelection.end,
+                    innerSelection.start
+                );
+            }
+        });
+    });
 }
 
 export function expandToIncludeBlankLines(
@@ -107,6 +129,10 @@ export function positionToRange(point: vscode.Position): vscode.Range {
 
 export function rangeToSelection(range: vscode.Range): vscode.Selection {
     return new vscode.Selection(range.start, range.end);
+}
+
+export function positionToSelection(point: vscode.Position): vscode.Selection {
+    return new vscode.Selection(point, point);
 }
 
 export function wordRangeToPosition(

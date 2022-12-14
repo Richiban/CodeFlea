@@ -169,4 +169,8 @@ export default class CodeFleaManager {
 
         this.mode.fixSelection();
     }
+
+    async jump() {
+        await this.mode.jump();
+    }
 }

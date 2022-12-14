@@ -102,15 +102,9 @@ export default abstract class SubjectIOBase {
         options: IterationOptions
     ): vscode.Range | undefined {
         for (const wordRange of this.iterAll(document, options)) {
-            const charRange = new vscode.Range(
-                wordRange.start,
-                wordRange.start.translate({ characterDelta: 1 })
-            );
+            const char = editor.charAt(document, wordRange.start);
 
-            if (
-                document.getText(charRange).toLowerCase() ===
-                targetChar.toLowerCase()
-            ) {
+            if (char.toLowerCase() === targetChar.toLowerCase()) {
                 return wordRange;
             }
         }

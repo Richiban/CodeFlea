@@ -2,11 +2,13 @@ import * as vscode from "vscode";
 import LineIO, * as lines from "../io/LineIO";
 import * as selections from "../utils/selectionsAndRanges";
 import SubjectBase from "./SubjectBase";
+import * as common from "../common";
 
 export default class LineSubject extends SubjectBase {
     protected subjectIO = new LineIO();
     public decorationType = LineSubject.decorationType;
     readonly name = "LINE";
+    public readonly jumpPhaseType = "single-phase";
 
     public static decorationType = vscode.window.createTextEditorDecorationType(
         {

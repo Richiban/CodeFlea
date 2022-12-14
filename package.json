@@ -95,7 +95,7 @@
                 },
                 "codeFlea.jump.characters": {
                     "type": "string",
-                    "default": "k, j, d, f, l, s, a, h, g, i, o, n, u, r, v, c, w, e, x, m, b, p, q, t, y, z, K, J, D, F, L, S, A, H, G, I, O, N, U, R, V, C, W, E, X, M, B, P, Q, T, Y, Z"
+                    "default": "k, j, d, f, l, s, a, h, g, i, o, n, u, r, v, c, w, e, x, m, b, p, q, t, y, z, 1, 2, 3, 4, 5, 6, 7, 8, 9, K, J, D, F, L, S, A, H, G, N, U, R, E, M, B, P, Q, T, Y"
                 },
                 "codeFlea.jump.timeout": {
                     "type": "number",
@@ -288,6 +288,11 @@
             {
                 "key": "/",
                 "command": "codeFlea.changeToEditModeMidPoint",
+                "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "shift+/",
+                "command": "codeFlea.changeToEditModeSurround",
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
@@ -553,5 +558,5 @@
         "eslint": "^8.26.0",
         "typescript": "^4.8.4"
     },
-    "version": "2.0.0-preview5"
+    "version": "2.0.0-preview6"
 }

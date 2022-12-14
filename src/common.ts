@@ -1,5 +1,6 @@
 import { Config } from "./config";
 import * as vscode from "vscode";
+import Linqish from "./utils/Linqish";
 
 export type TextObject = vscode.Range;
 
@@ -15,9 +16,17 @@ export type Change = "greaterThan" | "lessThan";
 export const Direction = {
     backwards: "backwards",
     forwards: "forwards",
-};
+} as const;
 
 export type Direction = typeof Direction[keyof typeof Direction];
+
+export const IterationDirection = {
+    ...Direction,
+    alternate: "alternate",
+} as const;
+
+export type IterationDirection =
+    typeof IterationDirection[keyof typeof IterationDirection];
 
 export type RelativeIndentation =
     | "more-indentation"
@@ -27,7 +36,7 @@ export type RelativeIndentation =
 
 export type IndentationRequest = RelativeIndentation | "any-indentation";
 
-export type JumpLocations = JumpLocation[];
+export type JumpPhaseType = "single-phase" | "dual-phase";
 
 export type JumpLocation = {
     jumpCode: string;
@@ -46,10 +55,6 @@ export type Char = string & { length: 1 };
 
 export function opposite(direction: Direction) {
     return direction === "forwards" ? "backwards" : "forwards";
-}
-
-export function getJumpCodes(config: Config) {
-    return config.jump.characters.split(/[\s,]+/);
 }
 
 export function directionToDelta(direction: Direction) {

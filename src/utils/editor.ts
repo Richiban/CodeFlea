@@ -152,3 +152,12 @@ export function tryGetLineAt(editor: vscode.TextEditor, lineNumber: number) {
 
     return editor.document.lineAt(lineNumber);
 }
+
+export function charAt(
+    document: vscode.TextDocument,
+    position: vscode.Position
+): string {
+    return document.getText(
+        new vscode.Range(position, position.translate(0, 1))
+    );
+}

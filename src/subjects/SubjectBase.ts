@@ -12,6 +12,7 @@ export default abstract class SubjectBase implements SubjectActions {
     protected abstract subjectIO: SubjectIOBase;
     public abstract decorationType: vscode.TextEditorDecorationType;
     public abstract name: SubjectType;
+    public abstract jumpPhaseType: common.JumpPhaseType;
 
     async nextSubjectDown() {
         selections.tryMap(this.context.editor, (selection) =>
@@ -278,7 +279,21 @@ export default abstract class SubjectBase implements SubjectActions {
         return this.name === other.name;
     }
 
-    iterAll(direction: common.Direction): Linqish<vscode.Range> {
+    iterAll(direction: common.IterationDirection): Linqish<vscode.Range> {
+        if (direction === common.IterationDirection.alternate) {
+            return this.subjectIO
+                .iterAll(this.context.editor.document, {
+                    startingPosition: this.context.editor.selection,
+                    direction: "forwards",
+                })
+                .alternateWith(
+                    this.subjectIO.iterAll(this.context.editor.document, {
+                        startingPosition: this.context.editor.selection,
+                        direction: "backwards",
+                    })
+                );
+        }
+
         return this.subjectIO.iterAll(this.context.editor.document, {
             startingPosition: this.context.editor.selection,
             direction,
