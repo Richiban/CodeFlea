@@ -536,7 +536,7 @@
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
-                "key": "'",
+                "key": "t",
                 "command": "codeFlea.jump",
                 "when": "editorTextFocus && codeFlea.mode == 'NAVIGATE' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             }
@@ -558,5 +558,5 @@
         "eslint": "^8.26.0",
         "typescript": "^4.8.4"
     },
-    "version": "2.0.0-preview6"
+    "version": "2.0.0-preview7"
 }

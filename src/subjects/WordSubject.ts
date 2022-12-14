@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 import WordIO from "../io/WordIO";
 import SubjectBase from "./SubjectBase";
-import * as common from "../common";
 
 export default class WordSubject extends SubjectBase {
     protected subjectIO = new WordIO();
@@ -14,9 +13,6 @@ export default class WordSubject extends SubjectBase {
             border: "1px solid #964d4d;",
         }
     );
-
-    public static quickNumberDecoration =
-        vscode.window.createTextEditorDecorationType({});
 
     async firstSubjectInScope() {
         await vscode.commands.executeCommand("cursorHome");
