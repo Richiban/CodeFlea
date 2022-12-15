@@ -27,7 +27,7 @@ export default class NullMode extends EditorMode {
         );
 
         switch (newMode.kind) {
-            case "EDIT":
+            case "INSERT":
                 return new InsertMode(this.context, navigateMode);
 
             case "EXTEND":
@@ -37,7 +37,7 @@ export default class NullMode extends EditorMode {
                     defaultNumHandler
                 );
 
-            case "NAVIGATE":
+            case "FLEA":
                 return navigateMode;
         }
     }

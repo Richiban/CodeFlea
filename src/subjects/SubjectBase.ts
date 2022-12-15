@@ -14,7 +14,7 @@ export default abstract class SubjectBase implements SubjectActions {
     public abstract name: SubjectType;
     public abstract jumpPhaseType: common.JumpPhaseType;
 
-    async nextSubjectDown() {
+    async nextObjectDown() {
         selections.tryMap(this.context.editor, (selection) =>
             this.subjectIO
                 .iterVertically(this.context.editor.document, {
@@ -25,7 +25,7 @@ export default abstract class SubjectBase implements SubjectActions {
         );
     }
 
-    async nextSubjectRight() {
+    async nextObjectRight() {
         selections.tryMap(this.context.editor, (selection) =>
             this.subjectIO
                 .iterHorizontally(this.context.editor.document, {
@@ -36,7 +36,7 @@ export default abstract class SubjectBase implements SubjectActions {
         );
     }
 
-    async nextSubjectUp() {
+    async nextObjectUp() {
         selections.tryMap(this.context.editor, (selection) =>
             this.subjectIO
                 .iterVertically(this.context.editor.document, {
@@ -47,7 +47,7 @@ export default abstract class SubjectBase implements SubjectActions {
         );
     }
 
-    async nextSubjectLeft() {
+    async nextObjectLeft() {
         selections.tryMap(this.context.editor, (selection) =>
             this.subjectIO
                 .iterHorizontally(this.context.editor.document, {
@@ -58,43 +58,43 @@ export default abstract class SubjectBase implements SubjectActions {
         );
     }
 
-    async addSubjectUp(): Promise<void> {
+    async addObjectAbove(): Promise<void> {
         const existingSelections = this.context.editor.selections;
 
-        await this.nextSubjectUp();
+        await this.nextObjectUp();
 
         this.context.editor.selections =
             this.context.editor.selections.concat(existingSelections);
     }
 
-    async addSubjectDown() {
+    async addObjectBelow() {
         const existingSelections = this.context.editor.selections;
 
-        await this.nextSubjectDown();
+        await this.nextObjectDown();
 
         this.context.editor.selections =
             this.context.editor.selections.concat(existingSelections);
     }
 
-    async addSubjectLeft(): Promise<void> {
+    async addObjectToLeft(): Promise<void> {
         const existingSelections = this.context.editor.selections;
 
-        await this.nextSubjectLeft();
+        await this.nextObjectLeft();
 
         this.context.editor.selections =
             this.context.editor.selections.concat(existingSelections);
     }
 
-    async addSubjectRight() {
+    async addObjectToRight() {
         const existingSelections = this.context.editor.selections;
 
-        await this.nextSubjectRight();
+        await this.nextObjectRight();
 
         this.context.editor.selections =
             this.context.editor.selections.concat(existingSelections);
     }
 
-    async swapSubjectDown() {
+    async swapWithObjectBelow() {
         await this.context.editor.edit((e) => {
             selections.tryMap(this.context.editor, (selection) =>
                 this.subjectIO.swapVertically(
@@ -106,7 +106,7 @@ export default abstract class SubjectBase implements SubjectActions {
             );
         });
     }
-    async swapSubjectUp() {
+    async swapWithObjectAbove() {
         await this.context.editor.edit((e) => {
             selections.tryMap(this.context.editor, (selection) =>
                 this.subjectIO.swapVertically(
@@ -119,33 +119,45 @@ export default abstract class SubjectBase implements SubjectActions {
         });
     }
 
-    async swapSubjectLeft() {
+    async swapWithObjectToLeft() {
+        const newSelections: vscode.Selection[] = [];
+
         await this.context.editor.edit((e) => {
-            selections.tryMap(this.context.editor, (selection) =>
-                this.subjectIO.swapHorizontally(
+            for (const selection of this.context.editor.selections) {
+                const s = this.subjectIO.swapHorizontally(
                     this.context.editor.document,
                     e,
                     selection,
                     "backwards"
-                )
-            );
+                );
+
+                newSelections.push(new vscode.Selection(s.end, s.start));
+            }
         });
+
+        this.context.editor.selections = newSelections;
     }
 
-    async swapSubjectRight() {
+    async swapWithObjectToRight() {
+        const newSelections: vscode.Selection[] = [];
+
         await this.context.editor.edit((e) => {
-            selections.tryMap(this.context.editor, (selection) =>
-                this.subjectIO.swapHorizontally(
+            for (const selection of this.context.editor.selections) {
+                const s = this.subjectIO.swapHorizontally(
                     this.context.editor.document,
                     e,
                     selection,
                     "forwards"
-                )
-            );
+                );
+
+                newSelections.push(new vscode.Selection(s.end, s.start));
+            }
         });
+
+        this.context.editor.selections = newSelections;
     }
 
-    async deleteSubject() {
+    async deleteObject() {
         await this.context.editor.edit((e) => {
             for (const selection of this.context.editor.selections) {
                 this.subjectIO.deleteObject(
@@ -159,7 +171,7 @@ export default abstract class SubjectBase implements SubjectActions {
         this.fixSelection();
     }
 
-    async duplicateSubject() {
+    async duplicateObject() {
         await this.context.editor.edit((e) => {
             selections.tryMap(this.context.editor, (selection) =>
                 this.subjectIO.duplicate(
@@ -171,7 +183,7 @@ export default abstract class SubjectBase implements SubjectActions {
         });
     }
 
-    async firstSubjectInScope(): Promise<void> {
+    async firstObjectInScope(): Promise<void> {
         selections.tryMap(this.context.editor, (selection) =>
             this.subjectIO
                 .iterAll(this.context.editor.document, {
@@ -182,7 +194,7 @@ export default abstract class SubjectBase implements SubjectActions {
                 .tryLast()
         );
     }
-    async lastSubjectInScope(): Promise<void> {
+    async lastObjectInScope(): Promise<void> {
         selections.tryMap(this.context.editor, (selection) =>
             this.subjectIO
                 .iterAll(this.context.editor.document, {
@@ -212,25 +224,25 @@ export default abstract class SubjectBase implements SubjectActions {
         );
     }
 
-    async nextSubjectMatch() {
+    async nextOccurrenceOfObject() {
         await vscode.commands.executeCommand(
             "editor.action.moveSelectionToNextFindMatch"
         );
     }
 
-    async prevSubjectMatch() {
+    async prevOccurrenceOfObject() {
         await vscode.commands.executeCommand(
             "editor.action.moveSelectionToPreviousFindMatch"
         );
     }
 
-    async extendPrevSubjectMatch() {
+    async extendPrevOccurrenceOfObject() {
         await vscode.commands.executeCommand(
             "editor.action.addSelectionToPreviousFindMatch"
         );
     }
 
-    async extendNextSubjectMatch() {
+    async extendNextOccurrenceOfObject() {
         await vscode.commands.executeCommand(
             "editor.action.addSelectionToNextFindMatch"
         );

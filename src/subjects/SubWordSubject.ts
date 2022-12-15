@@ -15,19 +15,19 @@ export default class SubwordSubject extends SubjectBase {
         }
     );
 
-    async nextSubjectDown() {
+    async nextObjectDown() {
         await vscode.commands.executeCommand("cursorDown");
     }
 
-    async nextSubjectUp() {
+    async nextObjectUp() {
         await vscode.commands.executeCommand("cursorUp");
     }
 
-    async firstSubjectInScope() {
+    async firstObjectInScope() {
         await vscode.commands.executeCommand("cursorHome");
     }
 
-    async lastSubjectInScope() {
+    async lastObjectInScope() {
         await vscode.commands.executeCommand("cursorEnd");
     }
 }

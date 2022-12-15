@@ -29,9 +29,9 @@ export default class ExtendMode extends EditorMode {
 
     async changeTo(newMode: EditorModeChangeRequest): Promise<EditorMode> {
         switch (newMode.kind) {
-            case "EDIT":
+            case "INSERT":
                 return new InsertMode(this.context, this.wrappedMode);
-            case "NAVIGATE":
+            case "FLEA":
                 return this.wrappedMode;
             case "EXTEND":
                 if (newMode.subjectName !== this.wrappedMode.subject.name) {

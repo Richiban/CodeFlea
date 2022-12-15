@@ -11,7 +11,7 @@ import { linqish } from "../utils/Linqish";
 import SubjectIOBase, { IterationOptions } from "./SubjectIOBase";
 import * as editor from "../utils/editor";
 
-type CharClass = "word" | "operator";
+type CharClass = "word" | "operator" | "whitespace";
 
 function* enumerate(text: string) {
     var index = 0;
@@ -24,16 +24,13 @@ function* enumerate(text: string) {
 }
 
 function getCharClass(char: string): CharClass | undefined {
-    // if (char.length !== 1) {
-    //     return undefined;
-    // }
-
     if (char.match(/[a-zA-Z0-9]/)) {
         return "word";
     }
-    // if (char.match(/\s/)) {
-    //     return "whitespace";
-    // }
+
+    if (char.match(/\s/)) {
+        return "whitespace";
+    }
 
     return "operator";
 }
@@ -160,7 +157,7 @@ function iterAll(document: vscode.TextDocument, options: IterationOptions) {
                       ).filter(
                           (sw) =>
                               !isFirstLine ||
-                              sw.range.start > startingPosition.character
+                              sw.range.start >= startingPosition.character
                       )
                     : split(line.text, line.firstNonWhitespaceCharacterIndex)
                           .filter(

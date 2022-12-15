@@ -40,7 +40,7 @@ export default class CodeFleaManager {
 
         if (this.mode instanceof NullMode) {
             await this.changeMode({
-                kind: "NAVIGATE",
+                kind: "FLEA",
                 subjectName: "WORD",
             });
         }
@@ -83,7 +83,7 @@ export default class CodeFleaManager {
             event.selections.length === 1 &&
             !event.selections[0].isEmpty
         ) {
-            await this.changeMode({ kind: "EDIT" });
+            await this.changeMode({ kind: "INSERT" });
             return;
         }
 

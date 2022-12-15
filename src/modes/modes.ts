@@ -3,8 +3,8 @@ import { SubjectAction } from "../subjects/SubjectActions";
 import { SubjectType } from "../subjects/SubjectType";
 
 export type EditorModeChangeRequest =
-    | { kind: "EDIT" }
-    | { kind: "NAVIGATE" | "EXTEND"; subjectName: SubjectType };
+    | { kind: "INSERT" }
+    | { kind: "FLEA" | "EXTEND"; subjectName: SubjectType };
 
 export abstract class EditorMode implements vscode.Disposable {
     abstract equals(previousMode: EditorMode): boolean;

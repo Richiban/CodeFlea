@@ -16,7 +16,7 @@ export default class BlockSubject extends SubjectBase {
         }
     );
 
-    async firstSubjectInScope() {
+    async firstObjectInScope() {
         selections.tryMap(this.context.editor, (selection) =>
             this.subjectIO
                 .iterVertically(this.context.editor.document, {
@@ -28,7 +28,7 @@ export default class BlockSubject extends SubjectBase {
         );
     }
 
-    async lastSubjectInScope() {
+    async lastObjectInScope() {
         selections.tryMap(this.context.editor, (selection) =>
             this.subjectIO
                 .iterVertically(this.context.editor.document, {

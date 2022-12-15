@@ -3,31 +3,31 @@ import * as common from "../common";
 export type SubjectAction = keyof SubjectActions;
 
 export type SubjectActions = {
-    nextSubjectDown(): Promise<void>;
-    nextSubjectUp(): Promise<void>;
-    nextSubjectLeft(): Promise<void>;
-    nextSubjectRight(): Promise<void>;
+    nextObjectDown(): Promise<void>;
+    nextObjectUp(): Promise<void>;
+    nextObjectLeft(): Promise<void>;
+    nextObjectRight(): Promise<void>;
 
-    addSubjectDown(): Promise<void>;
-    addSubjectUp(): Promise<void>;
-    addSubjectLeft(): Promise<void>;
-    addSubjectRight(): Promise<void>;
+    addObjectBelow(): Promise<void>;
+    addObjectAbove(): Promise<void>;
+    addObjectToLeft(): Promise<void>;
+    addObjectToRight(): Promise<void>;
 
-    swapSubjectDown(): Promise<void>;
-    swapSubjectUp(): Promise<void>;
-    swapSubjectLeft(): Promise<void>;
-    swapSubjectRight(): Promise<void>;
+    swapWithObjectBelow(): Promise<void>;
+    swapWithObjectAbove(): Promise<void>;
+    swapWithObjectToLeft(): Promise<void>;
+    swapWithObjectToRight(): Promise<void>;
 
-    nextSubjectMatch(): Promise<void>;
-    prevSubjectMatch(): Promise<void>;
-    extendNextSubjectMatch(): Promise<void>;
-    extendPrevSubjectMatch(): Promise<void>;
+    nextOccurrenceOfObject(): Promise<void>;
+    prevOccurrenceOfObject(): Promise<void>;
+    extendNextOccurrenceOfObject(): Promise<void>;
+    extendPrevOccurrenceOfObject(): Promise<void>;
 
-    firstSubjectInScope(): Promise<void>;
-    lastSubjectInScope(): Promise<void>;
+    firstObjectInScope(): Promise<void>;
+    lastObjectInScope(): Promise<void>;
 
-    deleteSubject(): Promise<void>;
-    duplicateSubject(): Promise<void>;
+    deleteObject(): Promise<void>;
+    duplicateObject(): Promise<void>;
 
     search(target: common.Char): Promise<void>;
     searchBackwards(target: string): Promise<void>;

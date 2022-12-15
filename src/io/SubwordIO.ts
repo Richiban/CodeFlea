@@ -281,7 +281,7 @@ function getClosestRangeAt(
 }
 
 export default class SubwordIO extends SubjectIOBase {
-    deletableSeparators = /^[\s,.:=+\-*\/%]$/;
+    deletableSeparators = /^[\s,.:=+\-*\/%]+$/;
 
     getContainingObjectAt = getSubwordRangeAtPosition;
     getClosestObjectTo = getClosestRangeAt;

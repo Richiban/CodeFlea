@@ -28,7 +28,7 @@ export default class InsertMode extends EditorMode {
 
     async changeTo(newMode: EditorModeChangeRequest): Promise<EditorMode> {
         switch (newMode.kind) {
-            case "EDIT":
+            case "INSERT":
                 return this;
             case "EXTEND":
                 return new ExtendMode(
@@ -37,7 +37,7 @@ export default class InsertMode extends EditorMode {
                     defaultNumHandler(this.context)
                 );
 
-            case "NAVIGATE":
+            case "FLEA":
                 return this.previousNavigateMode;
         }
     }
@@ -87,19 +87,17 @@ export default class InsertMode extends EditorMode {
     clearUI(): void {}
 
     async setUI() {
-        this.context.statusBar.text = `Edit`;
+        this.context.statusBar.text = `Insert mode`;
 
         if (this.context.editor) {
             this.context.editor.options.cursorStyle =
                 vscode.TextEditorCursorStyle.Line;
-            this.context.editor.options.lineNumbers =
-                vscode.TextEditorLineNumbersStyle.On;
         }
 
         await vscode.commands.executeCommand(
             "setContext",
             "codeFlea.mode",
-            "EDIT"
+            "INSERT"
         );
     }
 

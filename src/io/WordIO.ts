@@ -156,7 +156,7 @@ export function swapVertically(
 }
 
 export default class WordIO extends SubjectIOBase {
-    deletableSeparators = /^[\s,.:=+\-*\/%]$/;
+    deletableSeparators = /^[\s,.:=+\-*\/%]+$/;
 
     getContainingObjectAt = getContainingWordAt;
     getClosestObjectTo = findWordClosestTo;

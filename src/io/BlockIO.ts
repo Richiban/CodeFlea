@@ -36,29 +36,6 @@ function lineIsBlockStart(
     return false;
 }
 
-function lineIsBlockEnd(
-    currentLine: vscode.TextLine,
-    nextLine: vscode.TextLine | undefined
-) {
-    if (!nextLine) {
-        return true;
-    }
-    if (currentLine.isEmptyOrWhitespace) {
-        return false;
-    }
-    if (lineUtils.lineIsStopLine(nextLine)) {
-        return true;
-    }
-    if (
-        lineUtils.getRelativeIndentation(currentLine, nextLine) ===
-        "less-indentation"
-    ) {
-        return true;
-    }
-
-    return false;
-}
-
 function iterBlockStarts(
     document: vscode.TextDocument,
     options: BlockIterationOptions
@@ -181,14 +158,6 @@ function findCorrespondingBlockEnd(
 
         if (current.isEmptyOrWhitespace) {
             continue;
-        }
-
-        if (
-            lineIsBlockEnd(prev, current) &&
-            relativeIndentation === "same-indentation"
-        ) {
-            candidate = current;
-            break;
         }
 
         if (lineIsBlockStart(prev, current)) {

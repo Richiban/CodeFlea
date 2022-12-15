@@ -56,32 +56,40 @@ export default class LineSubject extends SubjectBase {
         this.context.editor.revealRange(this.context.editor.selection);
     }
 
-    async nextSubjectUp() {
+    async nextObjectUp() {
         await vscode.commands.executeCommand("cursorUp");
         this.fixSelection();
     }
 
-    async nextSubjectDown() {
+    async nextObjectDown() {
         await vscode.commands.executeCommand("cursorDown");
         this.fixSelection();
     }
 
-    async addSubjectDown() {
+    async addObjectBelow() {
         await vscode.commands.executeCommand("editor.action.insertCursorBelow");
         this.fixSelection();
     }
 
-    async addSubjectUp() {
+    async addObjectAbove() {
         await vscode.commands.executeCommand("editor.action.insertCursorAbove");
         this.fixSelection();
     }
 
-    async changeSubject() {
-        await vscode.commands.executeCommand("deleteLeft");
+    async deleteObject() {
+        await vscode.commands.executeCommand("editor.action.deleteLines");
+        this.fixSelection();
     }
 
-    async deleteSubject() {
-        await vscode.commands.executeCommand("editor.action.deleteLines");
+    async swapWithObjectAbove(): Promise<void> {
+        await vscode.commands.executeCommand("editor.action.moveLinesUpAction");
+        this.fixSelection();
+    }
+
+    async swapWithObjectBelow(): Promise<void> {
+        await vscode.commands.executeCommand(
+            "editor.action.moveLinesDownAction"
+        );
         this.fixSelection();
     }
 }

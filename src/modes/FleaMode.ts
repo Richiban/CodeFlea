@@ -49,13 +49,13 @@ export default class FleaMode extends modes.EditorMode {
         newMode: modes.EditorModeChangeRequest
     ): Promise<modes.EditorMode> {
         switch (newMode.kind) {
-            case "EDIT":
+            case "INSERT":
                 return new InsertMode(this.context, this);
 
             case "EXTEND":
                 return new ExtendMode(this.context, this, this.numHandler);
 
-            case "NAVIGATE":
+            case "FLEA":
                 if (editor) {
                     selections.collapseSelections(this.context.editor, "start");
                 }
@@ -97,18 +97,14 @@ export default class FleaMode extends modes.EditorMode {
     }
 
     setUI() {
-        this.context.statusBar.text = `Navigate (${this.subject?.name})`;
+        this.context.statusBar.text = `Flea mode (${this.subject?.name})`;
 
         if (this.context.editor) {
             this.context.editor.options.cursorStyle =
                 vscode.TextEditorCursorStyle.UnderlineThin;
         }
 
-        vscode.commands.executeCommand(
-            "setContext",
-            "codeFlea.mode",
-            "NAVIGATE"
-        );
+        vscode.commands.executeCommand("setContext", "codeFlea.mode", "FLEA");
 
         this.numHandler.setUI(this.subject);
 
