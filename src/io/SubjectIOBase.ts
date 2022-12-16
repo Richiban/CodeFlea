@@ -32,7 +32,7 @@ export default abstract class SubjectIOBase {
                 startingPosition: position,
                 direction: "forwards",
             }).tryFirst(),
-        ]).minBy((w) => Math.abs(w!.end.line - position.line));
+        ]).tryMinBy((w) => Math.abs(w!.end.line - position.line));
 
         return wordRange ?? new vscode.Range(position, position);
     }
@@ -89,7 +89,7 @@ export default abstract class SubjectIOBase {
                     return { separatingText, separatingRange };
                 }
             })
-            .minBy((x) => x.separatingText.length);
+            .tryMinBy((x) => x.separatingText.length);
 
         if (bestMatch) {
             return bestMatch.separatingRange;

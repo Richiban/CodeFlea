@@ -110,7 +110,9 @@ function findWordClosestTo(
             startingPosition: position,
             direction: "forwards",
         }).tryFirst(),
-    ]).minBy((w) => Math.abs(w!.end.line - position.line));
+    ])
+        .filterUndefined()
+        .tryMinBy((w) => Math.abs(w.end.line - position.line));
 
     return wordRange ?? new vscode.Range(position, position);
 }

@@ -19,14 +19,14 @@ export function closerOf(
 ): vscode.Range {
     if (a.start.line !== b.start.line) {
         return (
-            new Linqish([a, b]).minBy((r) =>
+            new Linqish([a, b]).tryMinBy((r) =>
                 Math.abs(startingPosition.line - r.start.line)
             ) ?? a
         );
     }
 
     return (
-        new Linqish([a, b]).minBy((r) =>
+        new Linqish([a, b]).tryMinBy((r) =>
             Math.abs(startingPosition.character - r.start.character)
         ) ?? a
     );

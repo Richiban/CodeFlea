@@ -1,4 +1,4 @@
-export default class Linqish<T> implements Iterable<T> {
+export default class Linqish<out T> implements Iterable<T> {
     constructor(private iter: Iterable<T>) {}
 
     [Symbol.iterator](): Iterator<T, any, undefined> {
@@ -23,7 +23,7 @@ export default class Linqish<T> implements Iterable<T> {
         );
     }
 
-    minBy(selector: (item: T) => number): T | undefined {
+    tryMinBy(selector: (item: T) => number): T | undefined {
         const iter = this.iter;
 
         let currentBestItem = undefined;
@@ -308,6 +308,7 @@ export default class Linqish<T> implements Iterable<T> {
         return result;
     }
 }
+
 export function linqish<T>(f: () => Iterable<T>) {
     return new Linqish(f());
 }
