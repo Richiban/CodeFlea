@@ -35,7 +35,9 @@ function iterVertically(
                     const newPosition = currentPosition.with(
                         nextLine.lineNumber
                     );
-                    const wordRange = findWordClosestTo(document, newPosition);
+                    const wordRange = findWordClosestTo(document, newPosition, {
+                        limitToCurrentLine: true,
+                    });
 
                     if (wordRange) {
                         yield wordRange;
@@ -59,10 +61,18 @@ function iterAll(
             options.direction
         );
 
+        const startingLine = searchPosition.line;
         const diff = options.direction === "forwards" ? 2 : -2;
         let first = true;
 
         do {
+            if (
+                options.restrictToCurrentScope &&
+                searchPosition.line !== startingLine
+            ) {
+                return undefined;
+            }
+
             const wordRange = document.getWordRangeAtPosition(searchPosition);
 
             if (wordRange) {
@@ -99,16 +109,25 @@ function getContainingWordAt(
 
 function findWordClosestTo(
     document: vscode.TextDocument,
-    position: vscode.Position
+    position: vscode.Position,
+    options: { limitToCurrentLine: boolean }
 ): vscode.Range {
+    const wordUnderCursor = document.getWordRangeAtPosition(position);
+
+    if (wordUnderCursor) {
+        return wordUnderCursor;
+    }
+
     const wordRange = new Linqish([
         iterAll(document, {
             startingPosition: position,
             direction: "backwards",
+            restrictToCurrentScope: options.limitToCurrentLine,
         }).tryFirst(),
         iterAll(document, {
             startingPosition: position,
             direction: "forwards",
+            restrictToCurrentScope: options.limitToCurrentLine,
         }).tryFirst(),
     ])
         .filterUndefined()
@@ -161,7 +180,15 @@ export default class WordIO extends SubjectIOBase {
     deletableSeparators = /^[\s,.:=+\-*\/%]+$/;
 
     getContainingObjectAt = getContainingWordAt;
-    getClosestObjectTo = findWordClosestTo;
+
+    getClosestObjectTo(
+        document: vscode.TextDocument,
+        position: vscode.Position
+    ) {
+        return findWordClosestTo(document, position, {
+            limitToCurrentLine: false,
+        });
+    }
 
     iterAll = iterAll;
     iterVertically = iterVertically;

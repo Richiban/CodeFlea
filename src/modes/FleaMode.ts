@@ -116,7 +116,7 @@ export default class FleaMode extends modes.EditorMode {
         this.context.editor.revealRange(this.context.editor.selection);
     }
 
-    async executeSubjectCommand(command: SubjectAction) {
+    async executeSubjectCommand(command: SubjectAction): Promise<void> {
         if (this.subject[command].length > 1) {
             throw new Error(
                 "Functions with multiple arguments are not supported"
@@ -127,15 +127,19 @@ export default class FleaMode extends modes.EditorMode {
 
         if (this.subject[command].length === 1) {
             const input = await editor.inputBoxChar(command);
+
+            if (input === undefined) {
+                return;
+            }
+
             args = [input];
         }
 
         this.lastCommand = { commandName: command, args: args };
 
-        const { needsUiRefresh: refreshNeeded } =
-            await this.numHandler.handleCommandExecution(async () => {
-                await (this.subject[command] as any)(...args);
-            });
+        await this.numHandler.handleCommandExecution(async () => {
+            await (this.subject[command] as any)(...args);
+        });
 
         this.setUI();
     }
@@ -199,7 +203,10 @@ export default class FleaMode extends modes.EditorMode {
 
     async jump(): Promise<void> {
         const jumpLocations = this.subject
-            .iterAll(common.IterationDirection.alternate)
+            .iterAll(
+                common.IterationDirection.alternate,
+                this.context.editor.visibleRanges[0]
+            )
             .map((range) => range.start);
 
         const jumpInterface = new JumpInterface(this.context);

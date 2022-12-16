@@ -53,8 +53,10 @@ export function quickCommandPicker(
     });
 }
 
-export function inputBoxChar(placeholder?: string): Promise<string> {
-    return new Promise((resolve, reject) => {
+export function inputBoxChar(
+    placeholder?: string
+): Promise<string | undefined> {
+    return new Promise((resolve) => {
         const inputBox = vscode.window.createInputBox();
 
         inputBox.placeholder = placeholder;
@@ -65,7 +67,7 @@ export function inputBoxChar(placeholder?: string): Promise<string> {
         });
 
         inputBox.onDidHide(() => {
-            reject();
+            resolve(undefined);
             inputBox.dispose();
         });
 

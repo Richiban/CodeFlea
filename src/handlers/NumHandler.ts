@@ -32,7 +32,7 @@ export abstract class NumHandler {
     abstract handleNumKey(number: number, shifted: boolean): Promise<void>;
     abstract handleCommandExecution(
         command: () => Promise<void>
-    ): Promise<{ needsUiRefresh: boolean }>;
+    ): Promise<void>;
     abstract clearUI(): void;
 
     abstract setUI(subject: SubjectBase): void;
@@ -76,8 +76,15 @@ export class QuickJumpNumHandler extends NumHandler {
     }
 
     setUI(subject: SubjectBase): void {
-        this.forwardRanges = subject.iterAll("forwards").take(10).toArray();
-        this.backwardRanges = subject.iterAll("backwards").take(10).toArray();
+        this.forwardRanges = subject
+            .iterAll("forwards", this.context.editor.visibleRanges[0])
+            .take(10)
+            .toArray();
+
+        this.backwardRanges = subject
+            .iterAll("backwards", this.context.editor.visibleRanges[0])
+            .take(10)
+            .toArray();
 
         const decorations = new Linqish(this.forwardRanges!)
             .skip(1)
@@ -101,10 +108,8 @@ export class QuickJumpNumHandler extends NumHandler {
 
     async handleCommandExecution(
         repeatCommand: () => Promise<void>
-    ): Promise<{ needsUiRefresh: boolean }> {
+    ): Promise<void> {
         await repeatCommand();
-
-        return { needsUiRefresh: false };
     }
 }
 
@@ -139,20 +144,13 @@ export class CommandMultiplierNumHandler extends NumHandler {
         }
     }
 
-    async handleCommandExecution(
-        command: () => Promise<void>
-    ): Promise<{ needsUiRefresh: boolean }> {
-        let needsUiRefresh = false;
-
+    async handleCommandExecution(command: () => Promise<void>): Promise<void> {
         while (this.commandMultiplier >= 1) {
             await command();
             this.commandMultiplier--;
-            needsUiRefresh = true;
         }
 
         this.commandMultiplier = 1;
-
-        return { needsUiRefresh };
     }
 
     setUI(): void {}

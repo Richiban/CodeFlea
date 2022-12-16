@@ -291,17 +291,22 @@ export default abstract class SubjectBase implements SubjectActions {
         return this.name === other.name;
     }
 
-    iterAll(direction: common.IterationDirection): Linqish<vscode.Range> {
+    iterAll(
+        direction: common.IterationDirection,
+        bounds: vscode.Range
+    ): Linqish<vscode.Range> {
         if (direction === common.IterationDirection.alternate) {
             return this.subjectIO
                 .iterAll(this.context.editor.document, {
                     startingPosition: this.context.editor.selection,
                     direction: "forwards",
+                    bounds,
                 })
                 .alternateWith(
                     this.subjectIO.iterAll(this.context.editor.document, {
                         startingPosition: this.context.editor.selection,
                         direction: "backwards",
+                        bounds,
                     })
                 );
         }

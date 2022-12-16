@@ -29,11 +29,11 @@ export default class LineSubject extends SubjectBase {
             );
 
             return new vscode.Selection(
+                endLine.range.end,
                 new vscode.Position(
                     startLine.lineNumber,
                     startLine.firstNonWhitespaceCharacterIndex
-                ),
-                endLine.range.end
+                )
             );
         });
 

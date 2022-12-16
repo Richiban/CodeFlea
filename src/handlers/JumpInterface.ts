@@ -18,13 +18,13 @@ function createDecorationOption(decorationRange: vscode.Range, text: string) {
     };
 }
 
+const jumpCodeDecorationType = vscode.window.createTextEditorDecorationType({});
+
 export default class JumpInterface {
     private jumpCodes: string[];
-    private decorationType;
 
     constructor(private readonly context: common.ExtensionContext) {
         this.jumpCodes = context.config.jump.characters.split(/[\s,]+/);
-        this.decorationType = vscode.window.createTextEditorDecorationType({});
     }
 
     async jump(jumpLocations: {
@@ -36,6 +36,10 @@ export default class JumpInterface {
                 const targetChar = await editor.inputBoxChar(
                     "Enter the first character"
                 );
+
+                if (!targetChar) {
+                    return undefined;
+                }
 
                 const remainingLocations = jumpLocations.locations.filterMap(
                     (p) => {
@@ -68,6 +72,10 @@ export default class JumpInterface {
 
                 this.removeJumpCodes();
 
+                if (!targetChar) {
+                    return undefined;
+                }
+
                 return this.findMatch(codedLocations, targetChar);
             }
         }
@@ -87,7 +95,7 @@ export default class JumpInterface {
     }
 
     private removeJumpCodes() {
-        this.context.editor.setDecorations(this.decorationType, []);
+        this.context.editor.setDecorations(jumpCodeDecorationType, []);
     }
 
     private drawJumpCodes(
@@ -100,6 +108,6 @@ export default class JumpInterface {
             )
         );
 
-        this.context.editor.setDecorations(this.decorationType, decorations);
+        this.context.editor.setDecorations(jumpCodeDecorationType, decorations);
     }
 }
