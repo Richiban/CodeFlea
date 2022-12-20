@@ -100,6 +100,19 @@ export const registeredCommands: ExtensionCommand[] = [
         },
     },
     {
+        id: "codeFlea.changeToPreviousSubject",
+        execute: async (manager) => {},
+    },
+    {
+        id: "codeFlea.changeToBracketSubject",
+        execute: async (manager) => {
+            manager.changeMode({
+                kind: "FLEA",
+                subjectName: "BRACKETS",
+            });
+        },
+    },
+    {
         id: "codeFlea.changeToWordSubject",
         execute: async (manager: CodeFleaManager) => {
             manager.changeMode({

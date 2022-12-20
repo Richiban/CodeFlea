@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as common from "../common";
-import Linqish from "../utils/Linqish";
+import Enumerable from "../utils/Enumerable";
 import * as lineUtils from "../utils/lines";
 import {
     closerOf,
@@ -106,8 +106,8 @@ function getSubwordRangeAtPosition(
 function iterSubwords(
     document: vscode.TextDocument,
     options: IterationOptions
-): Linqish<vscode.Range> {
-    return new Linqish<vscode.Range>(
+): Enumerable<vscode.Range> {
+    return new Enumerable<vscode.Range>(
         (function* () {
             let isFirstLine = true;
             const startingPosition = wordRangeToPosition(
@@ -205,8 +205,8 @@ function expandSelectionToSubwords(
 function iterVertically(
     document: vscode.TextDocument,
     options: IterationOptions
-): Linqish<vscode.Range> {
-    return new Linqish<vscode.Range>(
+): Enumerable<vscode.Range> {
+    return new Enumerable<vscode.Range>(
         (function* () {
             let isFirstLine = true;
             const startingPosition = wordRangeToPosition(

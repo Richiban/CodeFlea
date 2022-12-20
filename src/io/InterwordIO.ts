@@ -1,13 +1,13 @@
 import * as vscode from "vscode";
 import * as common from "../common";
-import Linqish from "../utils/Linqish";
+import Enumerable from "../utils/Enumerable";
 import * as lineUtils from "../utils/lines";
 import {
     closerOf,
     positionToRange,
     wordRangeToPosition as rangeToPosition,
 } from "../utils/selectionsAndRanges";
-import { linqish } from "../utils/Linqish";
+import { enumerable } from "../utils/Enumerable";
 import SubjectIOBase, { IterationOptions } from "./SubjectIOBase";
 import * as editor from "../utils/editor";
 
@@ -36,7 +36,7 @@ function getCharClass(char: string): CharClass | undefined {
 }
 
 function split(text: string, startingCharacter: number): common.SubTextRange[] {
-    return linqish(function* () {
+    return enumerable(function* () {
         let prevCharClass: CharClass | undefined = undefined;
         let current: { text: string; startIndex: number } | undefined;
 
@@ -138,7 +138,7 @@ function getClosestRangeTo(
 }
 
 function iterAll(document: vscode.TextDocument, options: IterationOptions) {
-    return linqish(function* () {
+    return enumerable(function* () {
         let isFirstLine = true;
         const startingPosition = rangeToPosition(
             options.startingPosition,
@@ -203,8 +203,8 @@ function findBest(
 function iterVertically(
     document: vscode.TextDocument,
     options: IterationOptions
-): Linqish<vscode.Range> {
-    return new Linqish<vscode.Range>(
+): Enumerable<vscode.Range> {
+    return new Enumerable<vscode.Range>(
         (function* () {
             const startingPosition = rangeToPosition(
                 options.startingPosition,

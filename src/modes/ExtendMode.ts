@@ -1,5 +1,5 @@
 import * as common from "../common";
-import Linqish from "../utils/Linqish";
+import Enumerable from "../utils/Enumerable";
 import * as vscode from "vscode";
 import * as subjects from "../subjects/subjects";
 import InsertMode from "./InsertMode";
@@ -105,7 +105,7 @@ export default class ExtendMode extends EditorMode {
     async executeSubjectCommand(command: SubjectAction): Promise<void> {
         await this.wrappedMode.executeSubjectCommand(command);
 
-        const newSelections = new Linqish(this.anchors)
+        const newSelections = new Enumerable(this.anchors)
             .zipWith(this.context.editor.selections)
             .map(([a, b]) => {
                 const newRange = a.union(b);

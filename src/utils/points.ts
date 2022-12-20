@@ -1,5 +1,5 @@
 import { Direction } from "../common";
-import Linqish, { linqish } from "./Linqish";
+import Enumerable, { enumerable } from "./Enumerable";
 import * as vscode from "vscode";
 import { iterLines, lineIsStopLine } from "./lines";
 
@@ -78,8 +78,8 @@ export function getInterestingPoints(
     editor: vscode.TextEditor,
     startPosition: vscode.Position,
     direction: Direction = "forwards"
-): Linqish<vscode.Position> {
-    return linqish(function* () {
+): Enumerable<vscode.Position> {
+    return enumerable(function* () {
         const document = editor.document;
 
         if (!startPosition || !document) {

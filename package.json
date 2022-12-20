@@ -281,6 +281,11 @@
                 "when": "editorTextFocus && codeFlea.mode == 'FLEA' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
+                "key": "k",
+                "command": "codeFlea.changeToBracketSubject",
+                "when": "editorTextFocus && codeFlea.mode == 'FLEA' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
                 "key": "a",
                 "command": "codeFlea.changeToInsertModeAppend",
                 "when": "editorTextFocus && codeFlea.mode == 'FLEA' || editorTextFocus && codeFlea.mode == 'EXTEND'"
@@ -378,11 +383,11 @@
             {
                 "key": "escape",
                 "command": "codeFlea.changeToFleaModeDefault",
-                "when": "textInputFocus && codeFlea.mode == 'INSERT' && !parameterHintsVisible && !cancellableOperation && !notificationToastsVisible && !messageVisible && !actionWidgetVisible && !inlineSuggestionVisible && !inlineSuggestionVisible"
+                "when": "textInputFocus && codeFlea.mode == 'INSERT' && !editorHasMultipleSelections && !parameterHintsVisible && !cancellableOperation && !notificationToastsVisible && !messageVisible && !actionWidgetVisible && !inlineSuggestionVisible && !inlineSuggestionVisible"
             },
             {
                 "key": "escape",
-                "command": "codeFlea.changeToInsertMode",
+                "command": "codeFlea.changeToPreviousSubject",
                 "when": "editorTextFocus && codeFlea.mode == 'FLEA'"
             },
             {

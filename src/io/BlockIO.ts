@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as common from "../common";
-import Linqish from "../utils/Linqish";
+import Enumerable from "../utils/Enumerable";
 import * as lines from "./LineIO";
 import * as lineUtils from "../utils/lines";
 import {
@@ -39,8 +39,8 @@ function lineIsBlockStart(
 function iterBlockStarts(
     document: vscode.TextDocument,
     options: BlockIterationOptions
-): Linqish<vscode.Position> {
-    return new Linqish(
+): Enumerable<vscode.Position> {
+    return new Enumerable(
         (function* () {
             options = <typeof options>{
                 indentationLevel: "same-indentation",
@@ -183,7 +183,7 @@ function getContainingBlock(
 function iterVertically(
     document: vscode.TextDocument,
     options: IterationOptions
-): Linqish<vscode.Range> {
+): Enumerable<vscode.Range> {
     return iterBlockStarts(document, {
         ...options,
         indentationLevel: "same-indentation",
@@ -193,7 +193,7 @@ function iterVertically(
 function iterHorizontally(
     document: vscode.TextDocument,
     options: IterationOptions
-): Linqish<vscode.Range> {
+): Enumerable<vscode.Range> {
     const indentation =
         options.direction === common.Direction.forwards
             ? "more-indentation"
@@ -208,7 +208,7 @@ function iterHorizontally(
 function iterAll(
     document: vscode.TextDocument,
     options: IterationOptions
-): Linqish<vscode.Range> {
+): Enumerable<vscode.Range> {
     return iterBlockStarts(document, {
         ...options,
         indentationLevel: "any-indentation",

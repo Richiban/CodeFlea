@@ -3,7 +3,7 @@ import * as selections from "../utils/selectionsAndRanges";
 import * as common from "../common";
 import { SubjectActions } from "./SubjectActions";
 import { SubjectType } from "./SubjectType";
-import Linqish from "../utils/Linqish";
+import Enumerable from "../utils/Enumerable";
 import SubjectIOBase from "../io/SubjectIOBase";
 
 export default abstract class SubjectBase implements SubjectActions {
@@ -294,7 +294,7 @@ export default abstract class SubjectBase implements SubjectActions {
     iterAll(
         direction: common.IterationDirection,
         bounds: vscode.Range
-    ): Linqish<vscode.Range> {
+    ): Enumerable<vscode.Range> {
         if (direction === common.IterationDirection.alternate) {
             return this.subjectIO
                 .iterAll(this.context.editor.document, {

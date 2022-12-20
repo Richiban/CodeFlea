@@ -1,4 +1,4 @@
-export default class Linqish<out T> implements Iterable<T> {
+export default class Enumerable<out T> implements Iterable<T> {
     constructor(private iter: Iterable<T>) {}
 
     [Symbol.iterator](): Iterator<T, any, undefined> {
@@ -9,10 +9,10 @@ export default class Linqish<out T> implements Iterable<T> {
         return this.skip(number).tryFirst();
     }
 
-    counted(): Linqish<readonly [T, number]> {
+    counted(): Enumerable<readonly [T, number]> {
         const iter = this.iter;
 
-        return new Linqish(
+        return new Enumerable(
             (function* () {
                 let count = 0;
                 for (const item of iter) {
@@ -43,10 +43,10 @@ export default class Linqish<out T> implements Iterable<T> {
         return currentBestItem;
     }
 
-    skip(numToSkip: number): Linqish<T> {
+    skip(numToSkip: number): Enumerable<T> {
         const iter = this.iter;
 
-        return new Linqish(
+        return new Enumerable(
             (function* () {
                 let skipped = 0;
 
@@ -61,10 +61,10 @@ export default class Linqish<out T> implements Iterable<T> {
         );
     }
 
-    take(count: number): Linqish<T> {
+    take(count: number): Enumerable<T> {
         const iter = this.iter;
 
-        return new Linqish(
+        return new Enumerable(
             (function* () {
                 let numRemaining = Math.max(0, count);
 
@@ -81,10 +81,10 @@ export default class Linqish<out T> implements Iterable<T> {
         );
     }
 
-    pairwise(): Linqish<readonly [T, T]> {
+    pairwise(): Enumerable<readonly [T, T]> {
         const iter = this.iter;
 
-        return new Linqish(
+        return new Enumerable(
             (function* () {
                 let previous = undefined;
 
@@ -99,10 +99,10 @@ export default class Linqish<out T> implements Iterable<T> {
         );
     }
 
-    map<R>(f: (x: T) => R): Linqish<R> {
+    map<R>(f: (x: T) => R): Enumerable<R> {
         const iter = this.iter;
 
-        return new Linqish(
+        return new Enumerable(
             (function* () {
                 for (const x of iter) {
                     yield f(x);
@@ -111,10 +111,10 @@ export default class Linqish<out T> implements Iterable<T> {
         );
     }
 
-    takeWhile(f: (x: T) => boolean): Linqish<T> {
+    takeWhile(f: (x: T) => boolean): Enumerable<T> {
         const iter = this.iter;
 
-        return new Linqish(
+        return new Enumerable(
             (function* () {
                 for (const x of iter) {
                     if (f(x) === false) {
@@ -127,11 +127,11 @@ export default class Linqish<out T> implements Iterable<T> {
         );
     }
 
-    zipWith<T2>(iter2: Iterable<T2>): Linqish<readonly [T, T2]> {
+    zipWith<T2>(iter2: Iterable<T2>): Enumerable<readonly [T, T2]> {
         const i1 = this.iter[Symbol.iterator]();
         const i2 = iter2[Symbol.iterator]();
 
-        return new Linqish(
+        return new Enumerable(
             (function* () {
                 while (true) {
                     const lResult = i1.next();
@@ -150,7 +150,7 @@ export default class Linqish<out T> implements Iterable<T> {
     concat(iter2: Iterable<T>) {
         const iter = this.iter;
 
-        return new Linqish(
+        return new Enumerable(
             (function* () {
                 for (const item of iter) {
                     yield item;
@@ -166,7 +166,7 @@ export default class Linqish<out T> implements Iterable<T> {
     filter(f: (x: T) => boolean) {
         const iter = this.iter;
 
-        return new Linqish(
+        return new Enumerable(
             (function* () {
                 for (const x of iter) {
                     if (f(x)) {
@@ -184,7 +184,7 @@ export default class Linqish<out T> implements Iterable<T> {
     filterMap<R>(f: (x: T) => R | undefined) {
         const iter = this.iter;
 
-        return new Linqish(
+        return new Enumerable(
             (function* () {
                 for (const x of iter) {
                     const r = f(x);
@@ -196,11 +196,11 @@ export default class Linqish<out T> implements Iterable<T> {
         );
     }
 
-    alternateWith<U>(iter2: Iterable<U>): Linqish<T | U> {
+    alternateWith<U>(iter2: Iterable<U>): Enumerable<T | U> {
         const i1 = this.iter[Symbol.iterator]();
         const i2 = iter2[Symbol.iterator]();
 
-        return new Linqish(
+        return new Enumerable(
             (function* () {
                 let currentIterator: Iterator<T | U> = i1;
 
@@ -238,7 +238,22 @@ export default class Linqish<out T> implements Iterable<T> {
         );
     }
 
-    fold<State>(f: (x: T, state: State) => State, seed: State) {
+    scan<State>(f: (x: T, y: State) => State, seed: State): Enumerable<State> {
+        const iter = this.iter;
+
+        return new Enumerable(
+            (function* () {
+                let result = seed;
+
+                for (const x of iter) {
+                    result = f(x, result);
+                    yield result;
+                }
+            })()
+        );
+    }
+
+    fold<State>(f: (x: T, state: State) => State, seed: State): State {
         const iter = this.iter;
 
         let state = seed;
@@ -309,8 +324,8 @@ export default class Linqish<out T> implements Iterable<T> {
     }
 }
 
-export function linqish<T>(f: () => Iterable<T>) {
-    return new Linqish(f());
+export function enumerable<T>(f: () => Iterable<T>) {
+    return new Enumerable(f());
 }
 
-linqish.empty = new Linqish((function* () {})());
+enumerable.empty = new Enumerable((function* () {})());

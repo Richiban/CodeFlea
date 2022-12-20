@@ -1,6 +1,6 @@
 import * as common from "../common";
 import * as editor from "../utils/editor";
-import Linqish from "../utils/Linqish";
+import Enumerable from "../utils/Enumerable";
 import * as vscode from "vscode";
 import * as ranges from "../utils/selectionsAndRanges";
 
@@ -29,7 +29,7 @@ export default class JumpInterface {
 
     async jump(jumpLocations: {
         kind: common.JumpPhaseType;
-        locations: Linqish<vscode.Position>;
+        locations: Enumerable<vscode.Position>;
     }): Promise<vscode.Position | undefined> {
         switch (jumpLocations.kind) {
             case "dual-phase": {

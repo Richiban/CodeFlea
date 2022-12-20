@@ -2,14 +2,14 @@ import * as vscode from "vscode";
 import * as common from "../common";
 import * as lineUtils from "../utils/lines";
 import { getNextLineOfChangeOfIndentation } from "../utils/lines";
-import Linqish, { linqish } from "../utils/Linqish";
+import Enumerable, { enumerable } from "../utils/Enumerable";
 import { wordRangeToPosition as rangeToPosition } from "../utils/selectionsAndRanges";
 import SubjectIOBase, { IterationOptions } from "./SubjectIOBase";
 
 function iterAll(
     document: vscode.TextDocument,
     options: IterationOptions
-): Linqish<vscode.Range> {
+): Enumerable<vscode.Range> {
     return lineUtils
         .iterLines(document, options)
         .map((l) => lineUtils.rangeWithoutIndentation(l));
@@ -18,8 +18,8 @@ function iterAll(
 function iterHorizontally(
     document: vscode.TextDocument,
     options: IterationOptions
-): Linqish<vscode.Range> {
-    return linqish(function* () {
+): Enumerable<vscode.Range> {
+    return enumerable(function* () {
         let currentLine: vscode.TextLine | undefined = document.lineAt(
             rangeToPosition(options.startingPosition, options.direction)
         );

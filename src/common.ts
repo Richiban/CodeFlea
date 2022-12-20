@@ -1,6 +1,6 @@
 import { Config } from "./config";
 import * as vscode from "vscode";
-import Linqish from "./utils/Linqish";
+import Enumerable from "./utils/Enumerable";
 
 export type TextObject = vscode.Range;
 

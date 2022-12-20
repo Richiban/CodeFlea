@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as common from "../common";
-import Linqish from "./Linqish";
+import Enumerable from "./Enumerable";
 
 export type SelectionCollapsePoint = "start" | "end" | "midpoint" | "surround";
 
@@ -19,15 +19,36 @@ export function closerOf(
 ): vscode.Range {
     if (a.start.line !== b.start.line) {
         return (
-            new Linqish([a, b]).tryMinBy((r) =>
+            new Enumerable([a, b]).tryMinBy((r) =>
                 Math.abs(startingPosition.line - r.start.line)
             ) ?? a
         );
     }
 
     return (
-        new Linqish([a, b]).tryMinBy((r) =>
+        new Enumerable([a, b]).tryMinBy((r) =>
             Math.abs(startingPosition.character - r.start.character)
+        ) ?? a
+    );
+}
+
+export function closerPositionOf(
+    document: vscode.TextDocument,
+    startingPosition: vscode.Position,
+    a: vscode.Position | undefined,
+    b: vscode.Position | undefined
+): vscode.Position | undefined {
+    if (!a) {
+        return b;
+    }
+
+    if (!b) {
+        return a;
+    }
+
+    return (
+        new Enumerable([a, b]).tryMinBy((r) =>
+            Math.abs(document.offsetAt(startingPosition) - document.offsetAt(r))
         ) ?? a
     );
 }

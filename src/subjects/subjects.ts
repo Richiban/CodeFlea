@@ -6,6 +6,7 @@ import LineSubject from "./LineSubject";
 import SubwordSubject from "./SubWordSubject";
 import WordSubject from "./WordSubject";
 import InterwordSubject from "./InterwordSubject";
+import BracketSubject from "./BracketSubject";
 
 export function createFrom(
     context: common.ExtensionContext,
@@ -22,5 +23,7 @@ export function createFrom(
             return new BlockSubject(context);
         case "INTERWORD":
             return new InterwordSubject(context);
+        case "BRACKETS":
+            return new BracketSubject(context);
     }
 }

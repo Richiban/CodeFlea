@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as common from "../common";
-import Linqish from "../utils/Linqish";
+import Enumerable from "../utils/Enumerable";
 import * as editor from "../utils/editor";
 
 export type IterationOptions = {
@@ -23,7 +23,7 @@ export default abstract class SubjectIOBase {
         document: vscode.TextDocument,
         position: vscode.Position
     ): common.TextObject {
-        const wordRange = new Linqish([
+        const wordRange = new Enumerable([
             this.iterAll(document, {
                 startingPosition: position,
                 direction: "backwards",
@@ -40,15 +40,15 @@ export default abstract class SubjectIOBase {
     abstract iterAll(
         document: vscode.TextDocument,
         options: IterationOptions
-    ): Linqish<common.TextObject>;
+    ): Enumerable<common.TextObject>;
     abstract iterHorizontally(
         document: vscode.TextDocument,
         options: IterationOptions
-    ): Linqish<common.TextObject>;
+    ): Enumerable<common.TextObject>;
     abstract iterVertically(
         document: vscode.TextDocument,
         options: IterationOptions
-    ): Linqish<common.TextObject>;
+    ): Enumerable<common.TextObject>;
 
     getSeparatingText(
         document: vscode.TextDocument,
@@ -74,7 +74,7 @@ export default abstract class SubjectIOBase {
             ? new vscode.Range(object.end, nextObject.start)
             : undefined;
 
-        const bestMatch = new Linqish([
+        const bestMatch = new Enumerable([
             separatingTextRangeBefore,
             separatingTextRangeAfter,
         ])

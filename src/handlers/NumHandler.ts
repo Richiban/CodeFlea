@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as common from "../common";
-import Linqish from "../utils/Linqish";
+import Enumerable from "../utils/Enumerable";
 import SubjectBase from "../subjects/SubjectBase";
 import * as ranges from "../utils/selectionsAndRanges";
 
@@ -86,11 +86,11 @@ export class QuickJumpNumHandler extends NumHandler {
             .take(10)
             .toArray();
 
-        const decorations = new Linqish(this.forwardRanges!)
+        const decorations = new Enumerable(this.forwardRanges!)
             .skip(1)
             .zipWith([1, 2, 3, 4, 5, 6, 7, 8, 9, 0])
             .concat(
-                new Linqish(this.backwardRanges!).zipWith([
+                new Enumerable(this.backwardRanges!).zipWith([
                     1, 2, 3, 4, 5, 6, 7, 8, 9, 0,
                 ])
             )
