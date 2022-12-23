@@ -166,7 +166,8 @@ function getLastPositionIn(document: vscode.TextDocument) {
 
 function iterRight(
     document: vscode.TextDocument,
-    startingPosition: vscode.Position | vscode.Range
+    startingPosition: vscode.Position | vscode.Range,
+    inclusive: boolean
 ) {
     const bounds =
         startingPosition instanceof vscode.Range
@@ -189,10 +190,17 @@ function iterRight(
                 );
 
                 if (rightBracket) {
-                    yield new vscode.Range(
-                        position.translate(0, 1),
-                        rightBracket.position
-                    );
+                    if (inclusive) {
+                        yield new vscode.Range(
+                            position,
+                            rightBracket.position.translate(0, 1)
+                        );
+                    } else {
+                        yield new vscode.Range(
+                            position.translate(0, 1),
+                            rightBracket.position
+                        );
+                    }
                 }
             }
         }
@@ -201,7 +209,8 @@ function iterRight(
 
 function iterLeft(
     document: vscode.TextDocument,
-    startingPosition: vscode.Position | vscode.Range
+    startingPosition: vscode.Position | vscode.Range,
+    inclusive: boolean
 ): Enumerable<vscode.Range> {
     startingPosition = rangeToPosition(startingPosition, "backwards");
 
@@ -219,7 +228,11 @@ function iterLeft(
         }).tryElementAt(2);
 
         if (characters) {
-            const object = getContainingObjectAt(document, characters.position);
+            const object = getContainingObjectAt(
+                document,
+                characters.position,
+                inclusive
+            );
 
             if (object) {
                 yield object;
@@ -230,7 +243,8 @@ function iterLeft(
 
 function getContainingObjectAt(
     document: vscode.TextDocument,
-    position: vscode.Position
+    position: vscode.Position,
+    inclusive: boolean
 ): vscode.Range | undefined {
     const leftBracket = getLeftBracket(document, position);
 
@@ -245,15 +259,23 @@ function getContainingObjectAt(
         return undefined;
     }
 
-    return new vscode.Range(
-        leftBracket.position.translate(0, 1),
-        rightBracket.position
-    );
+    if (inclusive) {
+        return new vscode.Range(
+            leftBracket.position,
+            rightBracket.position.translate(0, 1)
+        );
+    } else {
+        return new vscode.Range(
+            leftBracket.position.translate(0, 1),
+            rightBracket.position
+        );
+    }
 }
 
 function getClosestObjectTo(
     document: vscode.TextDocument,
-    position: vscode.Position
+    position: vscode.Position,
+    inclusive: boolean
 ): vscode.Range {
     const leftBracket = iterCharacters(document, {
         startingPosition: position,
@@ -288,13 +310,15 @@ function getClosestObjectTo(
         ) ?? position;
 
     return (
-        getContainingObjectAt(document, bestMatch) ?? positionToRange(bestMatch)
+        getContainingObjectAt(document, bestMatch, inclusive) ??
+        positionToRange(bestMatch)
     );
 }
 
 function iterAll(
     document: vscode.TextDocument,
-    options: IterationOptions
+    options: IterationOptions,
+    inclusive: boolean
 ): Enumerable<vscode.Range> {
     return enumerable(function* () {
         for (const { char, position } of iterCharacters(document, {
@@ -308,10 +332,17 @@ function iterAll(
                 );
 
                 if (rightBracket) {
-                    yield new vscode.Range(
-                        position.translate(0, 1),
-                        rightBracket.position
-                    );
+                    if (inclusive) {
+                        yield new vscode.Range(
+                            position,
+                            rightBracket.position.translate(0, 1)
+                        );
+                    } else {
+                        yield new vscode.Range(
+                            position.translate(0, 1),
+                            rightBracket.position
+                        );
+                    }
                 }
             }
         }
@@ -320,18 +351,20 @@ function iterAll(
 
 function iterHorizontally(
     document: vscode.TextDocument,
-    options: IterationOptions
+    options: IterationOptions,
+    inclusive: boolean
 ): Enumerable<vscode.Range> {
     if (options.direction === "forwards") {
-        return iterRight(document, options.startingPosition);
+        return iterRight(document, options.startingPosition, inclusive);
     } else {
-        return iterLeft(document, options.startingPosition);
+        return iterLeft(document, options.startingPosition, inclusive);
     }
 }
 
 function iterVertically(
     document: vscode.TextDocument,
-    options: IterationOptions
+    options: IterationOptions,
+    inclusive: boolean
 ): Enumerable<vscode.Range> {
     const startingPosition = rangeToPosition(
         options.startingPosition,
@@ -350,7 +383,8 @@ function iterVertically(
             if (bracketsToLookFor.includes(char)) {
                 const containingObject = getContainingObjectAt(
                     document,
-                    position
+                    position,
+                    inclusive
                 );
 
                 if (containingObject) {
@@ -364,9 +398,33 @@ function iterVertically(
 export default class BracketIO extends SubjectIOBase {
     deletableSeparators = /^[\s,.:=+\-*\/%]+$/;
 
-    getContainingObjectAt = getContainingObjectAt;
-    getClosestObjectTo = getClosestObjectTo;
-    iterAll = iterAll;
-    iterHorizontally = iterHorizontally;
-    iterVertically = iterVertically;
+    constructor(private inclusive: boolean) {
+        super();
+    }
+
+    getContainingObjectAt(
+        document: vscode.TextDocument,
+        position: vscode.Position
+    ) {
+        return getContainingObjectAt(document, position, this.inclusive);
+    }
+
+    getClosestObjectTo(
+        document: vscode.TextDocument,
+        position: vscode.Position
+    ) {
+        return getClosestObjectTo(document, position, this.inclusive);
+    }
+
+    iterAll(document: vscode.TextDocument, options: IterationOptions) {
+        return iterAll(document, options, this.inclusive);
+    }
+
+    iterHorizontally(document: vscode.TextDocument, options: IterationOptions) {
+        return iterHorizontally(document, options, this.inclusive);
+    }
+
+    iterVertically(document: vscode.TextDocument, options: IterationOptions) {
+        return iterVertically(document, options, this.inclusive);
+    }
 }

@@ -11,16 +11,25 @@ import { SubjectAction } from "../subjects/SubjectActions";
 export default class ExtendMode extends EditorMode {
     private readonly wrappedMode: FleaMode;
     private readonly anchors: vscode.Selection[] = [];
+    private actives: readonly vscode.Selection[] = [];
+
+    readonly cursorStyle = vscode.TextEditorCursorStyle.BlockOutline;
+    readonly name = "EXTEND";
+    readonly decorationType;
+    get statusBarText(): string {
+        return `Extend (${this.wrappedMode.subject.name})`;
+    }
 
     constructor(
         private readonly context: common.ExtensionContext,
-        previousMode: FleaMode,
-        private readonly numHandler: NumHandler
+        previousMode: FleaMode
     ) {
         super();
 
         this.wrappedMode = previousMode;
+        this.decorationType = this.wrappedMode.decorationType;
         this.anchors = [...this.context.editor.selections];
+        this.actives = [...this.context.editor.selections];
     }
 
     async fixSelection() {
@@ -34,13 +43,16 @@ export default class ExtendMode extends EditorMode {
             case "FLEA":
                 return this.wrappedMode;
             case "EXTEND":
+                if (!newMode.subjectName) {
+                    throw new Error("No subject name provided");
+                }
+
                 if (newMode.subjectName !== this.wrappedMode.subject.name) {
                     await vscode.commands.executeCommand("cancelSelection");
 
                     return new FleaMode(
                         this.context,
-                        subjects.createFrom(this.context, newMode.subjectName),
-                        this.numHandler
+                        subjects.createFrom(this.context, newMode.subjectName)
                     );
                 }
 
@@ -48,23 +60,17 @@ export default class ExtendMode extends EditorMode {
                     case "WORD":
                         return new FleaMode(
                             this.context,
-                            subjects.createFrom(this.context, "SUBWORD"),
-                            this.numHandler
+                            subjects.createFrom(this.context, "SUBWORD")
                         );
                     case "SUBWORD":
                         return new FleaMode(
                             this.context,
-                            subjects.createFrom(this.context, "WORD"),
-                            this.numHandler
+                            subjects.createFrom(this.context, "WORD")
                         );
                 }
 
                 return this;
         }
-    }
-
-    changeNumHandler(): EditorMode {
-        return this.with({ numHandler: this.numHandler.change() });
     }
 
     with(
@@ -76,8 +82,7 @@ export default class ExtendMode extends EditorMode {
     ) {
         return new ExtendMode(
             args.context ?? this.context,
-            args.wrappedMode ?? this.wrappedMode,
-            args.numHandler ?? this.numHandler
+            args.wrappedMode ?? this.wrappedMode
         );
     }
 
@@ -103,17 +108,22 @@ export default class ExtendMode extends EditorMode {
     }
 
     async executeSubjectCommand(command: SubjectAction): Promise<void> {
+        this.context.editor.selections = this.actives;
         await this.wrappedMode.executeSubjectCommand(command);
+        this.actives = this.context.editor.selections;
 
-        const newSelections = new Enumerable(this.anchors)
+        this.context.editor.selections = new Enumerable(this.anchors)
             .zipWith(this.context.editor.selections)
-            .map(([a, b]) => {
-                const newRange = a.union(b);
-                return new vscode.Selection(newRange.end, newRange.start);
+            .map(([anchor, active]) => {
+                const newRange = anchor.union(active);
+
+                if (anchor.start.isBefore(active.start)) {
+                    return new vscode.Selection(newRange.start, newRange.end);
+                } else {
+                    return new vscode.Selection(newRange.end, newRange.start);
+                }
             })
             .toArray();
-
-        this.context.editor.selections = newSelections;
     }
 
     async repeatSubjectCommand() {}

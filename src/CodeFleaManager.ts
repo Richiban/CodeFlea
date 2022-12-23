@@ -10,11 +10,13 @@ import { SubjectAction } from "./subjects/SubjectActions";
 import { EditorMode, EditorModeChangeRequest } from "./modes/modes";
 import NullMode from "./modes/NullMode";
 import InsertMode from "./modes/InsertMode";
+import { createDefaultNumHandler, NumHandler } from "./handlers/NumHandler";
 
 export default class CodeFleaManager {
     private mode: EditorMode;
     public statusBar: vscode.StatusBarItem;
     public editor: vscode.TextEditor = undefined!;
+    private numHandler: NumHandler;
 
     constructor(public config: Config) {
         this.statusBar = vscode.window.createStatusBarItem(
@@ -26,10 +28,12 @@ export default class CodeFleaManager {
         this.mode = new NullMode(this);
 
         this.statusBar.show();
+
+        this.numHandler = createDefaultNumHandler(this);
     }
 
     async changeEditor(editor: vscode.TextEditor | undefined) {
-        this.mode.clearUI();
+        this.clearUI();
 
         if (!editor) {
             this.mode = new NullMode(this);
@@ -45,22 +49,31 @@ export default class CodeFleaManager {
             });
         }
 
-        this.mode.setUI();
+        this.setUI();
+    }
+
+    clearUI() {
+        this.statusBar.text = "";
+        // this.editor.options.cursorStyle = vscode.TextEditorCursorStyle.Line;
+
+        if (this.mode.decorationType) {
+            this.editor.setDecorations(this.mode.decorationType, []);
+        }
     }
 
     async changeMode(newMode: EditorModeChangeRequest) {
-        this.mode.clearUI();
+        this.clearUI();
 
         this.mode = await this.mode.changeTo(newMode);
 
-        this.mode.setUI();
+        this.setUI();
         this.mode.fixSelection();
     }
 
     async changeNumHandler() {
-        this.mode.clearUI();
-        this.mode = this.mode.changeNumHandler();
-        this.mode.setUI();
+        this.clearUI();
+        this.numHandler = this.numHandler.change();
+        this.setUI();
     }
 
     async executeSubjectCommand(command: SubjectAction) {
@@ -75,6 +88,13 @@ export default class CodeFleaManager {
     async onDidChangeTextEditorSelection(
         event: vscode.TextEditorSelectionChangeEvent
     ) {
+        if (this.mode?.decorationType) {
+            this.editor.setDecorations(
+                this.mode.decorationType,
+                this.editor.selections
+            );
+        }
+
         if (event.kind === vscode.TextEditorSelectionChangeKind.Command) return;
         if (this.mode instanceof InsertMode) return;
 
@@ -88,18 +108,25 @@ export default class CodeFleaManager {
         }
 
         this.mode.fixSelection();
-        this.mode.setUI();
+        this.setUI();
     }
 
-    onCharTyped(typed: { text: string }) {
-        const newMode = this.mode.onCharTyped(typed);
+    setUI() {
+        this.statusBar.text = this.mode.statusBarText;
 
-        if (newMode) {
-            this.mode.clearUI();
-            this.mode = newMode;
-            this.mode.setUI();
-            this.mode.fixSelection();
+        if (this.editor) {
+            this.editor.options.cursorStyle = this.mode.cursorStyle;
         }
+
+        vscode.commands.executeCommand(
+            "setContext",
+            "codeFlea.mode",
+            this.mode.name
+        );
+
+        // this.numHandler.setUI(this.subject);
+
+        this.editor.revealRange(this.editor.selection);
     }
 
     async openSpaceMenu() {

@@ -4,4 +4,5 @@ export type SubjectType =
     | "SUBWORD"
     | "BLOCK"
     | "INTERWORD"
-    | "BRACKETS";
+    | "BRACKETS"
+    | "BRACKETS_INCLUSIVE";

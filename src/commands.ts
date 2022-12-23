@@ -173,6 +173,14 @@ export const registeredCommands: ExtensionCommand[] = [
         },
     },
     {
+        id: "codeFlea.changeToFleaModeLast",
+        execute: async (manager: CodeFleaManager) => {
+            manager.changeMode({
+                kind: "FLEA",
+            });
+        },
+    },
+    {
         id: "codeFlea.changeToExtendMode",
         execute: async (manager: CodeFleaManager) => {
             manager.changeMode({
@@ -306,12 +314,6 @@ export const registeredCommands: ExtensionCommand[] = [
             await vscode.commands.executeCommand(
                 "editor.action.insertLineBefore"
             );
-        },
-    },
-    {
-        id: "type",
-        execute: async (manager: CodeFleaManager, typed: { text: string }) => {
-            manager.onCharTyped(typed);
         },
     },
     {

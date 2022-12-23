@@ -4,7 +4,7 @@ import Enumerable from "../utils/Enumerable";
 import SubjectBase from "../subjects/SubjectBase";
 import * as ranges from "../utils/selectionsAndRanges";
 
-export function defaultNumHandler(context: common.ExtensionContext) {
+export function createDefaultNumHandler(context: common.ExtensionContext) {
     return new CommandMultiplierNumHandler(context);
 }
 

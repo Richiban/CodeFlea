@@ -4,9 +4,14 @@ import ExtendMode from "./ExtendMode";
 import * as common from "../common";
 import { EditorMode, EditorModeChangeRequest } from "./modes";
 import FleaMode from "./FleaMode";
-import { defaultNumHandler as createDefaultNumHandler } from "../handlers/NumHandler";
+import { createDefaultNumHandler as createDefaultNumHandler } from "../handlers/NumHandler";
 
 export default class NullMode extends EditorMode {
+    readonly decorationType = undefined;
+    readonly cursorStyle = undefined;
+    readonly name = "NULL";
+    readonly statusBarText = "Initialising...";
+
     constructor(private readonly context: common.ExtensionContext) {
         super();
     }
@@ -20,30 +25,18 @@ export default class NullMode extends EditorMode {
     async changeTo(newMode: EditorModeChangeRequest): Promise<EditorMode> {
         const defaultSubject = createFrom(this.context, "WORD");
         const defaultNumHandler = createDefaultNumHandler(this.context);
-        const navigateMode = new FleaMode(
-            this.context,
-            defaultSubject,
-            defaultNumHandler
-        );
+        const navigateMode = new FleaMode(this.context, defaultSubject);
 
         switch (newMode.kind) {
             case "INSERT":
                 return new InsertMode(this.context, navigateMode);
 
             case "EXTEND":
-                return new ExtendMode(
-                    this.context,
-                    navigateMode,
-                    defaultNumHandler
-                );
+                return new ExtendMode(this.context, navigateMode);
 
             case "FLEA":
                 return navigateMode;
         }
-    }
-
-    changeNumHandler(): EditorMode {
-        return this;
     }
 
     setUI() {

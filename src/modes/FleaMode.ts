@@ -16,10 +16,21 @@ export default class FleaMode extends modes.EditorMode {
         | { commandName: SubjectAction; args: string[] }
         | undefined;
 
+    readonly cursorStyle = vscode.TextEditorCursorStyle.UnderlineThin;
+    readonly name = "FLEA";
+
+    get decorationType(): vscode.TextEditorDecorationType {
+        return this.subject.decorationType;
+    }
+
+    get statusBarText(): string {
+        const subjectText = subjects.toDisplayName(this.subject?.name);
+        return `Flea mode (${subjectText})`;
+    }
+
     constructor(
         private readonly context: common.ExtensionContext,
-        public readonly subject: SubjectBase,
-        private readonly numHandler: NumHandler
+        public readonly subject: SubjectBase
     ) {
         super();
     }
@@ -27,7 +38,7 @@ export default class FleaMode extends modes.EditorMode {
     equals(previousMode: modes.EditorMode): boolean {
         return (
             previousMode instanceof FleaMode &&
-            previousMode.subject === this.subject
+            previousMode.subject.equals(this.subject)
         );
     }
 
@@ -40,8 +51,7 @@ export default class FleaMode extends modes.EditorMode {
     ) {
         return new FleaMode(
             args.context ?? this.context,
-            args.subject ?? this.subject,
-            args.numHandler ?? this.numHandler
+            args.subject ?? this.subject
         );
     }
 
@@ -53,11 +63,15 @@ export default class FleaMode extends modes.EditorMode {
                 return new InsertMode(this.context, this);
 
             case "EXTEND":
-                return new ExtendMode(this.context, this, this.numHandler);
+                return new ExtendMode(this.context, this);
 
             case "FLEA":
                 if (editor) {
                     selections.collapseSelections(this.context.editor, "start");
+                }
+
+                if (!newMode.subjectName) {
+                    return this;
                 }
 
                 if (newMode.subjectName !== this.subject.name) {
@@ -81,40 +95,31 @@ export default class FleaMode extends modes.EditorMode {
                         return this.with({
                             subject: subjects.createFrom(this.context, "WORD"),
                         });
+                    case "BRACKETS":
+                        return this.with({
+                            subject: subjects.createFrom(
+                                this.context,
+                                "BRACKETS_INCLUSIVE"
+                            ),
+                        });
+                    case "BRACKETS_INCLUSIVE":
+                        return this.with({
+                            subject: subjects.createFrom(
+                                this.context,
+                                "BRACKETS"
+                            ),
+                        });
                 }
 
                 return this;
         }
     }
 
-    changeNumHandler(): modes.EditorMode {
-        return this.with({ numHandler: this.numHandler.change() });
-    }
-
     clearUI() {
         this.subject.clearUI();
-        this.numHandler.clearUI();
     }
 
-    setUI() {
-        this.context.statusBar.text = `Flea mode (${this.subject?.name})`;
-
-        if (this.context.editor) {
-            this.context.editor.options.cursorStyle =
-                vscode.TextEditorCursorStyle.UnderlineThin;
-        }
-
-        vscode.commands.executeCommand("setContext", "codeFlea.mode", "FLEA");
-
-        this.numHandler.setUI(this.subject);
-
-        this.context.editor.setDecorations(
-            this.subject.decorationType,
-            this.context.editor.selections
-        );
-
-        this.context.editor.revealRange(this.context.editor.selection);
-    }
+    setUI() {}
 
     async executeSubjectCommand(command: SubjectAction): Promise<void> {
         if (this.subject[command].length > 1) {
@@ -137,9 +142,7 @@ export default class FleaMode extends modes.EditorMode {
 
         this.lastCommand = { commandName: command, args: args };
 
-        await this.numHandler.handleCommandExecution(async () => {
-            await (this.subject[command] as any)(...args);
-        });
+        await (this.subject[command] as any)(...args);
 
         this.setUI();
     }
@@ -162,43 +165,8 @@ export default class FleaMode extends modes.EditorMode {
         );
     }
 
-    onCharTyped(typed: { text: string }): modes.EditorMode {
-        const parsed = this.tryParseNumber(typed.text);
-
-        if (!parsed) {
-            vscode.commands.executeCommand("default:type", typed);
-            return this;
-        }
-
-        this.numHandler.handleNumKey(parsed.number, parsed.shifted);
-
-        return this;
-    }
-
     async fixSelection() {
         await this.subject.fixSelection();
-    }
-
-    private tryParseNumber(
-        text: string
-    ): { number: number; shifted: boolean } | undefined {
-        if (text.length !== 1) {
-            return undefined;
-        }
-
-        const regularNums = "0123456789";
-        const shiftedNums = ")!@#$%^&*(";
-
-        const regularIndex = regularNums.indexOf(text);
-        const shiftedIndex = shiftedNums.indexOf(text);
-
-        if (regularIndex !== -1) {
-            return { number: regularIndex, shifted: false };
-        }
-
-        if (shiftedIndex !== -1) {
-            return { number: shiftedIndex, shifted: true };
-        }
     }
 
     async jump(): Promise<void> {
