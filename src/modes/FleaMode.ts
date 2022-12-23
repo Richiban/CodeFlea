@@ -24,8 +24,7 @@ export default class FleaMode extends modes.EditorMode {
     }
 
     get statusBarText(): string {
-        const subjectText = subjects.toDisplayName(this.subject?.name);
-        return `Flea mode (${subjectText})`;
+        return `Flea mode (${this.subject.displayName})`;
     }
 
     constructor(
@@ -115,12 +114,6 @@ export default class FleaMode extends modes.EditorMode {
         }
     }
 
-    clearUI() {
-        this.subject.clearUI();
-    }
-
-    setUI() {}
-
     async executeSubjectCommand(command: SubjectAction): Promise<void> {
         if (this.subject[command].length > 1) {
             throw new Error(
@@ -143,8 +136,6 @@ export default class FleaMode extends modes.EditorMode {
         this.lastCommand = { commandName: command, args: args };
 
         await (this.subject[command] as any)(...args);
-
-        this.setUI();
     }
 
     async repeatSubjectCommand() {

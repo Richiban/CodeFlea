@@ -209,6 +209,24 @@ export const registeredCommands: ExtensionCommand[] = [
         },
     },
     {
+        id: "codeFlea.appendNewObject",
+        execute: async (manager) => {
+            await manager.executeSubjectCommand("duplicateObject");
+
+            await manager.changeMode({ kind: "INSERT" });
+            await vscode.commands.executeCommand("deleteLeft");
+        },
+    },
+    {
+        id: "codeFlea.prependNewObject",
+        execute: async (manager) => {
+            await manager.executeSubjectCommand("duplicateObject");
+
+            await manager.changeMode({ kind: "INSERT" });
+            await vscode.commands.executeCommand("deleteLeft");
+        },
+    },
+    {
         id: "codeFlea.changeToInsertModeMidPoint",
         execute: async (manager) => {
             collapseSelections(manager.editor, "midpoint");

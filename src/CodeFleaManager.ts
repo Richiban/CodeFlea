@@ -53,9 +53,6 @@ export default class CodeFleaManager {
     }
 
     clearUI() {
-        this.statusBar.text = "";
-        // this.editor.options.cursorStyle = vscode.TextEditorCursorStyle.Line;
-
         if (this.mode.decorationType) {
             this.editor.setDecorations(this.mode.decorationType, []);
         }
@@ -93,6 +90,8 @@ export default class CodeFleaManager {
                 this.mode.decorationType,
                 this.editor.selections
             );
+
+            this.editor.revealRange(this.editor.selection);
         }
 
         if (event.kind === vscode.TextEditorSelectionChangeKind.Command) return;
@@ -124,9 +123,8 @@ export default class CodeFleaManager {
             this.mode.name
         );
 
+        // TODO restore this
         // this.numHandler.setUI(this.subject);
-
-        this.editor.revealRange(this.editor.selection);
     }
 
     async openSpaceMenu() {

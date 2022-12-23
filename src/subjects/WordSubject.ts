@@ -9,7 +9,8 @@ const decorationType = vscode.window.createTextEditorDecorationType({
 export default class WordSubject extends SubjectBase {
     protected subjectIO = new WordIO();
     public readonly decorationType = decorationType;
-    readonly name = "WORD";
+    public readonly name = "WORD";
+    public readonly displayName = "word";
     public readonly jumpPhaseType = "dual-phase";
 
     async firstObjectInScope() {

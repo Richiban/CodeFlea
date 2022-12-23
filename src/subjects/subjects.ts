@@ -6,8 +6,8 @@ import LineSubject from "./LineSubject";
 import SubwordSubject from "./SubWordSubject";
 import WordSubject from "./WordSubject";
 import InterwordSubject from "./InterwordSubject";
-import BracketSubject from "./BracketSubject";
-import InclusiveBracketSubject from "./InclusiveBracketSubject";
+import InsideBracketSubject from "./InsideBracketSubject";
+import OutsideBracketSubject from "./OutsideBracketSubject";
 
 export function createFrom(
     context: common.ExtensionContext,
@@ -25,27 +25,8 @@ export function createFrom(
         case "INTERWORD":
             return new InterwordSubject(context);
         case "BRACKETS":
-            return new BracketSubject(context);
+            return new InsideBracketSubject(context);
         case "BRACKETS_INCLUSIVE":
-            return new InclusiveBracketSubject(context);
-    }
-}
-
-export function toDisplayName(subjectName: SubjectType): string {
-    switch (subjectName) {
-        case "LINE":
-            return "Line";
-        case "WORD":
-            return "Word";
-        case "SUBWORD":
-            return "Subword";
-        case "BLOCK":
-            return "Block";
-        case "INTERWORD":
-            return "Inter-word";
-        case "BRACKETS":
-            return "Inside brackets";
-        case "BRACKETS_INCLUSIVE":
-            return "Outside brackets";
+            return new OutsideBracketSubject(context);
     }
 }

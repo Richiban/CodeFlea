@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import * as common from "../common";
 import Enumerable from "../utils/Enumerable";
 import * as editor from "../utils/editor";
+import { positionToRange } from "../utils/selectionsAndRanges";
 
 export type IterationOptions = {
     startingPosition: common.TextObject | vscode.Position;
@@ -135,7 +136,7 @@ export default abstract class SubjectIOBase {
         if (separationTextRange) {
             const separationText = document.getText(separationTextRange);
 
-            if (separationTextRange.start <= selection.end) {
+            if (separationTextRange.start.isBefore(selection.end)) {
                 textEdit.insert(selection.end, separationText);
             } else {
                 textEdit.insert(selection.start, separationText);
@@ -144,7 +145,7 @@ export default abstract class SubjectIOBase {
 
         textEdit.insert(selection.end, document.getText(selection));
 
-        return selection;
+        return positionToRange(selection.end);
     }
 
     swapVertically(

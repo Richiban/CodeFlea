@@ -291,6 +291,21 @@
                 "when": "editorTextFocus && codeFlea.mode == 'FLEA' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
+                "key": "shift+a",
+                "command": "codeFlea.appendNewObject",
+                "when": "editorTextFocus && codeFlea.mode == 'FLEA' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "p",
+                "command": "codeFlea.changeToInsertModePrepend",
+                "when": "editorTextFocus && codeFlea.mode == 'FLEA' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "shift+p",
+                "command": "codeFlea.prependNewObject",
+                "when": "editorTextFocus && codeFlea.mode == 'FLEA' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
                 "key": "/",
                 "command": "codeFlea.changeToInsertModeMidPoint",
                 "when": "editorTextFocus && codeFlea.mode == 'FLEA' || editorTextFocus && codeFlea.mode == 'EXTEND'"
@@ -298,11 +313,6 @@
             {
                 "key": "shift+/",
                 "command": "codeFlea.changeToInsertModeSurround",
-                "when": "editorTextFocus && codeFlea.mode == 'FLEA' || editorTextFocus && codeFlea.mode == 'EXTEND'"
-            },
-            {
-                "key": "p",
-                "command": "codeFlea.changeToInsertModePrepend",
                 "when": "editorTextFocus && codeFlea.mode == 'FLEA' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {

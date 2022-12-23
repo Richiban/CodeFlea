@@ -7,7 +7,8 @@ const decorationType = vscode.window.createTextEditorDecorationType({
 });
 
 export default class SubwordSubject extends SubjectBase {
-    readonly name = "SUBWORD";
+    public readonly name = "SUBWORD";
+    public readonly displayName = "subword";
     public decorationType = decorationType;
     protected readonly subjectIO = new SubwordIO();
     public readonly jumpPhaseType = "dual-phase";

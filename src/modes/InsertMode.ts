@@ -10,7 +10,7 @@ const decorationType = vscode.window.createTextEditorDecorationType({});
 export default class InsertMode extends EditorMode {
     private keySequenceStarted: boolean = false;
     readonly decorationType = decorationType;
-    readonly cursorStyle = undefined;
+    readonly cursorStyle = vscode.TextEditorCursorStyle.Line;
     readonly name = "INSERT";
     readonly statusBarText = "Insert";
 

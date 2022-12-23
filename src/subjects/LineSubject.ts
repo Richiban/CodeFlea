@@ -6,7 +6,8 @@ import SubjectBase from "./SubjectBase";
 export default class LineSubject extends SubjectBase {
     protected subjectIO = new LineIO();
     public decorationType = LineSubject.decorationType;
-    readonly name = "LINE";
+    public readonly name = "LINE";
+    public readonly displayName = "line";
     public readonly jumpPhaseType = "single-phase";
 
     public static decorationType = vscode.window.createTextEditorDecorationType(
@@ -14,10 +15,6 @@ export default class LineSubject extends SubjectBase {
             border: "1px solid #8feb34;",
         }
     );
-
-    clearUI() {
-        this.context.editor.setDecorations(LineSubject.decorationType, []);
-    }
 
     async fixSelection() {
         selections.tryMap(this.context.editor, (selection) => {

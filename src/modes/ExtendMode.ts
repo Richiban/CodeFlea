@@ -86,27 +86,6 @@ export default class ExtendMode extends EditorMode {
         );
     }
 
-    clearUI(): void {
-        this.wrappedMode.clearUI();
-    }
-
-    async setUI() {
-        this.context.statusBar.text = `Extend (${this.wrappedMode.subject?.name})`;
-
-        if (this.context.editor) {
-            this.context.editor.options.cursorStyle =
-                vscode.TextEditorCursorStyle.BlockOutline;
-        }
-
-        await vscode.commands.executeCommand(
-            "setContext",
-            "codeFlea.mode",
-            "EXTEND"
-        );
-
-        this.wrappedMode.fixSelection();
-    }
-
     async executeSubjectCommand(command: SubjectAction): Promise<void> {
         this.context.editor.selections = this.actives;
         await this.wrappedMode.executeSubjectCommand(command);

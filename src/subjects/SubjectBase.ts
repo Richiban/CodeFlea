@@ -13,6 +13,7 @@ export default abstract class SubjectBase implements SubjectActions {
     public abstract decorationType: vscode.TextEditorDecorationType;
     public abstract name: SubjectType;
     public abstract jumpPhaseType: common.JumpPhaseType;
+    public abstract readonly displayName: string;
 
     async nextObjectDown() {
         selections.tryMap(this.context.editor, (selection) =>
@@ -281,10 +282,6 @@ export default abstract class SubjectBase implements SubjectActions {
             this.decorationType,
             this.context.editor.selections
         );
-    }
-
-    clearUI(): void {
-        this.context.editor.setDecorations(this.decorationType, []);
     }
 
     equals(other: SubjectBase) {

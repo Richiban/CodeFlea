@@ -293,7 +293,7 @@ export default class BlockIO extends SubjectIOBase {
     iterAll = iterAll;
     iterHorizontally = iterHorizontally;
     iterVertically = iterVertically;
-    duplicate = duplicate;
+    //duplicate = duplicate;
 
     deleteObject = deleteBlock;
 }

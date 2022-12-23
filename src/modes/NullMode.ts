@@ -16,8 +16,6 @@ export default class NullMode extends EditorMode {
         super();
     }
 
-    clearUI(): void {}
-
     equals(previousMode: EditorMode): boolean {
         return previousMode instanceof NullMode;
     }
@@ -39,11 +37,6 @@ export default class NullMode extends EditorMode {
         }
     }
 
-    setUI() {
-        this.context.statusBar.text = `Initializing...`;
-    }
-
     async executeSubjectCommand() {}
-
     async repeatSubjectCommand() {}
 }
