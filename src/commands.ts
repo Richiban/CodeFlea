@@ -94,12 +94,6 @@ export const registeredCommands: ExtensionCommand[] = [
         },
     },
     {
-        id: "codeFlea.changeNumHandler",
-        execute: async (manager) => {
-            await manager.changeNumHandler();
-        },
-    },
-    {
         id: "codeFlea.changeToPreviousSubject",
         execute: async (manager) => {},
     },

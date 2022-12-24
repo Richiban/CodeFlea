@@ -4,7 +4,6 @@ import ExtendMode from "./ExtendMode";
 import * as common from "../common";
 import { EditorMode, EditorModeChangeRequest } from "./modes";
 import FleaMode from "./FleaMode";
-import { createDefaultNumHandler as createDefaultNumHandler } from "../handlers/NumHandler";
 
 export default class NullMode extends EditorMode {
     readonly decorationType = undefined;
@@ -22,7 +21,6 @@ export default class NullMode extends EditorMode {
 
     async changeTo(newMode: EditorModeChangeRequest): Promise<EditorMode> {
         const defaultSubject = createFrom(this.context, "WORD");
-        const defaultNumHandler = createDefaultNumHandler(this.context);
         const navigateMode = new FleaMode(this.context, defaultSubject);
 
         switch (newMode.kind) {

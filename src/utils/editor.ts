@@ -132,14 +132,6 @@ export function scrollToCursorAtCenter(editor: vscode.TextEditor) {
     editor.revealRange(editor.selection, vscode.TextEditorRevealType.InCenter);
 }
 
-export function tryGetLineAt(editor: vscode.TextEditor, lineNumber: number) {
-    if (lineNumber >= editor.document.lineCount) {
-        return;
-    }
-
-    return editor.document.lineAt(lineNumber);
-}
-
 export function charAt(
     document: vscode.TextDocument,
     position: vscode.Position

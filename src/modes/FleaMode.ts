@@ -6,7 +6,6 @@ import * as modes from "./modes";
 import * as editor from "../utils/editor";
 import * as selections from "../utils/selectionsAndRanges";
 import * as common from "../common";
-import { NumHandler } from "../handlers/NumHandler";
 import SubjectBase from "../subjects/SubjectBase";
 import { SubjectAction } from "../subjects/SubjectActions";
 import JumpInterface from "../handlers/JumpInterface";
@@ -45,7 +44,6 @@ export default class FleaMode extends modes.EditorMode {
         args: Partial<{
             context: common.ExtensionContext;
             subject: SubjectBase;
-            numHandler: NumHandler;
         }>
     ) {
         return new FleaMode(

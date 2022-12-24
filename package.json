@@ -439,11 +439,6 @@
                 "when": "editorTextFocus && codeFlea.mode == 'FLEA' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
-                "command": "codeFlea.changeNumHandler",
-                "key": "`",
-                "when": "editorTextFocus && codeFlea.mode == 'FLEA' || editorTextFocus && codeFlea.mode == 'EXTEND'"
-            },
-            {
                 "command": "codeFlea.change",
                 "key": "c",
                 "when": "editorTextFocus && codeFlea.mode == 'FLEA' || editorTextFocus && codeFlea.mode == 'EXTEND'"

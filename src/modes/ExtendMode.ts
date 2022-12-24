@@ -5,7 +5,6 @@ import * as subjects from "../subjects/subjects";
 import InsertMode from "./InsertMode";
 import { EditorMode, EditorModeChangeRequest } from "./modes";
 import FleaMode from "./FleaMode";
-import { NumHandler } from "../handlers/NumHandler";
 import { SubjectAction } from "../subjects/SubjectActions";
 
 export default class ExtendMode extends EditorMode {
@@ -77,7 +76,6 @@ export default class ExtendMode extends EditorMode {
         args: Partial<{
             context: common.ExtensionContext;
             wrappedMode: FleaMode;
-            numHandler: NumHandler;
         }>
     ) {
         return new ExtendMode(

@@ -10,13 +10,11 @@ import { SubjectAction } from "./subjects/SubjectActions";
 import { EditorMode, EditorModeChangeRequest } from "./modes/modes";
 import NullMode from "./modes/NullMode";
 import InsertMode from "./modes/InsertMode";
-import { createDefaultNumHandler, NumHandler } from "./handlers/NumHandler";
 
 export default class CodeFleaManager {
     private mode: EditorMode;
     public statusBar: vscode.StatusBarItem;
     public editor: vscode.TextEditor = undefined!;
-    private numHandler: NumHandler;
 
     constructor(public config: Config) {
         this.statusBar = vscode.window.createStatusBarItem(
@@ -28,8 +26,6 @@ export default class CodeFleaManager {
         this.mode = new NullMode(this);
 
         this.statusBar.show();
-
-        this.numHandler = createDefaultNumHandler(this);
     }
 
     async changeEditor(editor: vscode.TextEditor | undefined) {
@@ -65,12 +61,6 @@ export default class CodeFleaManager {
 
         this.setUI();
         this.mode.fixSelection();
-    }
-
-    async changeNumHandler() {
-        this.clearUI();
-        this.numHandler = this.numHandler.change();
-        this.setUI();
     }
 
     async executeSubjectCommand(command: SubjectAction) {
