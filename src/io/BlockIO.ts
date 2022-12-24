@@ -231,26 +231,6 @@ function getContainingRangeAt(
     return getContainingBlock(document, positionToRange(position));
 }
 
-export function duplicate(
-    document: vscode.TextDocument,
-    textEdit: vscode.TextEditorEdit,
-    object: vscode.Range
-): vscode.Range {
-    const startLine = document.lineAt(object.start.line);
-    const endLine = document.lineAt(object.end.line);
-
-    const linesToDuplicate = document.getText(
-        new vscode.Range(
-            startLine.range.start,
-            endLine.rangeIncludingLineBreak.end
-        )
-    );
-
-    textEdit.insert(startLine.range.start, linesToDuplicate);
-
-    return object;
-}
-
 function deleteBlock(
     document: vscode.TextDocument,
     textEdit: vscode.TextEditorEdit,
@@ -293,7 +273,6 @@ export default class BlockIO extends SubjectIOBase {
     iterAll = iterAll;
     iterHorizontally = iterHorizontally;
     iterVertically = iterVertically;
-    //duplicate = duplicate;
 
     deleteObject = deleteBlock;
 }

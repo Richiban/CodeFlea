@@ -122,9 +122,6 @@ export default class CodeFleaManager {
             "codeFlea.mode",
             this.mode.name
         );
-
-        // TODO restore this
-        // this.numHandler.setUI(this.subject);
     }
 
     async openSpaceMenu() {

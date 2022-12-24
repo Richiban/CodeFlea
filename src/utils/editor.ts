@@ -129,22 +129,7 @@ export function goToLine(editor: vscode.TextEditor, lineNumber: number) {
 }
 
 export function scrollToCursorAtCenter(editor: vscode.TextEditor) {
-    const cursorPosition = editor.selection.active;
-
-    const viewportHeight =
-        editor.visibleRanges[0].end.line - editor.visibleRanges[0].start.line;
-
-    const rangeToReveal = new vscode.Range(
-        Math.max(0, cursorPosition.line - viewportHeight / 2),
-        0,
-        Math.min(
-            editor.document.lineCount - 1,
-            cursorPosition.line + viewportHeight / 2
-        ),
-        0
-    );
-
-    editor.revealRange(rangeToReveal);
+    editor.revealRange(editor.selection, vscode.TextEditorRevealType.InCenter);
 }
 
 export function tryGetLineAt(editor: vscode.TextEditor, lineNumber: number) {

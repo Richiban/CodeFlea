@@ -97,6 +97,57 @@ export const GoToCommands: QuickCommand[] = [
             );
         },
     },
+    {
+        quickKey: "p",
+        label: "go to file",
+        execute: async () => {
+            await vscode.commands.executeCommand("workbench.action.quickOpen");
+        },
+    },
+    {
+        quickKey: "q",
+        label: "go to last edit location",
+        execute: async () => {
+            await vscode.commands.executeCommand(
+                "workbench.action.navigateToLastEditLocation"
+            );
+        },
+    },
+    {
+        quickKey: "b",
+        label: "go to bracket",
+        execute: async () => {
+            await vscode.commands.executeCommand("editor.action.jumpToBracket");
+        },
+    },
+    {
+        quickKey: "b",
+        label: "go to bracket",
+        execute: async () => {
+            await vscode.commands.executeCommand("editor.action.jumpToBracket");
+        },
+    },
+    {
+        quickKey: "f",
+        label: "go to next folding range",
+        execute: async () => {
+            await vscode.commands.executeCommand("editor.gotoNextFold");
+        },
+    },
+    {
+        quickKey: "F",
+        label: "go to previous folding range",
+        execute: async () => {
+            await vscode.commands.executeCommand("editor.gotoPreviousFold");
+        },
+    },
+    {
+        quickKey: "a",
+        label: "go to parent fold",
+        execute: async () => {
+            await vscode.commands.executeCommand("editor.gotoParentFold");
+        },
+    },
 ];
 
 export const SpaceCommands: QuickCommand[] = [
@@ -104,7 +155,9 @@ export const SpaceCommands: QuickCommand[] = [
         quickKey: " ",
         label: "center editor",
         execute: async () => {
-            scrollToCursorAtCenter(vscode.window.activeTextEditor!);
+            if (vscode.window.activeTextEditor) {
+                scrollToCursorAtCenter(vscode.window.activeTextEditor);
+            }
         },
     },
     {
@@ -151,6 +204,62 @@ export const SpaceCommands: QuickCommand[] = [
         label: "Show Definition Preview Hover.",
         execute: async () => {
             await vscode.commands.executeCommand("editor.action.showHover");
+        },
+    },
+    {
+        quickKey: "l",
+        label: "Toggle fold",
+        execute: async () => {
+            await vscode.commands.executeCommand("editor.toggleFold");
+        },
+    },
+    {
+        quickKey: "1",
+        label: "Fold level 1",
+        execute: async () => {
+            await vscode.commands.executeCommand("editor.foldLevel1");
+        },
+    },
+    {
+        quickKey: "2",
+        label: "Fold level 2",
+        execute: async () => {
+            await vscode.commands.executeCommand("editor.foldLevel2");
+        },
+    },
+    {
+        quickKey: "3",
+        label: "Fold level 3",
+        execute: async () => {
+            await vscode.commands.executeCommand("editor.foldLevel3");
+        },
+    },
+    {
+        quickKey: "4",
+        label: "Fold level 4",
+        execute: async () => {
+            await vscode.commands.executeCommand("editor.foldLevel4");
+        },
+    },
+    {
+        quickKey: "5",
+        label: "Fold level 5",
+        execute: async () => {
+            await vscode.commands.executeCommand("editor.foldLevel5");
+        },
+    },
+    {
+        quickKey: "6",
+        label: "Fold level 6",
+        execute: async () => {
+            await vscode.commands.executeCommand("editor.foldLevel6");
+        },
+    },
+    {
+        quickKey: "7",
+        label: "Fold level 7",
+        execute: async () => {
+            await vscode.commands.executeCommand("editor.foldLevel7");
         },
     },
 ];
