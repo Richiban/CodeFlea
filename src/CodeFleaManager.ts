@@ -10,6 +10,7 @@ import { SubjectAction } from "./subjects/SubjectActions";
 import { EditorMode, EditorModeChangeRequest } from "./modes/modes";
 import NullMode from "./modes/NullMode";
 import InsertMode from "./modes/InsertMode";
+import * as common from "./common";
 
 export default class CodeFleaManager {
     private mode: EditorMode;
@@ -61,15 +62,18 @@ export default class CodeFleaManager {
 
         this.setUI();
         this.mode.fixSelection();
+
+        if (this.mode?.decorationType) {
+            this.editor.setDecorations(
+                this.mode.decorationType,
+                this.editor.selections
+            );
+        }
     }
 
     async executeSubjectCommand(command: SubjectAction) {
         console.log(`Executing subject command (${command})`);
         await this.mode.executeSubjectCommand(command);
-    }
-
-    async repeatSubjectCommand() {
-        await this.mode.repeatSubjectCommand();
     }
 
     async onDidChangeTextEditorSelection(
@@ -80,8 +84,6 @@ export default class CodeFleaManager {
                 this.mode.decorationType,
                 this.editor.selections
             );
-
-            this.editor.revealRange(this.editor.selection);
         }
 
         if (event.kind === vscode.TextEditorSelectionChangeKind.Command) return;
@@ -180,6 +182,15 @@ export default class CodeFleaManager {
         await vscode.commands.executeCommand("undo");
 
         this.mode.fixSelection();
+    }
+
+    async skip(direction: common.Direction) {
+        await this.mode.skip(direction);
+        this.setUI();
+    }
+
+    async repeatLastSkip(direction: common.Direction) {
+        await this.mode.repeatLastSkip(direction);
     }
 
     async jump() {

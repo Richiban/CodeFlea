@@ -11,19 +11,17 @@ import { SubjectAction } from "../subjects/SubjectActions";
 import JumpInterface from "../handlers/JumpInterface";
 
 export default class FleaMode extends modes.EditorMode {
-    private lastCommand:
-        | { commandName: SubjectAction; args: string[] }
-        | undefined;
+    private lastSkip: common.Char | undefined = undefined;
 
     readonly cursorStyle = vscode.TextEditorCursorStyle.UnderlineThin;
     readonly name = "FLEA";
 
-    get decorationType(): vscode.TextEditorDecorationType {
-        return this.subject.decorationType;
-    }
+    readonly decorationType: vscode.TextEditorDecorationType;
 
     get statusBarText(): string {
-        return `Flea mode (${this.subject.displayName})`;
+        const skipString = this.lastSkip ? ` | Skip: ${this.lastSkip}` : ``;
+
+        return `Flea mode (${this.subject.displayName})${skipString}`;
     }
 
     constructor(
@@ -31,6 +29,10 @@ export default class FleaMode extends modes.EditorMode {
         public readonly subject: SubjectBase
     ) {
         super();
+
+        this.decorationType = vscode.window.createTextEditorDecorationType({
+            border: `1px solid ${subject.outlineColour}`,
+        });
     }
 
     equals(previousMode: modes.EditorMode): boolean {
@@ -113,49 +115,33 @@ export default class FleaMode extends modes.EditorMode {
     }
 
     async executeSubjectCommand(command: SubjectAction): Promise<void> {
-        if (this.subject[command].length > 1) {
-            throw new Error(
-                "Functions with multiple arguments are not supported"
-            );
-        }
-
-        let args: [] | [string] = [];
-
-        if (this.subject[command].length === 1) {
-            const input = await editor.inputBoxChar(command);
-
-            if (input === undefined) {
-                return;
-            }
-
-            args = [input];
-        }
-
-        this.lastCommand = { commandName: command, args: args };
-
-        await (this.subject[command] as any)(...args);
-    }
-
-    async repeatSubjectCommand() {
-        if (!this.lastCommand) {
-            return;
-        }
-
-        const cf = this.subject[this.lastCommand.commandName];
-
-        if (cf.length > 1) {
-            throw new Error(
-                "Functions with multiple arguments are not supported"
-            );
-        }
-
-        await (this.subject[this.lastCommand.commandName] as any)(
-            ...this.lastCommand.args
-        );
+        await this.subject[command]();
     }
 
     async fixSelection() {
         await this.subject.fixSelection();
+    }
+
+    async skip(direction: common.Direction): Promise<void> {
+        const skipChar = await editor.inputBoxChar(
+            `Skip ${direction} to a ${this.subject.name} by its first character`
+        );
+
+        if (skipChar === undefined) {
+            return;
+        }
+
+        this.lastSkip = skipChar;
+
+        await this.subject.skip(direction, skipChar);
+    }
+
+    async repeatLastSkip(direction: common.Direction): Promise<void> {
+        if (!this.lastSkip) {
+            return;
+        }
+
+        await this.subject.skip(direction, this.lastSkip);
     }
 
     async jump(): Promise<void> {

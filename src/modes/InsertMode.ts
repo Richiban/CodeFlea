@@ -5,12 +5,10 @@ import { EditorMode, EditorModeChangeRequest } from "./modes";
 import FleaMode from "./FleaMode";
 import * as subjects from "../subjects/subjects";
 
-const decorationType = vscode.window.createTextEditorDecorationType({});
-
 export default class InsertMode extends EditorMode {
     private keySequenceStarted: boolean = false;
-    readonly decorationType = decorationType;
     readonly cursorStyle = vscode.TextEditorCursorStyle.Line;
+    readonly decorationType = undefined;
     readonly name = "INSERT";
     readonly statusBarText = "Insert";
 
@@ -50,5 +48,5 @@ export default class InsertMode extends EditorMode {
     }
 
     async executeSubjectCommand() {}
-    async repeatSubjectCommand() {}
+    async repeatLastSkip() {}
 }

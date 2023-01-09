@@ -177,10 +177,6 @@ function iterAll(document: vscode.TextDocument, options: IterationOptions) {
             }
 
             isFirstLine = false;
-
-            if (options.restrictToCurrentScope) {
-                break;
-            }
         }
     });
 }
@@ -278,6 +274,41 @@ export function swapVertically(
     return range;
 }
 
+function iterScope(
+    document: vscode.TextDocument,
+    options: IterationOptions
+): Enumerable<vscode.Range> {
+    return enumerable(function* () {
+        const startingPosition = rangeToPosition(
+            options.startingPosition,
+            options.direction
+        );
+
+        const line = document.lineAt(startingPosition);
+
+        const subwords =
+            options.direction === "forwards"
+                ? split(
+                      line.text,
+                      line.firstNonWhitespaceCharacterIndex
+                  ).filter((sw) => sw.range.start >= startingPosition.character)
+                : split(line.text, line.firstNonWhitespaceCharacterIndex)
+                      .filter(
+                          (sw) => sw.range.end <= startingPosition.character
+                      )
+                      .reverse();
+
+        for (const { range } of subwords) {
+            yield new vscode.Range(
+                line.lineNumber,
+                range.start,
+                line.lineNumber,
+                range.end
+            );
+        }
+    });
+}
+
 export default class InterwordIO extends SubjectIOBase {
     deletableSeparators = /^$/;
 
@@ -286,6 +317,7 @@ export default class InterwordIO extends SubjectIOBase {
     iterAll = iterAll;
     iterVertically = iterVertically;
     iterHorizontally = iterAll;
+    iterScope = iterScope;
 
     getSeparatingText() {
         return undefined;

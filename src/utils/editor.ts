@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { QuickCommand } from "./quickMenus";
+import * as common from "../common";
 
 export function quickCommandPicker(
     commands: QuickCommand[],
@@ -55,14 +56,14 @@ export function quickCommandPicker(
 
 export function inputBoxChar(
     placeholder?: string
-): Promise<string | undefined> {
+): Promise<common.Char | undefined> {
     return new Promise((resolve) => {
         const inputBox = vscode.window.createInputBox();
 
         inputBox.placeholder = placeholder;
 
         inputBox.onDidChangeValue((ch) => {
-            resolve(ch);
+            resolve(ch[0] as common.Char);
             inputBox.dispose();
         });
 

@@ -8,7 +8,6 @@ export type IterationOptions = {
     startingPosition: common.TextObject | vscode.Position;
     direction: common.Direction;
     currentInclusive?: boolean;
-    restrictToCurrentScope?: boolean;
     bounds?: common.TextObject;
 };
 
@@ -19,6 +18,11 @@ export default abstract class SubjectIOBase {
         document: vscode.TextDocument,
         position: vscode.Position
     ): common.TextObject | undefined;
+
+    abstract iterScope(
+        document: vscode.TextDocument,
+        options: IterationOptions
+    ): Enumerable<common.TextObject>;
 
     getClosestObjectTo(
         document: vscode.TextDocument,
@@ -57,13 +61,13 @@ export default abstract class SubjectIOBase {
         document: vscode.TextDocument,
         object: common.TextObject
     ): vscode.Range | undefined {
-        const prevObject = this.iterAll(document, {
+        const prevObject = this.iterScope(document, {
             direction: common.Direction.backwards,
             startingPosition: object,
             currentInclusive: false,
         }).tryFirst();
 
-        const nextObject = this.iterAll(document, {
+        const nextObject = this.iterScope(document, {
             direction: common.Direction.forwards,
             startingPosition: object,
             currentInclusive: false,
@@ -99,7 +103,7 @@ export default abstract class SubjectIOBase {
         }
     }
 
-    search(
+    skip(
         document: vscode.TextDocument,
         targetChar: common.Char,
         options: IterationOptions
@@ -148,6 +152,35 @@ export default abstract class SubjectIOBase {
         textEdit.insert(selection.end, document.getText(selection));
 
         return positionToRange(selection.end);
+    }
+
+    insertNew(
+        document: vscode.TextDocument,
+        textEdit: vscode.TextEditorEdit,
+        currentObject: common.TextObject,
+        direction: common.Direction
+    ) {
+        const separationTextRange = this.getSeparatingText(
+            document,
+            currentObject
+        );
+
+        if (separationTextRange) {
+            const separationText = document.getText(separationTextRange);
+
+            if (separationTextRange.start.isBefore(currentObject.end)) {
+                textEdit.insert(currentObject.end, separationText);
+            } else {
+                textEdit.insert(currentObject.start, separationText);
+            }
+        }
+
+        const insertionPoint =
+            direction === "forwards" ? currentObject.end : currentObject.start;
+
+        textEdit.insert(insertionPoint, "");
+
+        return positionToRange(insertionPoint);
     }
 
     swapVertically(

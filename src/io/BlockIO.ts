@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 import * as common from "../common";
 import Enumerable from "../utils/Enumerable";
-import * as lines from "./LineIO";
 import * as lineUtils from "../utils/lines";
 import {
     positionToRange,
@@ -11,6 +10,7 @@ import SubjectIOBase, { IterationOptions } from "./SubjectIOBase";
 
 type BlockIterationOptions = IterationOptions & {
     indentationLevel?: common.IndentationRequest;
+    restrictToCurrentScope?: boolean;
 };
 
 function lineIsBlockStart(
@@ -236,10 +236,9 @@ function deleteBlock(
     textEdit: vscode.TextEditorEdit,
     object: vscode.Range
 ) {
-    const nextBlock = iterVertically(document, {
+    const nextBlock = iterScope(document, {
         startingPosition: object.end,
         direction: "forwards",
-        restrictToCurrentScope: true,
     }).tryFirst();
 
     if (nextBlock) {
@@ -248,10 +247,9 @@ function deleteBlock(
         return positionToRange(object.start);
     }
 
-    const prevBlock = iterVertically(document, {
+    const prevBlock = iterScope(document, {
         startingPosition: object.start,
         direction: "backwards",
-        restrictToCurrentScope: true,
     }).tryFirst();
 
     if (prevBlock) {
@@ -265,14 +263,26 @@ function deleteBlock(
     return positionToRange(object.start);
 }
 
+function iterScope(
+    document: vscode.TextDocument,
+    options: IterationOptions
+): Enumerable<vscode.Range> {
+    return iterBlockStarts(document, {
+        ...options,
+        indentationLevel: "same-indentation",
+        restrictToCurrentScope: true,
+    }).map((point) => getContainingBlock(document, positionToRange(point)));
+}
+
 export default class BlockIO extends SubjectIOBase {
-    deletableSeparators = /.*/;
+    deletableSeparators = /^\s+$/;
 
     getContainingObjectAt = getContainingRangeAt;
     getClosestObjectTo = getClosestContainingBlock;
     iterAll = iterAll;
     iterHorizontally = iterHorizontally;
     iterVertically = iterVertically;
+    iterScope = iterScope;
 
     deleteObject = deleteBlock;
 }

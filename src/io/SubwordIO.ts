@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as common from "../common";
-import Enumerable from "../utils/Enumerable";
+import Enumerable, { enumerable } from "../utils/Enumerable";
 import * as lineUtils from "../utils/lines";
 import {
     closerOf,
@@ -103,6 +103,7 @@ function getSubwordRangeAtPosition(
 
     return undefined;
 }
+
 function iterSubwords(
     document: vscode.TextDocument,
     options: IterationOptions
@@ -144,62 +145,6 @@ function iterSubwords(
             }
         })()
     );
-}
-function search(
-    document: vscode.TextDocument,
-    targetChar: common.Char,
-    options: IterationOptions
-): vscode.Range | undefined {
-    for (const wordRange of iterSubwords(document, options)) {
-        const charRange = new vscode.Range(
-            wordRange.start,
-            wordRange.start.translate(undefined, 1)
-        );
-
-        if (
-            document.getText(charRange).localeCompare(targetChar, undefined, {
-                sensitivity: "base",
-            }) === 0
-        ) {
-            return wordRange;
-        }
-    }
-
-    return undefined;
-}
-
-function expandSelectionToSubwords(
-    document: vscode.TextDocument,
-    selection: vscode.Selection
-): vscode.Selection {
-    let [newStart, newEnd] = [selection.start, selection.end];
-
-    const leftWord = getSubwordRangeAtPosition(document, selection.start);
-
-    if (leftWord && !selection.start.isEqual(leftWord.start)) {
-        newStart = leftWord.start;
-    }
-
-    const rightWord = getSubwordRangeAtPosition(document, selection.end);
-
-    if (rightWord && !selection.end.isEqual(rightWord.end)) {
-        newEnd = rightWord.end;
-    }
-
-    const newSelection = new vscode.Selection(newEnd, newStart);
-
-    if (newSelection.isEmpty) {
-        const wordRange = getSubwordRangeAtPosition(
-            document,
-            newSelection.start
-        );
-
-        if (wordRange) {
-            return new vscode.Selection(wordRange.end, wordRange.start);
-        }
-    }
-
-    return newSelection;
 }
 
 function iterVertically(
@@ -280,6 +225,39 @@ function getClosestRangeAt(
     return new vscode.Range(position, position);
 }
 
+function iterScope(document: any, options: any): Enumerable<vscode.Range> {
+    return new Enumerable<vscode.Range>(
+        (function* () {
+            const startingPosition = wordRangeToPosition(
+                options.startingPosition,
+                options.direction
+            );
+
+            const line = document.lineAt(startingPosition.line);
+
+            const subwords =
+                options.direction === "forwards"
+                    ? splitTextIntoSubWords(line.text).filter(
+                          (sw) => sw.range.start >= startingPosition.character
+                      )
+                    : splitTextIntoSubWords(line.text)
+                          .filter(
+                              (sw) => sw.range.end <= startingPosition.character
+                          )
+                          .reverse();
+
+            for (const { range } of subwords) {
+                yield new vscode.Range(
+                    line.lineNumber,
+                    range.start,
+                    line.lineNumber,
+                    range.end
+                );
+            }
+        })()
+    );
+}
+
 export default class SubwordIO extends SubjectIOBase {
     deletableSeparators = /^[\s,.:=+\-*\/%]+$/;
 
@@ -288,4 +266,5 @@ export default class SubwordIO extends SubjectIOBase {
     iterAll = iterSubwords;
     iterHorizontally = iterSubwords;
     iterVertically = iterVertically;
+    iterScope = iterScope;
 }

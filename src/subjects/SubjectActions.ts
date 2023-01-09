@@ -29,6 +29,6 @@ export type SubjectActions = {
     deleteObject(): Promise<void>;
     duplicateObject(): Promise<void>;
 
-    search(target: common.Char): Promise<void>;
-    searchBackwards(target: string): Promise<void>;
+    prependNew(): Promise<void>;
+    appendNew(): Promise<void>;
 };

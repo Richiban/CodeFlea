@@ -61,18 +61,10 @@ function iterAll(
             options.direction
         );
 
-        const startingLine = searchPosition.line;
         const diff = options.direction === "forwards" ? 2 : -2;
         let first = true;
 
         do {
-            if (
-                options.restrictToCurrentScope &&
-                searchPosition.line !== startingLine
-            ) {
-                return undefined;
-            }
-
             const wordRange = document.getWordRangeAtPosition(searchPosition);
 
             if (wordRange) {
@@ -118,16 +110,16 @@ function findWordClosestTo(
         return wordUnderCursor;
     }
 
+    const iterObjects = options.limitToCurrentLine ? iterScope : iterAll;
+
     const wordRange = new Enumerable([
-        iterAll(document, {
+        iterObjects(document, {
             startingPosition: position,
             direction: "backwards",
-            restrictToCurrentScope: options.limitToCurrentLine,
         }).tryFirst(),
-        iterAll(document, {
+        iterObjects(document, {
             startingPosition: position,
             direction: "forwards",
-            restrictToCurrentScope: options.limitToCurrentLine,
         }).tryFirst(),
     ])
         .filterUndefined()
@@ -176,6 +168,13 @@ export function swapVertically(
     return range;
 }
 
+function iterScope(
+    document: vscode.TextDocument,
+    options: IterationOptions
+): Enumerable<vscode.Range> {
+    return iterAll(document, options);
+}
+
 export default class WordIO extends SubjectIOBase {
     deletableSeparators = /^[\s,.:=+\-*\/%]+$/;
 
@@ -196,4 +195,5 @@ export default class WordIO extends SubjectIOBase {
 
     swapHorizontally = swapHorizontally;
     swapVertically = swapVertically;
+    iterScope = iterScope;
 }

@@ -1,43 +1,10 @@
-import * as common from "../common";
-import * as vscode from "vscode";
-import * as selections from "../utils/selectionsAndRanges";
 import SubjectBase from "./SubjectBase";
 import BlockIO from "../io/BlockIO";
 
 export default class BlockSubject extends SubjectBase {
     protected subjectIO = new BlockIO();
-    public decorationType = BlockSubject.decorationType;
     readonly name = "BLOCK";
     readonly displayName = "block";
     public readonly jumpPhaseType = "single-phase";
-
-    public static decorationType = vscode.window.createTextEditorDecorationType(
-        {
-            border: "1px solid #aba246;",
-        }
-    );
-
-    async firstObjectInScope() {
-        selections.tryMap(this.context.editor, (selection) =>
-            this.subjectIO
-                .iterVertically(this.context.editor.document, {
-                    startingPosition: selection.start,
-                    direction: common.Direction.backwards,
-                    restrictToCurrentScope: true,
-                })
-                .tryLast()
-        );
-    }
-
-    async lastObjectInScope() {
-        selections.tryMap(this.context.editor, (selection) =>
-            this.subjectIO
-                .iterVertically(this.context.editor.document, {
-                    startingPosition: selection.start,
-                    direction: common.Direction.forwards,
-                    restrictToCurrentScope: true,
-                })
-                .tryLast()
-        );
-    }
+    public readonly outlineColour = "#aba246";
 }

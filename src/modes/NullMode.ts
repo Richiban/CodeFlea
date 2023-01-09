@@ -36,5 +36,5 @@ export default class NullMode extends EditorMode {
     }
 
     async executeSubjectCommand() {}
-    async repeatSubjectCommand() {}
+    async repeatLastSkip() {}
 }

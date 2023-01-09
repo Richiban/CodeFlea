@@ -53,7 +53,7 @@ Commands are available to:
 -   move the selection to neighbouring objects
 -   extend the selection to neighbouring objects
 -   swap neighbouring objects
--   search for a particular object based on its first character
+-   skip for a particular object based on its first character
 -   jump to any visible object
 
 The editor will draw a border around the current selection(s) with a colour that corresponds to the current subject.
@@ -187,7 +187,7 @@ The basic movement commands are laid out on the QWERTY keyboard in the same way 
 
 ## Searching
 
-By pressing `s` you will be prompted for the first character of the desired object. Once you have entered the first character, the selection will be moved to the first object that begins with that character. To search backwards the process is the same; just press `f` instead.
+By pressing `s` you will be prompted for the first character of the desired object. Once you have entered the first character, the selection will be moved to the first object that begins with that character. To skip backwards the process is the same; just press `f` instead.
 
 ## Jumping
 
@@ -261,8 +261,8 @@ By first changing the _subject_ to _Block_, we can reorder the methods of a clas
 | `→` / `i`          | `codeFlea.nextSubjectRight`        | Move to the next object to the right                  |
 | `;`                |                                    | Go back                                               |
 | `shift + ;`        |                                    | Go forwards                                           |
-| `s`                | `codeFlea.search`                  | Forward search of objects by their first character    |
-| `f`                | `codeFlea.searchBackwards`         | Backward search of objects by their first character   |
+| `s`                | `codeFlea.skip`                    | Forward skip of objects by their first character      |
+| `f`                | `codeFlea.skipBackwards`           | Backward skip of objects by their first character     |
 | `t`                | `codeFlea.jump`                    | Jump to a particular object (see [Jumping](#jumping)) |
 | `l`                | `codeFlea.goToFirstSubjectInScope` | Move to the first object in current scope             |
 | `y`                | `codeFlea.goToLastSubjectInScope`  | Move to the last object in current scope              |
@@ -313,7 +313,7 @@ By first changing the _subject_ to _Block_, we can reorder the methods of a clas
 -   CodeFlea is compatible with the mouse. You can
     -   click on a text object to select it
     -   drag to select (as normal) which will change the editor to **insert** mode
--   After conducting a _quick search_, you can press `enter` to repeat the search--moving the selection to the next search result
+-   After conducting a _quick skip_, you can press `enter` to repeat the skip--moving the selection to the next skip result
 
 # Development
 

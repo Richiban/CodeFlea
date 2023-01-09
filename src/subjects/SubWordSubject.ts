@@ -2,14 +2,10 @@ import * as vscode from "vscode";
 import SubwordIO from "../io/SubwordIO";
 import SubjectBase from "./SubjectBase";
 
-const decorationType = vscode.window.createTextEditorDecorationType({
-    border: "1px solid #9900ff;",
-});
-
 export default class SubwordSubject extends SubjectBase {
     public readonly name = "SUBWORD";
     public readonly displayName = "subword";
-    public decorationType = decorationType;
+    public readonly outlineColour = "#9900ff";
     protected readonly subjectIO = new SubwordIO();
     public readonly jumpPhaseType = "dual-phase";
 

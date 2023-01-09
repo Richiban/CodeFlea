@@ -29,6 +29,10 @@ export default class ExtendMode extends EditorMode {
         this.decorationType = this.wrappedMode.decorationType;
         this.anchors = [...this.context.editor.selections];
         this.actives = [...this.context.editor.selections];
+
+        this.decorationType = vscode.window.createTextEditorDecorationType({
+            border: `1px dashed ${previousMode.subject.outlineColour}`,
+        });
     }
 
     async fixSelection() {
@@ -103,7 +107,7 @@ export default class ExtendMode extends EditorMode {
             .toArray();
     }
 
-    async repeatSubjectCommand() {}
+    async repeatLastSkip() {}
 
     equals(other: EditorMode): boolean {
         return (

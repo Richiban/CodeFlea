@@ -199,25 +199,21 @@ export const registeredCommands: ExtensionCommand[] = [
         id: "codeFlea.changeToInsertModeAppend",
         execute: async (manager) => {
             collapseSelections(manager.editor, "end");
-            manager.changeMode({ kind: "INSERT" });
+            return manager.changeMode({ kind: "INSERT" });
         },
     },
     {
         id: "codeFlea.appendNewObject",
         execute: async (manager) => {
-            await manager.executeSubjectCommand("duplicateObject");
-
+            await manager.executeSubjectCommand("appendNew");
             await manager.changeMode({ kind: "INSERT" });
-            await vscode.commands.executeCommand("deleteLeft");
         },
     },
     {
         id: "codeFlea.prependNewObject",
         execute: async (manager) => {
-            await manager.executeSubjectCommand("duplicateObject");
-
+            await manager.executeSubjectCommand("prependNew");
             await manager.changeMode({ kind: "INSERT" });
-            await vscode.commands.executeCommand("deleteLeft");
         },
     },
     {
@@ -242,21 +238,27 @@ export const registeredCommands: ExtensionCommand[] = [
         },
     },
     {
-        id: "codeFlea.repeatCommand",
+        id: "codeFlea.repeatLastSkip",
         execute: async (manager) => {
-            await manager.repeatSubjectCommand();
+            await manager.repeatLastSkip("forwards");
         },
     },
     {
-        id: "codeFlea.search",
+        id: "codeFlea.repeatLastSkipBackwards",
         execute: async (manager) => {
-            await manager.executeSubjectCommand("search");
+            await manager.repeatLastSkip("backwards");
         },
     },
     {
-        id: "codeFlea.searchBackwards",
+        id: "codeFlea.skip",
         execute: async (manager) => {
-            await manager.executeSubjectCommand("searchBackwards");
+            await manager.skip("forwards");
+        },
+    },
+    {
+        id: "codeFlea.skipBackwards",
+        execute: async (manager) => {
+            await manager.skip("backwards");
         },
     },
     {

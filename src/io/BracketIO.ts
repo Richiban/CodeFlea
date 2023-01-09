@@ -361,6 +361,14 @@ function iterHorizontally(
     }
 }
 
+function iterScope(
+    document: vscode.TextDocument,
+    options: IterationOptions,
+    inclusive: boolean
+) {
+    return iterAll(document, options, inclusive);
+}
+
 function iterVertically(
     document: vscode.TextDocument,
     options: IterationOptions,
@@ -426,5 +434,12 @@ export default class BracketIO extends SubjectIOBase {
 
     iterVertically(document: vscode.TextDocument, options: IterationOptions) {
         return iterVertically(document, options, this.inclusive);
+    }
+
+    iterScope(
+        document: vscode.TextDocument,
+        options: IterationOptions
+    ): Enumerable<vscode.Range> {
+        return iterScope(document, options, this.inclusive);
     }
 }

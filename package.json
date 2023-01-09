@@ -225,12 +225,12 @@
             },
             {
                 "key": "enter",
-                "command": "codeFlea.repeatCommand",
+                "command": "codeFlea.repeatLastSkip",
                 "when": "editorTextFocus && codeFlea.mode == 'FLEA' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "key": "shift+enter",
-                "command": "codeFlea.undoCursorCommand",
+                "command": "codeFlea.repeatLastSkipBackwards",
                 "when": "editorTextFocus && codeFlea.mode == 'FLEA' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
@@ -255,12 +255,12 @@
             },
             {
                 "key": "s",
-                "command": "codeFlea.search",
+                "command": "codeFlea.skip",
                 "when": "editorTextFocus && codeFlea.mode == 'FLEA' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "key": "f",
-                "command": "codeFlea.searchBackwards",
+                "command": "codeFlea.skipBackwards",
                 "when": "editorTextFocus && codeFlea.mode == 'FLEA' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {

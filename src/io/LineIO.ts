@@ -117,6 +117,27 @@ export function duplicate(
     return selection;
 }
 
+function iterScope(
+    document: vscode.TextDocument,
+    options: IterationOptions
+): Enumerable<vscode.Range> {
+    const startingPosition = rangeToPosition(
+        options.startingPosition,
+        options.direction
+    );
+
+    const startingLine = document.lineAt(startingPosition);
+
+    return lineUtils
+        .iterLines(document, options)
+        .takeWhile(
+            (l) =>
+                lineUtils.getRelativeIndentation(startingLine, l) ===
+                "same-indentation"
+        )
+        .map((l) => lineUtils.rangeWithoutIndentation(l));
+}
+
 export default class LineIO extends SubjectIOBase {
     deletableSeparators = /\s/;
 
@@ -125,6 +146,7 @@ export default class LineIO extends SubjectIOBase {
     iterAll = iterAll;
     iterHorizontally = iterHorizontally;
     iterVertically = iterAll;
+    iterScope = iterScope;
 
     deleteObject() {
         throw new Error("Not supported: use VSCode command instead");

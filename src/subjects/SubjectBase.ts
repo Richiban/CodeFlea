@@ -10,7 +10,7 @@ export default abstract class SubjectBase implements SubjectActions {
     constructor(protected context: common.ExtensionContext) {}
 
     protected abstract subjectIO: SubjectIOBase;
-    public abstract decorationType: vscode.TextEditorDecorationType;
+    public abstract outlineColour: string;
     public abstract name: SubjectType;
     public abstract jumpPhaseType: common.JumpPhaseType;
     public abstract readonly displayName: string;
@@ -184,13 +184,38 @@ export default abstract class SubjectBase implements SubjectActions {
         });
     }
 
+    async prependNew(): Promise<void> {
+        await this.context.editor.edit((e) => {
+            selections.tryMap(this.context.editor, (selection) =>
+                this.subjectIO.insertNew(
+                    this.context.editor.document,
+                    e,
+                    selection,
+                    common.Direction.backwards
+                )
+            );
+        });
+    }
+
+    async appendNew(): Promise<void> {
+        await this.context.editor.edit((e) => {
+            selections.tryMap(this.context.editor, (selection) =>
+                this.subjectIO.insertNew(
+                    this.context.editor.document,
+                    e,
+                    selection,
+                    common.Direction.forwards
+                )
+            );
+        });
+    }
+
     async firstObjectInScope(): Promise<void> {
         selections.tryMap(this.context.editor, (selection) =>
             this.subjectIO
-                .iterAll(this.context.editor.document, {
+                .iterScope(this.context.editor.document, {
                     startingPosition: selection,
                     direction: "backwards",
-                    restrictToCurrentScope: true,
                 })
                 .tryLast()
         );
@@ -198,29 +223,19 @@ export default abstract class SubjectBase implements SubjectActions {
     async lastObjectInScope(): Promise<void> {
         selections.tryMap(this.context.editor, (selection) =>
             this.subjectIO
-                .iterAll(this.context.editor.document, {
+                .iterScope(this.context.editor.document, {
                     startingPosition: selection,
                     direction: "forwards",
-                    restrictToCurrentScope: true,
                 })
                 .tryLast()
         );
     }
 
-    async search(target: common.Char) {
+    async skip(direction: common.Direction, target: common.Char) {
         selections.tryMap(this.context.editor, (selection) =>
-            this.subjectIO.search(this.context.editor.document, target, {
+            this.subjectIO.skip(this.context.editor.document, target, {
                 startingPosition: selection.end,
-                direction: "forwards",
-            })
-        );
-    }
-
-    async searchBackwards(target: common.Char) {
-        selections.tryMap(this.context.editor, (selection) =>
-            this.subjectIO.search(this.context.editor.document, target, {
-                startingPosition: selection.start,
-                direction: "backwards",
+                direction,
             })
         );
     }
@@ -277,11 +292,6 @@ export default abstract class SubjectBase implements SubjectActions {
                 selection.start
             );
         });
-
-        this.context.editor.setDecorations(
-            this.decorationType,
-            this.context.editor.selections
-        );
     }
 
     equals(other: SubjectBase) {
