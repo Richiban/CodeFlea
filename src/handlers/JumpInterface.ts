@@ -5,14 +5,24 @@ import * as vscode from "vscode";
 import * as ranges from "../utils/selectionsAndRanges";
 
 function createDecorationOption(decorationRange: vscode.Range, text: string) {
+    const extraProps = [
+        "font-size:0.85em",
+        "border-radius: 0.5ch",
+        "line-height: 1.75ch",
+        "position: absolute",
+    ].join(";");
+
     return <vscode.DecorationOptions>{
         range: decorationRange,
         renderOptions: {
             before: {
-                color: new vscode.ThemeColor("editor.foreground"),
+                color: "silver",
+                backgroundColor: "navy",
                 contentText: text,
-                margin: `-1.5ch 0 0 0; position: absolute`,
-                textDecoration: ";font-size:0.85em;background-color:navy;",
+                margin: `-0.5ch 0.1ch 0 0`,
+                padding: `0 0.25ch`,
+                textDecoration: ";" + extraProps,
+                border: "1px solid gray",
             },
         },
     };
@@ -24,7 +34,7 @@ export default class JumpInterface {
     private jumpCodes: string[];
 
     constructor(private readonly context: common.ExtensionContext) {
-        this.jumpCodes = context.config.jump.characters.split(/[\s,]+/);
+        this.jumpCodes = context.config.jump.characters.split("");
     }
 
     async jump(jumpLocations: {

@@ -48,10 +48,12 @@ export default abstract class SubjectIOBase {
         document: vscode.TextDocument,
         options: IterationOptions
     ): Enumerable<common.TextObject>;
+
     abstract iterHorizontally(
         document: vscode.TextDocument,
         options: IterationOptions
     ): Enumerable<common.TextObject>;
+
     abstract iterVertically(
         document: vscode.TextDocument,
         options: IterationOptions
@@ -107,12 +109,12 @@ export default abstract class SubjectIOBase {
         document: vscode.TextDocument,
         targetChar: common.Char,
         options: IterationOptions
-    ): vscode.Range | undefined {
-        for (const wordRange of this.iterAll(document, options)) {
-            const char = editor.charAt(document, wordRange.start);
+    ): common.TextObject | undefined {
+        for (const textObject of this.iterAll(document, options)) {
+            const char = editor.charAt(document, textObject.start);
 
             if (char.toLowerCase() === targetChar.toLowerCase()) {
-                return wordRange;
+                return textObject;
             }
         }
 
