@@ -4,12 +4,12 @@ import * as vscode from "vscode";
 import * as subjects from "../subjects/subjects";
 import InsertMode from "./InsertMode";
 import { EditorMode, EditorModeChangeRequest } from "./modes";
-import FleaMode from "./FleaMode";
 import { SubjectAction } from "../subjects/SubjectActions";
+import CommandMode from "./CommandMode";
 
 export default class ExtendMode extends EditorMode {
-    private readonly wrappedMode: FleaMode;
-    private readonly anchors: vscode.Selection[] = [];
+    private readonly wrappedMode: CommandMode;
+    private readonly anchors: readonly vscode.Selection[] = [];
     private actives: readonly vscode.Selection[] = [];
 
     readonly cursorStyle = vscode.TextEditorCursorStyle.BlockOutline;
@@ -21,7 +21,7 @@ export default class ExtendMode extends EditorMode {
 
     constructor(
         private readonly context: common.ExtensionContext,
-        previousMode: FleaMode
+        previousMode: CommandMode
     ) {
         super();
 
@@ -31,7 +31,12 @@ export default class ExtendMode extends EditorMode {
         this.actives = [...this.context.editor.selections];
 
         this.decorationType = vscode.window.createTextEditorDecorationType({
-            border: `1px dashed ${previousMode.subject.outlineColour}`,
+            dark: {
+                border: `1px dashed ${previousMode.subject.outlineColour.dark}`,
+            },
+            light: {
+                border: `1px dashed ${previousMode.subject.outlineColour.light}`,
+            },
         });
     }
 
@@ -43,7 +48,7 @@ export default class ExtendMode extends EditorMode {
         switch (newMode.kind) {
             case "INSERT":
                 return new InsertMode(this.context, this.wrappedMode);
-            case "FLEA":
+            case "COMMAND":
                 return this.wrappedMode;
             case "EXTEND":
                 if (!newMode.subjectName) {
@@ -53,7 +58,7 @@ export default class ExtendMode extends EditorMode {
                 if (newMode.subjectName !== this.wrappedMode.subject.name) {
                     await vscode.commands.executeCommand("cancelSelection");
 
-                    return new FleaMode(
+                    return new CommandMode(
                         this.context,
                         subjects.createFrom(this.context, newMode.subjectName)
                     );
@@ -61,12 +66,12 @@ export default class ExtendMode extends EditorMode {
 
                 switch (newMode.subjectName) {
                     case "WORD":
-                        return new FleaMode(
+                        return new CommandMode(
                             this.context,
                             subjects.createFrom(this.context, "SUBWORD")
                         );
                     case "SUBWORD":
-                        return new FleaMode(
+                        return new CommandMode(
                             this.context,
                             subjects.createFrom(this.context, "WORD")
                         );
@@ -79,7 +84,7 @@ export default class ExtendMode extends EditorMode {
     with(
         args: Partial<{
             context: common.ExtensionContext;
-            wrappedMode: FleaMode;
+            wrappedMode: CommandMode;
         }>
     ) {
         return new ExtendMode(

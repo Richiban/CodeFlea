@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import * as common from "../common";
 import ExtendMode from "./ExtendMode";
 import { EditorMode, EditorModeChangeRequest } from "./modes";
-import FleaMode from "./FleaMode";
+import CommandMode from "./CommandMode";
 import * as subjects from "../subjects/subjects";
 
 export default class InsertMode extends EditorMode {
@@ -14,7 +14,7 @@ export default class InsertMode extends EditorMode {
 
     constructor(
         private readonly context: common.ExtensionContext,
-        private previousNavigateMode: FleaMode
+        private previousNavigateMode: CommandMode
     ) {
         super();
     }
@@ -33,7 +33,7 @@ export default class InsertMode extends EditorMode {
             case "EXTEND":
                 return new ExtendMode(this.context, this.previousNavigateMode);
 
-            case "FLEA":
+            case "COMMAND":
                 if (!newMode.subjectName) {
                     return this.previousNavigateMode;
                 } else {
@@ -42,7 +42,7 @@ export default class InsertMode extends EditorMode {
                         newMode.subjectName
                     );
 
-                    return new FleaMode(this.context, subject);
+                    return new CommandMode(this.context, subject);
                 }
         }
     }

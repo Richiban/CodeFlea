@@ -101,7 +101,7 @@ export const registeredCommands: ExtensionCommand[] = [
         id: "codeFlea.changeToBracketSubject",
         execute: async (manager) => {
             manager.changeMode({
-                kind: "FLEA",
+                kind: "COMMAND",
                 subjectName: "BRACKETS",
             });
         },
@@ -110,7 +110,7 @@ export const registeredCommands: ExtensionCommand[] = [
         id: "codeFlea.changeToWordSubject",
         execute: async (manager: CodeFleaManager) => {
             manager.changeMode({
-                kind: "FLEA",
+                kind: "COMMAND",
                 subjectName: "WORD",
             });
         },
@@ -119,7 +119,7 @@ export const registeredCommands: ExtensionCommand[] = [
         id: "codeFlea.changeToLineSubject",
         execute: async (manager: CodeFleaManager) => {
             manager.changeMode({
-                kind: "FLEA",
+                kind: "COMMAND",
                 subjectName: "LINE",
             });
         },
@@ -128,7 +128,7 @@ export const registeredCommands: ExtensionCommand[] = [
         id: "codeFlea.changeToInterwordSubject",
         execute: async (manager: CodeFleaManager) => {
             manager.changeMode({
-                kind: "FLEA",
+                kind: "COMMAND",
                 subjectName: "INTERWORD",
             });
         },
@@ -137,7 +137,7 @@ export const registeredCommands: ExtensionCommand[] = [
         id: "codeFlea.changeToSubwordSubject",
         execute: async (manager: CodeFleaManager) => {
             manager.changeMode({
-                kind: "FLEA",
+                kind: "COMMAND",
                 subjectName: "SUBWORD",
             });
         },
@@ -146,7 +146,7 @@ export const registeredCommands: ExtensionCommand[] = [
         id: "codeFlea.changeToBlockSubject",
         execute: async (manager: CodeFleaManager) => {
             manager.changeMode({
-                kind: "FLEA",
+                kind: "COMMAND",
                 subjectName: "BLOCK",
             });
         },
@@ -158,19 +158,19 @@ export const registeredCommands: ExtensionCommand[] = [
         },
     },
     {
-        id: "codeFlea.changeToFleaModeDefault",
+        id: "codeFlea.changeToCommandModeDefault",
         execute: async (manager: CodeFleaManager) => {
             manager.changeMode({
-                kind: "FLEA",
-                subjectName: "WORD",
+                kind: "COMMAND",
+                subjectName: manager.config.defaultSubject,
             });
         },
     },
     {
-        id: "codeFlea.changeToFleaModeLast",
+        id: "codeFlea.changeToCommandModeLast",
         execute: async (manager: CodeFleaManager) => {
             manager.changeMode({
-                kind: "FLEA",
+                kind: "COMMAND",
             });
         },
     },

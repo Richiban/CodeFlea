@@ -10,18 +10,18 @@ import SubjectBase from "../subjects/SubjectBase";
 import { SubjectAction } from "../subjects/SubjectActions";
 import JumpInterface from "../handlers/JumpInterface";
 
-export default class FleaMode extends modes.EditorMode {
+export default class CommandMode extends modes.EditorMode {
     private lastSkip: common.Char | undefined = undefined;
 
     readonly cursorStyle = vscode.TextEditorCursorStyle.UnderlineThin;
-    readonly name = "FLEA";
+    readonly name = "COMMAND";
 
     readonly decorationType: vscode.TextEditorDecorationType;
 
     get statusBarText(): string {
         const skipString = this.lastSkip ? ` | Skip: ${this.lastSkip}` : ``;
 
-        return `Flea mode (${this.subject.displayName})${skipString}`;
+        return `Command mode (${this.subject.displayName})${skipString}`;
     }
 
     constructor(
@@ -31,13 +31,18 @@ export default class FleaMode extends modes.EditorMode {
         super();
 
         this.decorationType = vscode.window.createTextEditorDecorationType({
-            border: `1px solid ${subject.outlineColour}`,
+            dark: {
+                border: `1px solid ${subject.outlineColour.dark}`,
+            },
+            light: {
+                border: `1px solid ${subject.outlineColour.light}`,
+            },
         });
     }
 
     equals(previousMode: modes.EditorMode): boolean {
         return (
-            previousMode instanceof FleaMode &&
+            previousMode instanceof CommandMode &&
             previousMode.subject.equals(this.subject)
         );
     }
@@ -48,7 +53,7 @@ export default class FleaMode extends modes.EditorMode {
             subject: SubjectBase;
         }>
     ) {
-        return new FleaMode(
+        return new CommandMode(
             args.context ?? this.context,
             args.subject ?? this.subject
         );
@@ -64,7 +69,7 @@ export default class FleaMode extends modes.EditorMode {
             case "EXTEND":
                 return new ExtendMode(this.context, this);
 
-            case "FLEA":
+            case "COMMAND":
                 if (editor) {
                     selections.collapseSelections(this.context.editor, "start");
                 }

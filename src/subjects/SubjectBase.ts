@@ -10,7 +10,10 @@ export default abstract class SubjectBase implements SubjectActions {
     constructor(protected context: common.ExtensionContext) {}
 
     protected abstract subjectIO: SubjectIOBase;
-    public abstract outlineColour: string;
+    public abstract outlineColour: {
+        dark: common.ColourString;
+        light: common.ColourString;
+    };
     public abstract name: SubjectType;
     public abstract jumpPhaseType: common.JumpPhaseType;
     public abstract readonly displayName: string;

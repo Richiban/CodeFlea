@@ -5,7 +5,10 @@ import SubjectBase from "./SubjectBase";
 export default class SubwordSubject extends SubjectBase {
     public readonly name = "SUBWORD";
     public readonly displayName = "subword";
-    public readonly outlineColour = "#9900ff";
+    public readonly outlineColour = {
+        dark: "#9900ff",
+        light: "#9900ff",
+    } as const;
     protected readonly subjectIO = new SubwordIO();
     public readonly jumpPhaseType = "dual-phase";
 

@@ -32,7 +32,10 @@ function getCharClass(char: string): CharClass | undefined {
     return "operator";
 }
 
-function splitTextIntoSubWords(text: string): common.SubTextRange[] {
+function splitTextIntoSubWords(
+    text: string,
+    direction: common.Direction
+): common.SubTextRange[] {
     const results: common.SubTextRange[] = [];
 
     let prevCharClass: CharClass | undefined = undefined;
@@ -75,7 +78,7 @@ function splitTextIntoSubWords(text: string): common.SubTextRange[] {
         });
     }
 
-    return results;
+    return direction === "forwards" ? results : results.reverse();
 }
 
 function getSubwordRangeAtPosition(
@@ -84,7 +87,7 @@ function getSubwordRangeAtPosition(
 ): vscode.Range | undefined {
     const line = document.lineAt(position.line);
 
-    const subwords = splitTextIntoSubWords(line.text);
+    const subwords = splitTextIntoSubWords(line.text, "forwards");
 
     const range = subwords.find(
         (w) =>
@@ -104,33 +107,58 @@ function getSubwordRangeAtPosition(
     return undefined;
 }
 
+function iterSubwordsOfLine(
+    line: vscode.TextLine,
+    startingPosition: vscode.Position,
+    direction: "forwards" | "backwards"
+): Enumerable<common.TextObject> {
+    const rangesAfterStartPosition =
+        direction === "forwards"
+            ? (subText: common.SubTextRange) =>
+                  subText.range.start >= startingPosition.character
+            : (subText: common.SubTextRange) =>
+                  subText.range.end <= startingPosition.character;
+
+    return new Enumerable(splitTextIntoSubWords(line.text, direction))
+        .filter(rangesAfterStartPosition)
+        .map(
+            ({ range }) =>
+                new vscode.Range(
+                    line.lineNumber,
+                    range.start,
+                    line.lineNumber,
+                    range.end
+                )
+        );
+}
+
 function iterSubwords(
     document: vscode.TextDocument,
     options: IterationOptions
 ): Enumerable<vscode.Range> {
     return new Enumerable<vscode.Range>(
         (function* () {
-            let isFirstLine = true;
             const startingPosition = wordRangeToPosition(
                 options.startingPosition,
                 options.direction
             );
 
-            for (const line of lineUtils.iterLines(document, options)) {
-                const subwords =
-                    options.direction === "forwards"
-                        ? splitTextIntoSubWords(line.text).filter(
-                              (sw) =>
-                                  !isFirstLine ||
-                                  sw.range.start >= startingPosition.character
-                          )
-                        : splitTextIntoSubWords(line.text)
-                              .filter(
-                                  (sw) =>
-                                      !isFirstLine ||
-                                      sw.range.end <= startingPosition.character
-                              )
-                              .reverse();
+            const currentLine = document.lineAt(startingPosition.line);
+
+            yield* iterSubwordsOfLine(
+                currentLine,
+                startingPosition,
+                options.direction
+            );
+
+            for (const line of lineUtils.iterLines(document, {
+                ...options,
+                currentInclusive: false,
+            })) {
+                const subwords = splitTextIntoSubWords(
+                    line.text,
+                    options.direction
+                );
 
                 for (const { range } of subwords) {
                     yield new vscode.Range(
@@ -140,8 +168,6 @@ function iterSubwords(
                         range.end
                     );
                 }
-
-                isFirstLine = false;
             }
         })()
     );
@@ -151,43 +177,7 @@ function iterVertically(
     document: vscode.TextDocument,
     options: IterationOptions
 ): Enumerable<vscode.Range> {
-    return new Enumerable<vscode.Range>(
-        (function* () {
-            let isFirstLine = true;
-            const startingPosition = wordRangeToPosition(
-                options.startingPosition,
-                options.direction
-            );
-
-            for (const line of lineUtils.iterLines(document, options)) {
-                const subwords =
-                    options.direction === "forwards"
-                        ? splitTextIntoSubWords(line.text).filter(
-                              (sw) =>
-                                  !isFirstLine ||
-                                  sw.range.start >= startingPosition.character
-                          )
-                        : splitTextIntoSubWords(line.text)
-                              .filter(
-                                  (sw) =>
-                                      !isFirstLine ||
-                                      sw.range.end <= startingPosition.character
-                              )
-                              .reverse();
-
-                for (const { range } of subwords) {
-                    yield new vscode.Range(
-                        line.lineNumber,
-                        range.start,
-                        line.lineNumber,
-                        range.end
-                    );
-                }
-
-                isFirstLine = false;
-            }
-        })()
-    );
+    throw new Error("Not supported. Use VSCode command instead");
 }
 
 function getClosestRangeAt(
@@ -225,37 +215,18 @@ function getClosestRangeAt(
     return new vscode.Range(position, position);
 }
 
-function iterScope(document: any, options: any): Enumerable<vscode.Range> {
-    return new Enumerable<vscode.Range>(
-        (function* () {
-            const startingPosition = wordRangeToPosition(
-                options.startingPosition,
-                options.direction
-            );
-
-            const line = document.lineAt(startingPosition.line);
-
-            const subwords =
-                options.direction === "forwards"
-                    ? splitTextIntoSubWords(line.text).filter(
-                          (sw) => sw.range.start >= startingPosition.character
-                      )
-                    : splitTextIntoSubWords(line.text)
-                          .filter(
-                              (sw) => sw.range.end <= startingPosition.character
-                          )
-                          .reverse();
-
-            for (const { range } of subwords) {
-                yield new vscode.Range(
-                    line.lineNumber,
-                    range.start,
-                    line.lineNumber,
-                    range.end
-                );
-            }
-        })()
+function iterScope(
+    document: vscode.TextDocument,
+    options: IterationOptions
+): Enumerable<vscode.Range> {
+    const startingPosition = wordRangeToPosition(
+        options.startingPosition,
+        options.direction
     );
+
+    const line = document.lineAt(startingPosition.line);
+
+    return iterSubwordsOfLine(line, startingPosition, options.direction);
 }
 
 export default class SubwordIO extends SubjectIOBase {

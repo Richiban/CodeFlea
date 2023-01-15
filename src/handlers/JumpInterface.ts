@@ -86,22 +86,13 @@ export default class JumpInterface {
                     return undefined;
                 }
 
-                return this.findMatch(codedLocations, targetChar);
+                return codedLocations.find(([location, jumpCode]) => {
+                    if (jumpCode === targetChar) {
+                        return location;
+                    }
+                })?.[0];
             }
         }
-    }
-
-    private findMatch(
-        codedLocations: (readonly [vscode.Position, string])[],
-        targetChar: string
-    ): vscode.Position | undefined {
-        for (const [location, jumpCode] of codedLocations) {
-            if (jumpCode === targetChar) {
-                return location;
-            }
-        }
-
-        return undefined;
     }
 
     private removeJumpCodes() {

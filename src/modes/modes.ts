@@ -3,11 +3,11 @@ import { Direction } from "../common";
 import { SubjectAction } from "../subjects/SubjectActions";
 import { SubjectType } from "../subjects/SubjectType";
 
-export type EditorModeType = "NULL" | "INSERT" | "FLEA" | "EXTEND";
+export type EditorModeType = "NULL" | "INSERT" | "COMMAND" | "EXTEND";
 
 export type EditorModeChangeRequest =
     | { kind: "INSERT" }
-    | { kind: "FLEA" | "EXTEND"; subjectName?: SubjectType };
+    | { kind: "COMMAND" | "EXTEND"; subjectName?: SubjectType };
 
 export abstract class EditorMode implements vscode.Disposable {
     abstract readonly name: EditorModeType;

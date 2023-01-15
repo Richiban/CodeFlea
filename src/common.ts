@@ -62,3 +62,5 @@ export function directionToDelta(direction: Direction) {
         ? (x: number) => x + 1
         : (x: number) => x - 1;
 }
+
+export type ColourString = `#${string}`;

@@ -2,7 +2,7 @@
 
 ## Quick reference
 
-1. To enter **Flea** mode, press `,.`
+1. To enter **Command** mode, press `,.`
 2. To enter **insert** mode `a`, `p`, `,`, `/` or `c` to insert at the end, beginning, current position, midpoint or delete the current selection and insert in its place
 3. Press `↑`, `↓`, `←`, `→` or `u`, `e`, `n`, `i` to move to the neighbouring line, word, inter-word or block respectively
 
@@ -24,15 +24,15 @@ CodeFlea is a modal extension (such as Vim or Helix), meaning that pressing a ke
 
 There are three modes in CodeFlea:
 
--   **Flea** mode: the default mode. In this mode, the editor is in a state where it is ready to accept commands to move the cursor around.
+-   **Command** mode: the default mode. In this mode, the editor is in a state where it is ready to accept commands to move the cursor around.
 -   **Insert** mode: in this mode the editor will accept text input and keyboard shortcuts as normal for VS Code.
--   **Extend** mode: this is the same as **Flea** mode, except that each selection will be extended when a movement is made.
+-   **Extend** mode: this is the same as **Command** mode, except that each selection will be extended when a movement is made.
 
 ## Changing modes
 
-The default mode when opening a new file is **Flea** mode. See the section on [keyboard shortcuts](#default-keybindings) for how to enter **Insert** mode.
+The default mode when opening a new file is **Command** mode. See the section on [keyboard shortcuts](#default-keybindings) for how to enter **Insert** mode.
 
-To return to **Flea** mode, press `,` then `.` in (very) quick succession.
+To return to **Command** mode, press `,` then `.` in (very) quick succession.
 
 ## Subjects and objects
 
@@ -185,7 +185,7 @@ The basic movement commands are laid out on the QWERTY keyboard in the same way 
 └───┘ └───┘ └───┘       └───┘ └───┘ └───┘
 ```
 
-## Searching
+## Skipping
 
 By pressing `s` you will be prompted for the first character of the desired object. Once you have entered the first character, the selection will be moved to the first object that begins with that character. To skip backwards the process is the same; just press `f` instead.
 
@@ -231,10 +231,6 @@ By first changing the _subject_ to _Block_, we can reorder the methods of a clas
 | `/`                | `codeFlea.changeToInsertModeMidPoint` | Insert at the midpoint of the current selection              |
 | `/`                | `codeFlea.changeToInsertModeSurround` | Insert at the midpoint of the current selection              |
 | `c`                | `codeFlea.changeToInsertModeAppend`   | Delete the current selection and insert in its place         |
-
-| Default keybinding          | Command ID | Description           |
-| --------------------------- | ---------- | --------------------- |
-| `, .` (when in insert mode) | ``         | Change to insert mode |
 
 | Default keybinding | Command ID                    | Description                 |
 | ------------------ | ----------------------------- | --------------------------- |

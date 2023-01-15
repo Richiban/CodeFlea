@@ -3,7 +3,7 @@ import InsertMode from "./InsertMode";
 import ExtendMode from "./ExtendMode";
 import * as common from "../common";
 import { EditorMode, EditorModeChangeRequest } from "./modes";
-import FleaMode from "./FleaMode";
+import CommandMode from "./CommandMode";
 
 export default class NullMode extends EditorMode {
     readonly decorationType = undefined;
@@ -21,7 +21,7 @@ export default class NullMode extends EditorMode {
 
     async changeTo(newMode: EditorModeChangeRequest): Promise<EditorMode> {
         const defaultSubject = createFrom(this.context, "WORD");
-        const navigateMode = new FleaMode(this.context, defaultSubject);
+        const navigateMode = new CommandMode(this.context, defaultSubject);
 
         switch (newMode.kind) {
             case "INSERT":
@@ -30,7 +30,7 @@ export default class NullMode extends EditorMode {
             case "EXTEND":
                 return new ExtendMode(this.context, navigateMode);
 
-            case "FLEA":
+            case "COMMAND":
                 return navigateMode;
         }
     }

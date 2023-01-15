@@ -6,5 +6,8 @@ export default class BlockSubject extends SubjectBase {
     readonly name = "BLOCK";
     readonly displayName = "block";
     public readonly jumpPhaseType = "single-phase";
-    public readonly outlineColour = "#aba246";
+    public readonly outlineColour = {
+        dark: "#aba246",
+        light: "#aba246",
+    } as const;
 }

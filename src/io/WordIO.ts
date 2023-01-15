@@ -172,7 +172,43 @@ function iterScope(
     document: vscode.TextDocument,
     options: IterationOptions
 ): Enumerable<vscode.Range> {
-    return iterAll(document, options);
+    return enumerable(function* () {
+        let searchPosition: vscode.Position | undefined = wordRangeToPosition(
+            options.startingPosition,
+            options.direction
+        );
+
+        const startingLine = searchPosition.line;
+
+        const diff = options.direction === "forwards" ? 2 : -2;
+        let first = true;
+
+        do {
+            const wordRange = document.getWordRangeAtPosition(searchPosition);
+
+            if (wordRange) {
+                if (options.currentInclusive || !first) {
+                    yield wordRange;
+                }
+
+                searchPosition = positions.translateWithWrap(
+                    document,
+                    options.direction === "forwards"
+                        ? wordRange.end
+                        : wordRange.start,
+                    diff
+                );
+            } else {
+                searchPosition = positions.translateWithWrap(
+                    document,
+                    searchPosition,
+                    diff
+                );
+            }
+
+            first = false;
+        } while (searchPosition && searchPosition.line === startingLine);
+    });
 }
 
 export default class WordIO extends SubjectIOBase {

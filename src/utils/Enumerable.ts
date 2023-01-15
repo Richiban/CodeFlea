@@ -111,6 +111,18 @@ export default class Enumerable<out T> implements Iterable<T> {
         );
     }
 
+    flatMap<R, U extends Iterable<R>>(f: (x: T) => U) {
+        const iter = this.iter;
+
+        return new Enumerable(
+            (function* () {
+                for (const x of iter) {
+                    yield* f(x);
+                }
+            })()
+        );
+    }
+
     takeWhile(f: (x: T) => boolean): Enumerable<T> {
         const iter = this.iter;
 

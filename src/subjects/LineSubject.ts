@@ -5,7 +5,7 @@ import SubjectBase from "./SubjectBase";
 
 export default class LineSubject extends SubjectBase {
     protected subjectIO = new LineIO();
-    public outlineColour = "#8feb34";
+    public outlineColour = { dark: "#8feb34", light: "#66CDAA" } as const;
     public readonly name = "LINE";
     public readonly displayName = "line";
     public readonly jumpPhaseType = "single-phase";

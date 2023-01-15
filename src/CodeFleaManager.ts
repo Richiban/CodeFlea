@@ -41,7 +41,7 @@ export default class CodeFleaManager {
 
         if (this.mode instanceof NullMode) {
             await this.changeMode({
-                kind: "FLEA",
+                kind: "COMMAND",
                 subjectName: "WORD",
             });
         }
