@@ -13,6 +13,7 @@ export type IterationOptions = {
 
 export default abstract class SubjectIOBase {
     abstract deletableSeparators: RegExp;
+    abstract defaultSeparationText: string;
 
     abstract getContainingObjectAt(
         document: vscode.TextDocument,
@@ -144,11 +145,7 @@ export default abstract class SubjectIOBase {
         if (separationTextRange) {
             const separationText = document.getText(separationTextRange);
 
-            if (separationTextRange.start.isBefore(selection.end)) {
-                textEdit.insert(selection.end, separationText);
-            } else {
-                textEdit.insert(selection.start, separationText);
-            }
+            textEdit.insert(selection.end, separationText);
         }
 
         textEdit.insert(selection.end, document.getText(selection));
@@ -167,14 +164,14 @@ export default abstract class SubjectIOBase {
             currentObject
         );
 
-        if (separationTextRange) {
-            const separationText = document.getText(separationTextRange);
+        const separationText = separationTextRange
+            ? document.getText(separationTextRange)
+            : this.defaultSeparationText;
 
-            if (separationTextRange.start.isBefore(currentObject.end)) {
-                textEdit.insert(currentObject.end, separationText);
-            } else {
-                textEdit.insert(currentObject.start, separationText);
-            }
+        if (direction === common.Direction.forwards) {
+            textEdit.insert(currentObject.end, separationText);
+        } else {
+            textEdit.insert(currentObject.start, separationText);
         }
 
         const insertionPoint =

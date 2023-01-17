@@ -1,50 +1,91 @@
 import * as vscode from "vscode";
-import { QuickCommand } from "./quickMenus";
+import { char, QuickCommand } from "./quickMenus";
 import * as common from "../common";
 
 export function quickCommandPicker(
-    commands: QuickCommand[],
-    options: { allowFreeEntry: true }
-): Promise<QuickCommand | string | undefined>;
-export function quickCommandPicker(
-    commands: QuickCommand[],
-    options: { allowFreeEntry: false }
+    commands: QuickCommand[]
 ): Promise<QuickCommand | undefined>;
+
 export function quickCommandPicker(
     commands: QuickCommand[],
-    options: { allowFreeEntry: boolean }
+    freeEntryOptions: { label: string; detail: string }
+): Promise<QuickCommand | string | undefined>;
+
+export function quickCommandPicker(
+    commands: QuickCommand[],
+    freeEntryOptions?: { label: string; detail: string }
 ): Promise<QuickCommand | string | undefined> {
     return new Promise((resolve, reject) => {
-        const quickPick = vscode.window.createQuickPick();
+        type QuickPickItem = vscode.QuickPickItem & {
+            quickKey?: common.Char;
+            displayOnly?: true;
+        };
 
-        quickPick.items = commands.map((e) => {
-            return { label: `[${e.quickKey}] ${e.label}` };
-        });
+        const quickPick = vscode.window.createQuickPick<QuickPickItem>();
+
+        const freeEntryItems = freeEntryOptions
+            ? [
+                  {
+                      label: "",
+                      kind: vscode.QuickPickItemKind.Separator,
+                      displayOnly: true,
+                  },
+                  {
+                      label: freeEntryOptions.label,
+                      alwaysShow: true,
+                      detail: freeEntryOptions.detail,
+                      displayOnly: true,
+                  },
+              ]
+            : [];
+
+        quickPick.items = commands
+            .map<vscode.QuickPickItem>((e) => {
+                return {
+                    quickKey: e.quickKey,
+                    label: `[${e.quickKey}]`,
+                    description: e.label,
+                    execute: e.execute,
+                };
+            })
+            .concat(...freeEntryItems);
 
         quickPick.onDidHide(() => {
             resolve(undefined);
             quickPick.dispose();
         });
 
-        quickPick.onDidChangeValue((e) => {
+        quickPick.onDidChangeValue((s) => {
             for (const option of commands) {
-                if (option.quickKey === e) {
+                if (option.quickKey === s) {
                     resolve(option);
                     quickPick.dispose();
                     return;
                 }
             }
 
-            if (!options.allowFreeEntry) {
+            if (!freeEntryOptions) {
                 quickPick.value = "";
             }
         });
 
         quickPick.onDidAccept(() => {
-            if (options.allowFreeEntry) {
-                resolve(quickPick.value);
-            } else {
-                reject();
+            const selected = quickPick.selectedItems[0];
+
+            if (selected.displayOnly) {
+                if (quickPick.value) {
+                    resolve(quickPick.value);
+                } else {
+                    return;
+                }
+            }
+
+            for (const option of commands) {
+                if (option.quickKey === selected.quickKey) {
+                    resolve(option);
+                    quickPick.dispose();
+                    return;
+                }
             }
 
             quickPick.dispose();

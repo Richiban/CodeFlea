@@ -405,6 +405,7 @@ function iterVertically(
 
 export default class BracketIO extends SubjectIOBase {
     deletableSeparators = /^[\s,.:=+\-*\/%]+$/;
+    defaultSeparationText = " ";
 
     constructor(private inclusive: boolean) {
         super();

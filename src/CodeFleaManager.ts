@@ -86,7 +86,14 @@ export default class CodeFleaManager {
             );
         }
 
-        if (event.kind === vscode.TextEditorSelectionChangeKind.Command) return;
+        if (
+            event.kind === vscode.TextEditorSelectionChangeKind.Command ||
+            event.kind === undefined
+        ) {
+            this.editor.revealRange(this.editor.selection);
+            return;
+        }
+
         if (this.mode instanceof InsertMode) return;
 
         if (
@@ -117,9 +124,7 @@ export default class CodeFleaManager {
     }
 
     async openSpaceMenu() {
-        const choice = await quickCommandPicker(SpaceCommands, {
-            allowFreeEntry: false,
-        });
+        const choice = await quickCommandPicker(SpaceCommands);
 
         if (choice) {
             await choice.execute();
@@ -128,7 +133,8 @@ export default class CodeFleaManager {
 
     async openGoToMenu() {
         const choice = await quickCommandPicker(GoToCommands, {
-            allowFreeEntry: true,
+            label: "Go to line...",
+            detail: "Enter a line number",
         });
 
         if (typeof choice === "string") {
@@ -140,7 +146,7 @@ export default class CodeFleaManager {
                 );
             }
 
-            await goToLine(this.editor, parsed);
+            await goToLine(this.editor, parsed - 1);
         } else if (choice) {
             choice.execute();
         }
@@ -149,9 +155,7 @@ export default class CodeFleaManager {
     }
 
     async openModifyMenu() {
-        const choice = await quickCommandPicker(ModifyCommands, {
-            allowFreeEntry: false,
-        });
+        const choice = await quickCommandPicker(ModifyCommands);
 
         if (choice) {
             await choice.execute();

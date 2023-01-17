@@ -311,6 +311,7 @@ function iterScope(
 
 export default class InterwordIO extends SubjectIOBase {
     deletableSeparators = /^$/;
+    defaultSeparationText = " ";
 
     getContainingObjectAt = getContainingRangeAt;
     getClosestObjectTo = getClosestRangeTo;

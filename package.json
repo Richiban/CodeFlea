@@ -398,6 +398,16 @@
                 "key": "t",
                 "command": "codeFlea.jump",
                 "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "backspace",
+                "command": "cursorUndo",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "delete",
+                "command": "cursorRedo",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             }
         ]
     },

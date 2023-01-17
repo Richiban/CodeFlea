@@ -276,6 +276,7 @@ function iterScope(
 
 export default class BlockIO extends SubjectIOBase {
     deletableSeparators = /^\s+$/;
+    defaultSeparationText = "\n\n";
 
     getContainingObjectAt = getContainingRangeAt;
     getClosestObjectTo = getClosestContainingBlock;

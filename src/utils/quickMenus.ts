@@ -1,15 +1,20 @@
 import * as vscode from "vscode";
 import { scrollToCursorAtCenter } from "./editor";
+import * as common from "../common";
+
+export function char(ch: string): common.Char {
+    return ch as common.Char;
+}
 
 export type QuickCommand = {
-    quickKey: string;
+    quickKey: common.Char;
     label: string;
     execute: () => Promise<void>;
 };
 
 export const ModifyCommands: QuickCommand[] = [
     {
-        quickKey: "k",
+        quickKey: char("k"),
         label: "Transform to kebab case",
         async execute() {
             await vscode.commands.executeCommand(
@@ -18,7 +23,7 @@ export const ModifyCommands: QuickCommand[] = [
         },
     },
     {
-        quickKey: "l",
+        quickKey: char("l"),
         label: "Transform to lower case",
         async execute() {
             await vscode.commands.executeCommand(
@@ -27,7 +32,7 @@ export const ModifyCommands: QuickCommand[] = [
         },
     },
     {
-        quickKey: "s",
+        quickKey: char("s"),
         label: "Transform to snake case",
         async execute() {
             await vscode.commands.executeCommand(
@@ -36,7 +41,7 @@ export const ModifyCommands: QuickCommand[] = [
         },
     },
     {
-        quickKey: "t",
+        quickKey: char("t"),
         label: "Transform to title case",
         async execute() {
             await vscode.commands.executeCommand(
@@ -45,7 +50,7 @@ export const ModifyCommands: QuickCommand[] = [
         },
     },
     {
-        quickKey: "u",
+        quickKey: char("u"),
         label: "Transform to upper case",
         async execute() {
             await vscode.commands.executeCommand(
@@ -57,22 +62,22 @@ export const ModifyCommands: QuickCommand[] = [
 
 export const GoToCommands: QuickCommand[] = [
     {
-        quickKey: "u",
-        label: "top of file",
+        quickKey: char("u"),
+        label: "Top of file",
         execute: async () => {
             await vscode.commands.executeCommand("cursorTop");
         },
     },
     {
-        quickKey: "e",
-        label: "bottom of file",
+        quickKey: char("e"),
+        label: "Bottom of file",
         execute: async () => {
             await vscode.commands.executeCommand("cursorBottom");
         },
     },
     {
-        quickKey: "t",
-        label: "go to type definition",
+        quickKey: char("t"),
+        label: "Go to type definition",
         execute: async () => {
             await vscode.commands.executeCommand(
                 "editor.action.goToTypeDefinition"
@@ -80,8 +85,8 @@ export const GoToCommands: QuickCommand[] = [
         },
     },
     {
-        quickKey: "i",
-        label: "go to implementation",
+        quickKey: char("i"),
+        label: "Go to implementation",
         execute: async () => {
             await vscode.commands.executeCommand(
                 "editor.action.goToImplementation"
@@ -89,8 +94,8 @@ export const GoToCommands: QuickCommand[] = [
         },
     },
     {
-        quickKey: "r",
-        label: "find references",
+        quickKey: char("r"),
+        label: "Find references",
         execute: async () => {
             await vscode.commands.executeCommand(
                 "editor.action.goToReferences"
@@ -98,15 +103,15 @@ export const GoToCommands: QuickCommand[] = [
         },
     },
     {
-        quickKey: "p",
-        label: "go to file",
+        quickKey: char("p"),
+        label: "Go to file",
         execute: async () => {
             await vscode.commands.executeCommand("workbench.action.quickOpen");
         },
     },
     {
-        quickKey: "q",
-        label: "go to last edit location",
+        quickKey: char("q"),
+        label: "Go to last edit location",
         execute: async () => {
             await vscode.commands.executeCommand(
                 "workbench.action.navigateToLastEditLocation"
@@ -114,36 +119,36 @@ export const GoToCommands: QuickCommand[] = [
         },
     },
     {
-        quickKey: "b",
-        label: "go to bracket",
+        quickKey: char("b"),
+        label: "Go to bracket",
         execute: async () => {
             await vscode.commands.executeCommand("editor.action.jumpToBracket");
         },
     },
     {
-        quickKey: "b",
-        label: "go to bracket",
+        quickKey: char("b"),
+        label: "Go to bracket",
         execute: async () => {
             await vscode.commands.executeCommand("editor.action.jumpToBracket");
         },
     },
     {
-        quickKey: "f",
-        label: "go to next folding range",
+        quickKey: char("f"),
+        label: "Go to next folding range",
         execute: async () => {
             await vscode.commands.executeCommand("editor.gotoNextFold");
         },
     },
     {
-        quickKey: "F",
-        label: "go to previous folding range",
+        quickKey: char("F"),
+        label: "Go to previous folding range",
         execute: async () => {
             await vscode.commands.executeCommand("editor.gotoPreviousFold");
         },
     },
     {
-        quickKey: "a",
-        label: "go to parent fold",
+        quickKey: char("a"),
+        label: "Go to parent fold",
         execute: async () => {
             await vscode.commands.executeCommand("editor.gotoParentFold");
         },
@@ -152,8 +157,8 @@ export const GoToCommands: QuickCommand[] = [
 
 export const SpaceCommands: QuickCommand[] = [
     {
-        quickKey: " ",
-        label: "center editor",
+        quickKey: char(" "),
+        label: "Center editor",
         execute: async () => {
             if (vscode.window.activeTextEditor) {
                 scrollToCursorAtCenter(vscode.window.activeTextEditor);
@@ -161,15 +166,15 @@ export const SpaceCommands: QuickCommand[] = [
         },
     },
     {
-        quickKey: "b",
-        label: "open breadcrumbs",
+        quickKey: char("b"),
+        label: "Open breadcrumbs",
         execute: async () => {
             await vscode.commands.executeCommand("breadcrumbs.focusAndSelect");
         },
     },
     {
-        quickKey: "f",
-        label: "format document",
+        quickKey: char("f"),
+        label: "Format document",
         execute: async () => {
             await vscode.commands.executeCommand(
                 "editor.action.formatDocument"
@@ -177,21 +182,21 @@ export const SpaceCommands: QuickCommand[] = [
         },
     },
     {
-        quickKey: "r",
-        label: "rename",
+        quickKey: char("r"),
+        label: "Rename",
         execute: async () => {
             await vscode.commands.executeCommand("editor.action.rename");
         },
     },
     {
-        quickKey: "s",
+        quickKey: char("s"),
         label: "Open VS Codes's Go to Symbol in Editor",
         execute: async () => {
             await vscode.commands.executeCommand("workbench.action.gotoSymbol");
         },
     },
     {
-        quickKey: "S",
+        quickKey: char("S"),
         label: "Open VS Codes's Go to Symbol in Workspace",
         execute: async () => {
             await vscode.commands.executeCommand(
@@ -200,66 +205,73 @@ export const SpaceCommands: QuickCommand[] = [
         },
     },
     {
-        quickKey: "h",
-        label: "Show Definition Preview Hover.",
+        quickKey: char("h"),
+        label: "Show Definition Preview Hover",
         execute: async () => {
             await vscode.commands.executeCommand("editor.action.showHover");
         },
     },
     {
-        quickKey: "l",
+        quickKey: char("l"),
         label: "Toggle fold",
         execute: async () => {
             await vscode.commands.executeCommand("editor.toggleFold");
         },
     },
     {
-        quickKey: "1",
+        quickKey: char("1"),
         label: "Fold level 1",
         execute: async () => {
             await vscode.commands.executeCommand("editor.foldLevel1");
         },
     },
     {
-        quickKey: "2",
+        quickKey: char("2"),
         label: "Fold level 2",
         execute: async () => {
             await vscode.commands.executeCommand("editor.foldLevel2");
         },
     },
     {
-        quickKey: "3",
+        quickKey: char("3"),
         label: "Fold level 3",
         execute: async () => {
             await vscode.commands.executeCommand("editor.foldLevel3");
         },
     },
     {
-        quickKey: "4",
+        quickKey: char("4"),
         label: "Fold level 4",
         execute: async () => {
             await vscode.commands.executeCommand("editor.foldLevel4");
         },
     },
     {
-        quickKey: "5",
+        quickKey: char("5"),
         label: "Fold level 5",
         execute: async () => {
             await vscode.commands.executeCommand("editor.foldLevel5");
         },
     },
     {
-        quickKey: "6",
+        quickKey: char("6"),
         label: "Fold level 6",
         execute: async () => {
             await vscode.commands.executeCommand("editor.foldLevel6");
         },
     },
     {
-        quickKey: "7",
+        quickKey: char("7"),
         label: "Fold level 7",
         execute: async () => {
             await vscode.commands.executeCommand("editor.foldLevel7");
+        },
+    },
+    {
+        quickKey: char("0"),
+        label: "Unfold all",
+        execute: async () => {
+            await vscode.commands.executeCommand("editor.unfoldAll");
         },
     },
 ];

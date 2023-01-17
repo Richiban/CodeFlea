@@ -231,6 +231,7 @@ function iterScope(
 
 export default class SubwordIO extends SubjectIOBase {
     deletableSeparators = /^[\s,.:=+\-*\/%]+$/;
+    defaultSeparationText = " ";
 
     getContainingObjectAt = getSubwordRangeAtPosition;
     getClosestObjectTo = getClosestRangeAt;

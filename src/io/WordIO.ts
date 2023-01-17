@@ -213,6 +213,7 @@ function iterScope(
 
 export default class WordIO extends SubjectIOBase {
     deletableSeparators = /^[\s,.:=+\-*\/%]+$/;
+    defaultSeparationText = " ";
 
     getContainingObjectAt = getContainingWordAt;
 

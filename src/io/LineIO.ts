@@ -130,16 +130,21 @@ function iterScope(
 
     return lineUtils
         .iterLines(document, options)
-        .takeWhile(
-            (l) =>
-                lineUtils.getRelativeIndentation(startingLine, l) ===
-                "same-indentation"
-        )
+        .takeWhile((l) => {
+            switch (lineUtils.getRelativeIndentation(startingLine, l)) {
+                case "same-indentation":
+                case "no-indentation":
+                    return true;
+                default:
+                    return false;
+            }
+        })
         .map((l) => lineUtils.rangeWithoutIndentation(l));
 }
 
 export default class LineIO extends SubjectIOBase {
     deletableSeparators = /\s/;
+    defaultSeparationText = "\n";
 
     getContainingObjectAt = getClosestRangeAt;
     getClosestRangeTo = getClosestRangeAt;
