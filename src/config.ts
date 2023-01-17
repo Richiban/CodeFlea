@@ -1,40 +1,22 @@
 import * as vscode from "vscode";
+import { SubjectType } from "./subjects/SubjectType";
 
 export type JumpConfig = {
-  characters: string;
-  timeout: number;
-};
-
-export type DecorationConfig = {
-  backgroundColor: string;
-  secondaryBackgroundColor: string;
-  backgroundOpacity: string;
-  color: string;
-  borderColor: string;
-
-  width: number;
-  height: number;
-
-  x: number;
-  y: number;
-
-  fontSize: number;
-  fontWeight: string;
-  fontFamily: string;
+    characters: string;
 };
 
 export type Config = {
-  decoration: DecorationConfig;
-  jump: JumpConfig;
-  scrollStep: number;
+    jump: JumpConfig;
+    scrollStep: number;
+    defaultSubject: SubjectType;
 };
 
 export function loadConfig(): Config {
-  const config = vscode.workspace.getConfiguration("codeFlea");
+    const config = vscode.workspace.getConfiguration("codeFlea");
 
-  return {
-    decoration: config.get<DecorationConfig>("decoration")!,
-    jump: config.get<JumpConfig>("jump")!,
-    scrollStep: config.get<number>("scrollStep") || 10,
-  };
+    return {
+        jump: config.get<JumpConfig>("jump")!,
+        scrollStep: config.get<number>("scrollStep") || 10,
+        defaultSubject: config.get<SubjectType>("defaultSubject") ?? "WORD",
+    };
 }

@@ -8,8 +8,11 @@
         "url": "https://github.com/Richiban/CodeFlea/"
     },
     "engines": {
-        "vscode": "^1.41.0"
+        "vscode": "^1.63.0"
     },
+    "extensionKind": [
+        "ui"
+    ],
     "categories": [
         "Other"
     ],
@@ -22,33 +25,7 @@
         "jump"
     ],
     "activationEvents": [
-        "onCommand:codeFlea.jump",
-        "onCommand:codeFlea.extendBlockSelection",
-        "onCommand:codeFlea.extendBlockSelectionBackwards",
-        "onCommand:codeFlea.nextBlankLine",
-        "onCommand:codeFlea.nextBlock",
-        "onCommand:codeFlea.prevBlock",
-        "onCommand:codeFlea.prevBlankLine",
-        "onCommand:codeFlea.nextOuterBlock",
-        "onCommand:codeFlea.prevOuterBlock",
-        "onCommand:codeFlea.nextSameBlock",
-        "onCommand:codeFlea.prevSameBlock",
-        "onCommand:codeFlea.nextInnerBlock",
-        "onCommand:codeFlea.prevInnerBlock",
-        "onCommand:codeFlea.nearestInnerLine",
-        "onCommand:codeFlea.nearestOuterLine",
-        "onCommand:codeFlea.nextInterestingPoint",
-        "onCommand:codeFlea.nextInnerLine",
-        "onCommand:codeFlea.nextSameLine",
-        "onCommand:codeFlea.prevInterestingPoint",
-        "onCommand:codeFlea.prevOuterLine",
-        "onCommand:codeFlea.prevSameLine",
-        "onCommand:codeFlea.scrollToCursor",
-        "onCommand:codeFlea.nextBlockEnd",
-        "onCommand:codeFlea.prevBlockEnd",
-        "onCommand:codeFlea.scrollEditorUp",
-        "onCommand:codeFlea.scrollEditorDown",
-        "onCommand:codeFlea.selectAllBlocksInCurrentScope"
+        "onStartupFinished"
     ],
     "main": "./out/extension.js",
     "contributes": {
@@ -56,251 +33,346 @@
             "title": "CodeFlea: ",
             "type": "",
             "properties": {
+                "codeFlea.modes.navigateKeySequence": {
+                    "description": "The key sequence that will trigger navigation mode from edit mode",
+                    "type": "string",
+                    "default": ",."
+                },
                 "codeFlea.scrollStep": {
                     "description": "The number of lines to scroll when scrolling the editor",
                     "type": "number",
                     "default": "10"
                 },
-                "codeFlea.decoration.backgroundColor": {
-                    "type": "string",
-                    "default": "lightskyblue",
-                    "description": "primary decorator background color"
-                },
-                "codeFlea.decoration.secondaryBackgroundColor": {
-                    "type": "string",
-                    "default": "yellow",
-                    "description": "secondary decorator background color"
-                },
-                "codeFlea.decoration.backgroundOpacity": {
-                    "type": "string",
-                    "default": "0.8"
-                },
-                "codeFlea.decoration.color": {
-                    "type": "string",
-                    "default": "black"
-                },
-                "codeFlea.decoration.borderColor": {
-                    "type": "string",
-                    "default": "black"
-                },
-                "codeFlea.decoration.width": {
-                    "type": "number",
-                    "default": 9
-                },
-                "codeFlea.decoration.height": {
-                    "type": "number",
-                    "default": 13
-                },
-                "codeFlea.decoration.x": {
-                    "type": "number",
-                    "default": 1
-                },
-                "codeFlea.decoration.y": {
-                    "type": "number",
-                    "default": 11
-                },
-                "codeFlea.decoration.fontSize": {
-                    "type": "number",
-                    "default": 12
-                },
-                "codeFlea.decoration.fontWeight": {
-                    "type": "string",
-                    "default": "bold"
-                },
-                "codeFlea.decoration.fontFamily": {
-                    "type": "string",
-                    "default": "Consolas"
-                },
                 "codeFlea.jump.characters": {
                     "type": "string",
-                    "default": "k, j, d, f, l, s, a, h, g, i, o, n, u, r, v, c, w, e, x, m, b, p, q, t, y, z, K, J, D, F, L, S, A, H, G, I, O, N, U, R, V, C, W, E, X, M, B, P, Q, T, Y, Z"
-                },
-                "codeFlea.jump.timeout": {
-                    "type": "number",
-                    "default": "5",
-                    "description": "timeout value in seconds to cancel codeFlea jump commands."
+                    "default": "kjdflsahgionurvcwexmbpqtyz123456789JDFLAHGNREMBPQTY"
                 },
                 "codeFlea.jump.centerLineAfterJump": {
                     "type": "boolean",
                     "default": "true"
+                },
+                "codeFlea.defaultSubject": {
+                    "type": "string",
+                    "default": "WORD"
                 }
             }
         },
         "commands": [
             {
-                "command": "codeFlea.nextBlock",
-                "title": "CodeFlea: Go to next block"
+                "command": "codeFlea.changeToInsertMode",
+                "title": "CodeFlea: Change to Insert mode"
             },
             {
-                "command": "codeFlea.prevBlock",
-                "title": "CodeFlea: Go to previous block"
+                "command": "codeFlea.changeToCommandModeLast",
+                "title": "CodeFlea: Change to last used Command mode"
             },
             {
-                "command": "codeFlea.nextOuterBlock",
-                "title": "CodeFlea: Go to next block at a higher level"
+                "command": "codeFlea.changeToExtendMode",
+                "title": "CodeFlea: Change to Extend mode"
             },
             {
-                "command": "codeFlea.prevOuterBlock",
-                "title": "CodeFlea: Go to previous block at a higher level"
+                "command": "codeFlea.changeToWordSubject",
+                "title": "CodeFlea: Change to Word Subject"
             },
             {
-                "command": "codeFlea.nextSameBlock",
-                "title": "CodeFlea: Go to next block at the same level"
+                "command": "codeFlea.changeToLineSubject",
+                "title": "CodeFlea: Change to Line Subject"
             },
             {
-                "command": "codeFlea.prevSameBlock",
-                "title": "CodeFlea: Go to previous block at the same level"
-            },
-            {
-                "command": "codeFlea.nextInnerBlock",
-                "title": "CodeFlea: Go to next block at a lower level"
-            },
-            {
-                "command": "codeFlea.prevInnerBlock",
-                "title": "CodeFlea: Go to previous block at a lower level"
-            },
-            {
-                "command": "codeFlea.extendBlockSelection",
-                "title": "CodeFlea: Extend block selection"
-            },
-            {
-                "command": "codeFlea.extendBlockSelectionBackwards",
-                "title": "CodeFlea: Extend block selection backwards"
-            },
-            {
-                "command": "codeFlea.nextBlankLine",
-                "title": "CodeFlea: Go to the next blank line"
-            },
-            {
-                "command": "codeFlea.prevBlankLine",
-                "title": "CodeFlea: Go to the previous blank line"
-            },
-            {
-                "command": "codeFlea.nearestOuterLine",
-                "title": "CodeFlea: Go to nearest line at a higher level"
-            },
-            {
-                "command": "codeFlea.nearestInnerLine",
-                "title": "CodeFlea: Go to nearest line at a lower level"
-            },
-            {
-                "command": "codeFlea.prevSameLine",
-                "title": "CodeFlea: Go to the previous line of the same indentation"
-            },
-            {
-                "command": "codeFlea.nextSameLine",
-                "title": "CodeFlea: Go to the next line of the same indentation"
-            },
-            {
-                "command": "codeFlea.prevInterestingPoint",
-                "title": "CodeFlea: Go to the previous interesting point"
-            },
-            {
-                "command": "codeFlea.nextInterestingPoint",
-                "title": "CodeFlea: Go to the next interesting point"
-            },
-            {
-                "command": "codeFlea.jump",
-                "title": "CodeFlea: Jump"
-            },
-            {
-                "command": "codeFlea.scrollToCursor",
-                "title": "CodeFlea: Scroll editor to the cursor"
-            },
-            {
-                "command": "codeFlea.nextBlockEnd",
-                "title": "CodeFlea: Go to next block end"
-            },
-            {
-                "command": "codeFlea.prevBlockEnd",
-                "title": "CodeFlea: Go to previous block end"
-            },
-            {
-                "command": "codeFlea.selectAllBlocksInCurrentScope",
-                "title": "CodeFlea: Select all blocks in current scope"
-            },
-            {
-                "command": "codeFlea.scrollEditorUp",
-                "title": "CodeFlea: Scroll editor up"
-            },
-            {
-                "command": "codeFlea.scrollEditorDown",
-                "title": "CodeFlea: Scroll editor down"
+                "command": "codeFlea.changeToBlockSubject",
+                "title": "CodeFlea: Change to Block Subject"
             }
         ],
         "keybindings": [
             {
-                "command": "codeFlea.input.cancel",
+                "key": ",",
+                "command": "codeFlea.changeToInsertMode",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": ".",
+                "command": "codeFlea.customVsCodeCommand",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "v",
+                "command": "codeFlea.changeToExtendMode",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND'"
+            },
+            {
+                "key": "v",
+                "command": "codeFlea.changeToCommandModeLast",
+                "when": "editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "w",
+                "command": "codeFlea.changeToWordSubject",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "x",
+                "command": "codeFlea.changeToLineSubject",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "b",
+                "command": "codeFlea.changeToBlockSubject",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "n",
+                "command": "codeFlea.changeToBracketSubject",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "a",
+                "command": "codeFlea.changeToInsertModeAppend",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "shift+a",
+                "command": "codeFlea.appendNewObject",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "p",
+                "command": "codeFlea.changeToInsertModePrepend",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "shift+p",
+                "command": "codeFlea.prependNewObject",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "/",
+                "command": "codeFlea.changeToInsertModeMidPoint",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "shift+/",
+                "command": "codeFlea.changeToInsertModeSurround",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "enter",
+                "command": "codeFlea.repeatLastSkip",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "shift+enter",
+                "command": "codeFlea.repeatLastSkipBackwards",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "space",
+                "command": "codeFlea.openSpaceMenu",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "g",
+                "command": "codeFlea.openGoToMenu",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "q",
+                "command": "codeFlea.changeToSubwordSubject",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "s",
+                "command": "codeFlea.skip",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "f",
+                "command": "codeFlea.skipBackwards",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "u",
+                "command": "codeFlea.goToFirstSubjectInScope",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "o",
+                "command": "codeFlea.goToLastSubjectInScope",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "y",
+                "command": "codeFlea.goToPrevOccurrence",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "h",
+                "command": "codeFlea.goToNextOccurrence",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "shift+y",
+                "command": "codeFlea.extendToPrevOccurrence",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "shift+h",
+                "command": "codeFlea.extendToNextOccurrence",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "m",
+                "command": "codeFlea.openModifyMenu",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
                 "key": "escape",
-                "when": "editorTextFocus && codeFleaInput"
+                "command": "codeFlea.changeToCommandModeDefault",
+                "when": "textInputFocus && codeFlea.mode == 'INSERT' && !editorHasMultipleSelections && !parameterHintsVisible && !cancellableOperation && !notificationToastsVisible && !messageVisible && !actionWidgetVisible && !inlineSuggestionVisible && !inlineSuggestionVisible"
             },
             {
-                "key": "ctrl+'",
-                "command": "codeFlea.jump"
+                "key": "i",
+                "command": "codeFlea.nextSubjectUp",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
-                "key": "alt+n",
-                "command": "codeFlea.nextOuterBlock"
+                "key": "up",
+                "command": "codeFlea.nextSubjectUp",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
-                "key": "alt+l",
-                "command": "codeFlea.prevOuterBlock"
+                "key": "k",
+                "command": "codeFlea.nextSubjectDown",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
-                "key": "alt+e",
-                "command": "codeFlea.nextSameBlock"
+                "key": "down",
+                "command": "codeFlea.nextSubjectDown",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
-                "key": "alt+u",
-                "command": "codeFlea.prevSameBlock"
+                "key": "j",
+                "command": "codeFlea.nextSubjectLeft",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
-                "key": "alt+shift+e",
-                "command": "codeFlea.extendBlockSelection"
+                "key": "left",
+                "command": "codeFlea.nextSubjectLeft",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
-                "key": "alt+shift+u",
-                "command": "codeFlea.extendBlockSelectionBackwards"
+                "key": "l",
+                "command": "codeFlea.nextSubjectRight",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
-                "key": "alt+i",
-                "command": "codeFlea.nextInnerBlock"
+                "key": "right",
+                "command": "codeFlea.nextSubjectRight",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
-                "key": "alt+y",
-                "command": "codeFlea.prevInnerBlock"
+                "key": "shift+i",
+                "command": "codeFlea.addSubjectUp",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
-                "key": "alt+.",
-                "command": "codeFlea.nextBlock"
+                "key": "shift+up",
+                "command": "codeFlea.addSubjectUp",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
-                "key": "alt+m",
-                "command": "codeFlea.prevBlock"
+                "key": "shift+k",
+                "command": "codeFlea.addSubjectDown",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
-                "key": "alt+o",
-                "command": "codeFlea.nextInterestingPoint"
+                "key": "shift+down",
+                "command": "codeFlea.addSubjectDown",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
-                "key": "alt+h",
-                "command": "codeFlea.prevInterestingPoint"
+                "key": "shift+j",
+                "command": "codeFlea.addSubjectLeft",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
-                "key": "alt+/",
-                "command": "codeFlea.scrollToCursor"
+                "key": "shift+left",
+                "command": "codeFlea.addSubjectLeft",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
-                "key": "alt+shift+,",
-                "command": "codeFlea.selectAllBlocksInCurrentScope"
+                "key": "shift+l",
+                "command": "codeFlea.addSubjectRight",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
-                "key": "ctrl+up",
-                "command": "codeFlea.scrollEditorUp"
+                "key": "shift+right",
+                "command": "codeFlea.addSubjectRight",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
-                "key": "ctrl+down",
-                "command": "codeFlea.scrollEditorDown"
+                "key": "ctrl+i",
+                "command": "codeFlea.swapSubjectUp",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "ctrl+k",
+                "command": "codeFlea.swapSubjectDown",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "ctrl+j",
+                "command": "codeFlea.swapSubjectLeft",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "ctrl+l",
+                "command": "codeFlea.swapSubjectRight",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "r",
+                "command": "editor.action.quickFix",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "d",
+                "command": "codeFlea.deleteSubject",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "shift+d",
+                "command": "codeFlea.duplicateSubject",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "c",
+                "command": "codeFlea.change",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": ";",
+                "command": "codeFlea.newLineBelow",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "shift+;",
+                "command": "codeFlea.newLineAbove",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "t",
+                "command": "codeFlea.jump",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "backspace",
+                "command": "cursorUndo",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "delete",
+                "command": "cursorRedo",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             }
         ]
     },
@@ -313,16 +385,12 @@
         "deploy": "vsce publish --yarn"
     },
     "devDependencies": {
-        "@types/glob": "^7.1.1",
-        "@types/mocha": "^5.2.7",
-        "@types/node": "^12.11.7",
-        "@types/vscode": "^1.41.0",
-        "glob": "^7.1.5",
-        "mocha": "^9.1.3",
-        "tslint": "^5.20.0",
-        "typescript": "^3.6.4",
-        "vsce": "^2.4.0",
-        "vscode-test": "^1.2.2"
+        "@types/node": "^16.11.7",
+        "@types/vscode": "^1.34.0",
+        "@typescript-eslint/eslint-plugin": "^5.42.0",
+        "@typescript-eslint/parser": "^5.42.0",
+        "eslint": "^8.26.0",
+        "typescript": "^4.8.4"
     },
-    "version": "0.0.0"
+    "version": "2.0.1"
 }
