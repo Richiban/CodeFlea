@@ -2,9 +2,9 @@
 
 ## Quick reference
 
-1. To enter **Command** mode, press `,.`
-2. To enter **insert** mode `a`, `p`, `,`, `/` or `c` to insert at the end, beginning, current position, midpoint or delete the current selection and insert in its place
-3. Press `↑`, `↓`, `←`, `→` or `u`, `e`, `n`, `i` to move to the neighbouring line, word, inter-word or block respectively
+1. To enter **Command** mode, press `escape`
+2. To enter **Insert** mode `a`, `p`, or `c` to insert at the end or beginning of the selection, or delete the current selection and insert in its place
+3. Press `↑`, `↓`, `←`, `→` or `u`, `e`, `n`, `i` to move to the neighbouring text object (e.g. line, word, inter-word or block)
 
 See more commands below in [Default keybindings](#default-keybindings).
 
@@ -20,7 +20,7 @@ CodeFlea addresses this by giving simple, intuitive commands for moving the curs
 
 # Basic operation
 
-CodeFlea is a modal extension (such as Vim or Helix), meaning that pressing a key will not enter text unless the editor is in **insert** mode.
+CodeFlea is a modal extension (such as Vim or Helix), meaning that pressing a key will not enter text unless the editor is in **Insert** mode.
 
 There are three modes in CodeFlea:
 
@@ -285,8 +285,8 @@ By first changing the _subject_ to _Block_, we can reorder the methods of a clas
 | ------------------ | --------------------------- | -------------------------------------------------------------- |
 | `d`                | `codeFlea.deleteSubject`    | Delete the current object (also cleans up separating text)     |
 | `shift + d`        | `codeFlea.duplicateSubject` | Duplicate the current object (also duplicates separating text) |
-| `;`                | `codeFlea.newLineBelow`     | Open a new line below and change to **insert** mode            |
-| `shift + ;`        | `codeFlea.newLineAbove`     | Open a new line above and change to **insert** mode            |
+| `;`                | `codeFlea.newLineBelow`     | Open a new line below and change to **Insert** mode            |
+| `shift + ;`        | `codeFlea.newLineAbove`     | Open a new line above and change to **Insert** mode            |
 | `m`                | `codeFlea.openModifyMenu`   | Open the modify menu                                           |
 | \*`ctrl/alt + ↑`   | `codeFlea.swapSubjectUp`    | Move the current object up                                     |
 | \*`ctrl/alt + ↓`   | `codeFlea.swapSubjectDown`  | Move the current object down                                   |
@@ -308,7 +308,7 @@ By first changing the _subject_ to _Block_, we can reorder the methods of a clas
 -   The _split selection_ command is particularly useful for the _inter-word_ subject
 -   CodeFlea is compatible with the mouse. You can
     -   click on a text object to select it
-    -   drag to select (as normal) which will change the editor to **insert** mode
+    -   drag to select (as normal) which will change the editor to **Insert** mode
 -   After conducting a _quick skip_, you can press `enter` to repeat the skip--moving the selection to the next skip result
 
 # Development
