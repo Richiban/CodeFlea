@@ -95,16 +95,6 @@
                 "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
-                "key": "z",
-                "command": "cursorUndo",
-                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
-            },
-            {
-                "key": "shift+z",
-                "command": "cursorRedo",
-                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
-            },
-            {
                 "key": "v",
                 "command": "codeFlea.changeToExtendMode",
                 "when": "editorTextFocus && codeFlea.mode == 'COMMAND'"
@@ -112,7 +102,7 @@
             {
                 "key": "v",
                 "command": "codeFlea.changeToCommandModeLast",
-                "when": "editorTextFocus && editorTextFocus && codeFlea.mode == 'EXTEND'"
+                "when": "editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
                 "key": "w",
@@ -130,7 +120,7 @@
                 "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
-                "key": "k",
+                "key": "n",
                 "command": "codeFlea.changeToBracketSubject",
                 "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
@@ -175,11 +165,6 @@
                 "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
-                "key": "cmd+z",
-                "command": "codeFlea.undoCommand",
-                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
-            },
-            {
                 "key": "space",
                 "command": "codeFlea.openSpaceMenu",
                 "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
@@ -205,17 +190,17 @@
                 "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
-                "key": "l",
+                "key": "u",
                 "command": "codeFlea.goToFirstSubjectInScope",
                 "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
-                "key": "y",
+                "key": "o",
                 "command": "codeFlea.goToLastSubjectInScope",
                 "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
-                "key": "j",
+                "key": "y",
                 "command": "codeFlea.goToPrevOccurrence",
                 "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
@@ -225,7 +210,7 @@
                 "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
-                "key": "shift+j",
+                "key": "shift+y",
                 "command": "codeFlea.extendToPrevOccurrence",
                 "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
@@ -245,153 +230,133 @@
                 "when": "textInputFocus && codeFlea.mode == 'INSERT' && !editorHasMultipleSelections && !parameterHintsVisible && !cancellableOperation && !notificationToastsVisible && !messageVisible && !actionWidgetVisible && !inlineSuggestionVisible && !inlineSuggestionVisible"
             },
             {
-                "command": "codeFlea.nextSubjectUp",
-                "key": "u",
-                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
-            },
-            {
-                "command": "codeFlea.nextSubjectUp",
-                "key": "up",
-                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
-            },
-            {
-                "command": "codeFlea.nextSubjectDown",
-                "key": "e",
-                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
-            },
-            {
-                "command": "codeFlea.nextSubjectDown",
-                "key": "down",
-                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
-            },
-            {
-                "command": "codeFlea.nextSubjectLeft",
-                "key": "n",
-                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
-            },
-            {
-                "command": "codeFlea.nextSubjectLeft",
-                "key": "left",
-                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
-            },
-            {
-                "command": "codeFlea.nextSubjectRight",
                 "key": "i",
+                "command": "codeFlea.nextSubjectUp",
                 "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
+                "key": "up",
+                "command": "codeFlea.nextSubjectUp",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "k",
+                "command": "codeFlea.nextSubjectDown",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "down",
+                "command": "codeFlea.nextSubjectDown",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "j",
+                "command": "codeFlea.nextSubjectLeft",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "left",
+                "command": "codeFlea.nextSubjectLeft",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "l",
                 "command": "codeFlea.nextSubjectRight",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
                 "key": "right",
+                "command": "codeFlea.nextSubjectRight",
                 "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
-                "command": "codeFlea.addSubjectUp",
-                "key": "shift+u",
-                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
-            },
-            {
-                "command": "codeFlea.addSubjectUp",
-                "key": "shift+up",
-                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
-            },
-            {
-                "command": "codeFlea.addSubjectDown",
-                "key": "shift+e",
-                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
-            },
-            {
-                "command": "codeFlea.addSubjectDown",
-                "key": "shift+down",
-                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
-            },
-            {
-                "command": "codeFlea.addSubjectLeft",
-                "key": "shift+n",
-                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
-            },
-            {
-                "command": "codeFlea.addSubjectLeft",
-                "key": "shift+left",
-                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
-            },
-            {
-                "command": "codeFlea.addSubjectRight",
                 "key": "shift+i",
-                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
-            },
-            {
-                "command": "codeFlea.addSubjectRight",
-                "key": "shift+right",
-                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
-            },
-            {
-                "command": "codeFlea.swapSubjectUp",
-                "key": "ctrl+u",
-                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
-            },
-            {
-                "command": "codeFlea.swapSubjectDown",
-                "key": "ctrl+e",
-                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
-            },
-            {
-                "command": "codeFlea.swapSubjectLeft",
-                "key": "ctrl+n",
-                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
-            },
-            {
-                "command": "codeFlea.swapSubjectRight",
-                "key": "ctrl+i",
-                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
-            },
-            {
                 "command": "codeFlea.addSubjectUp",
-                "key": "shift+u",
                 "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
-                "command": "editor.action.quickFix",
-                "key": "r",
+                "key": "shift+up",
+                "command": "codeFlea.addSubjectUp",
                 "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
+                "key": "shift+k",
                 "command": "codeFlea.addSubjectDown",
-                "key": "alt+e",
                 "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
+                "key": "shift+down",
+                "command": "codeFlea.addSubjectDown",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "shift+j",
                 "command": "codeFlea.addSubjectLeft",
-                "key": "alt+n",
                 "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
+                "key": "shift+left",
+                "command": "codeFlea.addSubjectLeft",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "shift+l",
                 "command": "codeFlea.addSubjectRight",
-                "key": "alt+i",
                 "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
-                "command": "codeFlea.deleteSubject",
+                "key": "shift+right",
+                "command": "codeFlea.addSubjectRight",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "ctrl+i",
+                "command": "codeFlea.swapSubjectUp",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "ctrl+k",
+                "command": "codeFlea.swapSubjectDown",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "ctrl+j",
+                "command": "codeFlea.swapSubjectLeft",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "ctrl+l",
+                "command": "codeFlea.swapSubjectRight",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "r",
+                "command": "editor.action.quickFix",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
                 "key": "d",
+                "command": "codeFlea.deleteSubject",
                 "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
-                "command": "codeFlea.duplicateSubject",
                 "key": "shift+d",
+                "command": "codeFlea.duplicateSubject",
                 "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
-                "command": "codeFlea.change",
                 "key": "c",
+                "command": "codeFlea.change",
                 "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
+                "key": ";",
                 "command": "codeFlea.newLineBelow",
-                "key": "o",
                 "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
+                "key": "shift+;",
                 "command": "codeFlea.newLineAbove",
-                "key": "shift+o",
                 "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {

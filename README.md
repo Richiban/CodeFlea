@@ -285,8 +285,8 @@ By first changing the _subject_ to _Block_, we can reorder the methods of a clas
 | ------------------ | --------------------------- | -------------------------------------------------------------- |
 | `d`                | `codeFlea.deleteSubject`    | Delete the current object (also cleans up separating text)     |
 | `shift + d`        | `codeFlea.duplicateSubject` | Duplicate the current object (also duplicates separating text) |
-| `o`                | `codeFlea.newLineBelow`     | Open a new line below and change to **insert** mode            |
-| `shift + o`        | `codeFlea.newLineAbove`     | Open a new line above and change to **insert** mode            |
+| `;`                | `codeFlea.newLineBelow`     | Open a new line below and change to **insert** mode            |
+| `shift + ;`        | `codeFlea.newLineAbove`     | Open a new line above and change to **insert** mode            |
 | `m`                | `codeFlea.openModifyMenu`   | Open the modify menu                                           |
 | \*`ctrl/alt + ↑`   | `codeFlea.swapSubjectUp`    | Move the current object up                                     |
 | \*`ctrl/alt + ↓`   | `codeFlea.swapSubjectDown`  | Move the current object down                                   |
