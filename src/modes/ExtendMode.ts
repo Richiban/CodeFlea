@@ -94,8 +94,28 @@ export default class ExtendMode extends EditorMode {
     }
 
     async executeSubjectCommand(command: SubjectAction): Promise<void> {
+        await this.extendSelections(() =>
+            this.wrappedMode.executeSubjectCommand(command)
+        );
+    }
+
+    async skip(direction: common.Direction) {
+        await this.extendSelections(() => this.wrappedMode.skip(direction));
+    }
+
+    async repeatLastSkip(direction: common.Direction) {
+        await this.extendSelections(() =>
+            this.wrappedMode.repeatLastSkip(direction)
+        );
+    }
+
+    async jump() {
+        await this.extendSelections(() => this.wrappedMode.jump());
+    }
+
+    private async extendSelections(movement: () => Promise<void>) {
         this.context.editor.selections = this.actives;
-        await this.wrappedMode.executeSubjectCommand(command);
+        await movement();
         this.actives = this.context.editor.selections;
 
         this.context.editor.selections = new Enumerable(this.anchors)
@@ -111,8 +131,6 @@ export default class ExtendMode extends EditorMode {
             })
             .toArray();
     }
-
-    async repeatLastSkip() {}
 
     equals(other: EditorMode): boolean {
         return (

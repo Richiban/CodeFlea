@@ -1,5 +1,4 @@
 {
-    "preview": true,
     "name": "codeflea",
     "displayName": "CodeFlea",
     "description": "An extension for intuitively moving the cursor around a code file",
@@ -392,5 +391,5 @@
         "eslint": "^8.26.0",
         "typescript": "^4.8.4"
     },
-    "version": "2.0.2"
+    "version": "2.0.3"
 }
