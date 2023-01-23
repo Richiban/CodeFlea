@@ -6,8 +6,8 @@ export default class SubwordSubject extends SubjectBase {
     public readonly name = "SUBWORD";
     public readonly displayName = "subword";
     public readonly outlineColour = {
-        dark: "#9900ff",
-        light: "#9900ff",
+        dark: "#ff6699",
+        light: "#ff6699",
     } as const;
     protected readonly subjectIO = new SubwordIO();
     public readonly jumpPhaseType = "dual-phase";
