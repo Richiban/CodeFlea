@@ -361,6 +361,12 @@ export const registeredCommands: ExtensionCommand[] = [
         },
     },
     {
+        id: "codeFlea.openViewMenu",
+        execute: async (manager) => {
+            await manager.openViewMenu();
+        },
+    },
+    {
         id: "codeFlea.undoCursorCommand",
         execute: async (manager) => {
             await manager.undoLastCommand();

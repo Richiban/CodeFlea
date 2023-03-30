@@ -94,9 +94,13 @@ export default class ExtendMode extends EditorMode {
     }
 
     async executeSubjectCommand(command: SubjectAction): Promise<void> {
-        await this.extendSelections(() =>
-            this.wrappedMode.executeSubjectCommand(command)
-        );
+        if (command === "deleteObject") {
+            await this.wrappedMode.executeSubjectCommand(command);
+        } else {
+            await this.extendSelections(() =>
+                this.wrappedMode.executeSubjectCommand(command)
+            );
+        }
     }
 
     async skip(direction: common.Direction) {

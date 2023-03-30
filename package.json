@@ -224,6 +224,11 @@
                 "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
+                "key": "z",
+                "command": "codeFlea.openViewMenu",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
                 "key": "escape",
                 "command": "codeFlea.changeToCommandModeDefault",
                 "when": "textInputFocus && codeFlea.mode == 'INSERT' && !editorHasMultipleSelections && !parameterHintsVisible && !cancellableOperation && !notificationToastsVisible && !messageVisible && !actionWidgetVisible && !inlineSuggestionVisible && !inlineSuggestionVisible"

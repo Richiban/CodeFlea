@@ -1,11 +1,7 @@
 import * as vscode from "vscode";
 import { Config } from "./config";
 import { goToLine, quickCommandPicker } from "./utils/editor";
-import {
-    GoToCommands,
-    SpaceCommands,
-    ModifyCommands,
-} from "./utils/quickMenus";
+import * as quickMenus from "./utils/quickMenus";
 import { SubjectAction } from "./subjects/SubjectActions";
 import { EditorMode, EditorModeChangeRequest } from "./modes/modes";
 import NullMode from "./modes/NullMode";
@@ -124,7 +120,7 @@ export default class CodeFleaManager {
     }
 
     async openSpaceMenu() {
-        const choice = await quickCommandPicker(SpaceCommands);
+        const choice = await quickCommandPicker(quickMenus.SpaceCommands);
 
         if (choice) {
             await choice.execute();
@@ -132,7 +128,7 @@ export default class CodeFleaManager {
     }
 
     async openGoToMenu() {
-        const choice = await quickCommandPicker(GoToCommands, {
+        const choice = await quickCommandPicker(quickMenus.GoToCommands, {
             label: "Go to line...",
             detail: "Enter a line number",
         });
@@ -155,13 +151,21 @@ export default class CodeFleaManager {
     }
 
     async openModifyMenu() {
-        const choice = await quickCommandPicker(ModifyCommands);
+        const choice = await quickCommandPicker(quickMenus.ModifyCommands);
 
         if (choice) {
             await choice.execute();
         }
 
         this.mode.fixSelection();
+    }
+
+    async openViewMenu() {
+        const choice = await quickCommandPicker(quickMenus.ViewCommands);
+
+        if (choice) {
+            await choice.execute();
+        }
     }
 
     async customVsCodeCommand() {

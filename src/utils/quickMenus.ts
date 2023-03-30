@@ -155,6 +155,72 @@ export const GoToCommands: QuickCommand[] = [
     },
 ];
 
+export const ViewCommands: QuickCommand[] = [
+    {
+        quickKey: char("1"),
+        label: "Single column editor layout",
+        execute: async () => {
+            await vscode.commands.executeCommand(
+                "workbench.action.editorLayoutSingle"
+            );
+        },
+    },
+    {
+        quickKey: char("2"),
+        label: "Two columns editor layout",
+        execute: async () => {
+            await vscode.commands.executeCommand(
+                "workbench.action.editorLayoutTwoColumns"
+            );
+        },
+    },
+    {
+        quickKey: char("3"),
+        label: "Three columns editor layout",
+        execute: async () => {
+            await vscode.commands.executeCommand(
+                "workbench.action.editorLayoutThreeColumns"
+            );
+        },
+    },
+    {
+        quickKey: char("n"),
+        label: "Focus previous editor group",
+        execute: async () => {
+            await vscode.commands.executeCommand(
+                "workbench.action.focusPreviousGroup"
+            );
+        },
+    },
+    {
+        quickKey: char("i"),
+        label: "Focus next editor group",
+        execute: async () => {
+            await vscode.commands.executeCommand(
+                "workbench.action.focusNextGroup"
+            );
+        },
+    },
+    {
+        quickKey: char("e"),
+        label: "Focus editor group below",
+        execute: async () => {
+            await vscode.commands.executeCommand(
+                "workbench.action.focusBelowGroup"
+            );
+        },
+    },
+    {
+        quickKey: char("u"),
+        label: "Focus editor group above",
+        execute: async () => {
+            await vscode.commands.executeCommand(
+                "workbench.action.focusAboveGroup"
+            );
+        },
+    },
+];
+
 export const SpaceCommands: QuickCommand[] = [
     {
         quickKey: char(" "),
