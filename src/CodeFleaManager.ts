@@ -29,7 +29,6 @@ export default class CodeFleaManager {
         this.clearUI();
 
         if (!editor) {
-            this.mode = new NullMode(this);
             return;
         }
 
@@ -68,7 +67,6 @@ export default class CodeFleaManager {
     }
 
     async executeSubjectCommand(command: SubjectAction) {
-        console.log(`Executing subject command (${command})`);
         await this.mode.executeSubjectCommand(command);
     }
 
