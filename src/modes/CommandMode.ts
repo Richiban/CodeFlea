@@ -9,6 +9,7 @@ import * as common from "../common";
 import SubjectBase from "../subjects/SubjectBase";
 import { SubjectAction } from "../subjects/SubjectActions";
 import JumpInterface from "../handlers/JumpInterface";
+import { SubjectName } from "../subjects/SubjectName";
 
 export default class CommandMode extends modes.EditorMode {
     private lastSkip: common.Char | undefined = undefined;
@@ -87,6 +88,7 @@ export default class CommandMode extends modes.EditorMode {
                     });
                 }
 
+                // This handles the "cyclable" subjects, e.g. "WORD" -> "INTERWORD" -> "WORD" etc
                 switch (newMode.subjectName) {
                     case "WORD":
                         return this.with({
@@ -169,6 +171,31 @@ export default class CommandMode extends modes.EditorMode {
                 selections.positionToSelection(jumpPosition);
 
             await this.fixSelection();
+        }
+    }
+
+    async jumpToSubject(subjectName: SubjectName) {
+        const tempSubject = subjects.createFrom(this.context, subjectName);
+        
+        const jumpLocations = tempSubject
+            .iterAll(
+                common.IterationDirection.alternate,
+                this.context.editor.visibleRanges[0]
+            )
+            .map((range) => range.start);
+
+        const jumpInterface = new JumpInterface(this.context);
+
+        const jumpPosition = await jumpInterface.jump({
+            kind: tempSubject.jumpPhaseType,
+            locations: jumpLocations,
+        });
+
+        if (jumpPosition) {
+            this.context.editor.selection =
+                selections.positionToSelection(jumpPosition);
+
+            return await this.changeTo({ kind: "COMMAND", subjectName });
         }
     }
 }

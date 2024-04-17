@@ -39,4 +39,5 @@ export default class NullMode extends EditorMode {
     async skip() {}
     async repeatLastSkip() {}
     async jump() {}
+    async jumpToSubject() { return undefined; }
 }

@@ -51,4 +51,5 @@ export default class InsertMode extends EditorMode {
     async repeatLastSkip() {}
     async skip() {}
     async jump() {}
+    async jumpToSubject() { return undefined; }
 }

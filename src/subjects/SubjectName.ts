@@ -1,4 +1,4 @@
-export type SubjectType =
+export type SubjectName =
     | "WORD"
     | "LINE"
     | "SUBWORD"

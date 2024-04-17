@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { SubjectType } from "./subjects/SubjectType";
+import { SubjectName } from "./subjects/SubjectName";
 
 export type JumpConfig = {
     characters: string;
@@ -8,7 +8,7 @@ export type JumpConfig = {
 export type Config = {
     jump: JumpConfig;
     scrollStep: number;
-    defaultSubject: SubjectType;
+    defaultSubject: SubjectName;
 };
 
 export function loadConfig(): Config {
@@ -17,6 +17,6 @@ export function loadConfig(): Config {
     return {
         jump: config.get<JumpConfig>("jump")!,
         scrollStep: config.get<number>("scrollStep") || 10,
-        defaultSubject: config.get<SubjectType>("defaultSubject") ?? "WORD",
+        defaultSubject: config.get<SubjectName>("defaultSubject") ?? "WORD",
     };
 }

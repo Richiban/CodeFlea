@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import * as selections from "../utils/selectionsAndRanges";
 import * as common from "../common";
 import { SubjectActions } from "./SubjectActions";
-import { SubjectType } from "./SubjectType";
+import { SubjectName } from "./SubjectName";
 import Enumerable from "../utils/Enumerable";
 import SubjectIOBase from "../io/SubjectIOBase";
 
@@ -14,7 +14,7 @@ export default abstract class SubjectBase implements SubjectActions {
         dark: common.ColourString;
         light: common.ColourString;
     };
-    public abstract name: SubjectType;
+    public abstract name: SubjectName;
     public abstract jumpPhaseType: common.JumpPhaseType;
     public abstract readonly displayName: string;
 

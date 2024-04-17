@@ -7,6 +7,7 @@ import { EditorMode, EditorModeChangeRequest } from "./modes/modes";
 import NullMode from "./modes/NullMode";
 import InsertMode from "./modes/InsertMode";
 import * as common from "./common";
+import { SubjectName } from "./subjects/SubjectName";
 
 export default class CodeFleaManager {
     private mode: EditorMode;
@@ -201,5 +202,24 @@ export default class CodeFleaManager {
 
     async jump() {
         await this.mode.jump();
+    }
+
+    async jumpToSubject(subjectName: SubjectName) {
+        const newMode = await this.mode.jumpToSubject(subjectName);
+        
+        if (newMode === undefined) return;
+
+        this.clearUI();
+        this.mode = newMode;
+
+        this.setUI();
+        this.mode.fixSelection();
+
+        if (this.mode?.decorationType) {
+            this.editor.setDecorations(
+                this.mode.decorationType,
+                this.editor.selections
+            );
+        }
     }
 }

@@ -1,15 +1,15 @@
 import * as vscode from "vscode";
 import { Direction } from "../common";
 import { SubjectAction } from "../subjects/SubjectActions";
-import { SubjectType } from "../subjects/SubjectType";
+import { SubjectName } from "../subjects/SubjectName";
 
 export type EditorModeType = "NULL" | "INSERT" | "COMMAND" | "EXTEND";
 
 export type EditorModeChangeRequest =
     | { kind: "INSERT" }
-    | { kind: "COMMAND" | "EXTEND"; subjectName?: SubjectType };
+    | { kind: "COMMAND" | "EXTEND"; subjectName?: SubjectName };
+    export abstract class EditorMode implements vscode.Disposable {
 
-export abstract class EditorMode implements vscode.Disposable {
     abstract readonly name: EditorModeType;
     abstract readonly statusBarText: string;
     abstract readonly cursorStyle: vscode.TextEditorCursorStyle | undefined;
@@ -25,4 +25,5 @@ export abstract class EditorMode implements vscode.Disposable {
     abstract skip(direction: Direction): Promise<void>;
     abstract repeatLastSkip(direction: Direction): Promise<void>;
     abstract jump(): Promise<void>;
+    abstract jumpToSubject(subjectName: string): Promise<EditorMode | undefined>;
 }

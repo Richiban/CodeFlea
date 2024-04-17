@@ -6,6 +6,7 @@ import InsertMode from "./InsertMode";
 import { EditorMode, EditorModeChangeRequest } from "./modes";
 import { SubjectAction } from "../subjects/SubjectActions";
 import CommandMode from "./CommandMode";
+import { SubjectName } from "../subjects/SubjectName";
 
 export default class ExtendMode extends EditorMode {
     private readonly wrappedMode: CommandMode;
@@ -115,6 +116,16 @@ export default class ExtendMode extends EditorMode {
 
     async jump() {
         await this.extendSelections(() => this.wrappedMode.jump());
+    }
+
+    async jumpToSubject(subjectName: SubjectName): Promise<EditorMode | undefined> {
+        let newMode: EditorMode | undefined = undefined;
+
+        await this.extendSelections(async () => {
+            newMode = await this.wrappedMode.jumpToSubject(subjectName);
+        });
+
+        return newMode;
     }
 
     private async extendSelections(movement: () => Promise<void>) {

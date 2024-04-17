@@ -1,5 +1,5 @@
 import * as common from "../common";
-import { SubjectType } from "./SubjectType";
+import { SubjectName } from "./SubjectName";
 import SubjectBase from "./SubjectBase";
 import BlockSubject from "./BlockSubject";
 import LineSubject from "./LineSubject";
@@ -11,7 +11,7 @@ import OutsideBracketSubject from "./OutsideBracketSubject";
 
 export function createFrom(
     context: common.ExtensionContext,
-    subjectName: SubjectType
+    subjectName: SubjectName
 ): SubjectBase {
     switch (subjectName) {
         case "LINE":

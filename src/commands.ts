@@ -107,6 +107,12 @@ export const registeredCommands: ExtensionCommand[] = [
         },
     },
     {
+        id: "codeFlea.jumpToBracketSubject",
+        execute: async (manager: CodeFleaManager) => {
+            manager.jumpToSubject('BRACKETS');
+        },
+    },
+    {
         id: "codeFlea.changeToWordSubject",
         execute: async (manager: CodeFleaManager) => {
             manager.changeMode({
@@ -116,12 +122,24 @@ export const registeredCommands: ExtensionCommand[] = [
         },
     },
     {
+        id: "codeFlea.jumpToWordSubject",
+        execute: async (manager: CodeFleaManager) => {
+            manager.jumpToSubject('WORD');
+        },
+    },
+    {
         id: "codeFlea.changeToLineSubject",
         execute: async (manager: CodeFleaManager) => {
             manager.changeMode({
                 kind: "COMMAND",
                 subjectName: "LINE",
             });
+        },
+    },
+    {
+        id: "codeFlea.jumpToLineSubject",
+        execute: async (manager: CodeFleaManager) => {
+            manager.jumpToSubject('LINE');
         },
     },
     {
@@ -149,6 +167,12 @@ export const registeredCommands: ExtensionCommand[] = [
                 kind: "COMMAND",
                 subjectName: "BLOCK",
             });
+        },
+    },
+    {
+        id: "codeFlea.jumpToBlockSubject",
+        execute: async (manager: CodeFleaManager) => {
+            manager.jumpToSubject('BLOCK');
         },
     },
     {
