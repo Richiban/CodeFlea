@@ -184,8 +184,13 @@
                 "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
-                "key": "f",
+                "key": "shift+s",
                 "command": "codeFlea.skipBackwards",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "f",
+                "command": "codeFlea.skipOver",
                 "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {
@@ -351,6 +356,11 @@
             {
                 "key": "c",
                 "command": "codeFlea.change",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "shift+c",
+                "command": "codeFlea.changeToLineEnd",
                 "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {

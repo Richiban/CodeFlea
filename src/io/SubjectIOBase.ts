@@ -3,6 +3,7 @@ import * as common from "../common";
 import Enumerable from "../utils/Enumerable";
 import * as editor from "../utils/editor";
 import { positionToRange } from "../utils/selectionsAndRanges";
+import { iterCharacters } from "../utils/characters";
 
 export type IterationOptions = {
     startingPosition: common.TextObject | vscode.Position;
@@ -116,6 +117,16 @@ export default abstract class SubjectIOBase {
 
             if (char.toLowerCase() === targetChar.toLowerCase()) {
                 return textObject;
+            }
+        }
+
+        return undefined;
+    }
+
+    skipOver(document: vscode.TextDocument, skipChar: common.Char, options: IterationOptions): common.TextObject | undefined {
+        for (const {char, position} of iterCharacters(document, options)) {
+            if (char.toLowerCase() === skipChar.toLowerCase()) {
+                return this.iterAll(document, {...options, startingPosition: position, currentInclusive: false}).tryFirst();
             }
         }
 

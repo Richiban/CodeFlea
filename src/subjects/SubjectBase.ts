@@ -242,6 +242,15 @@ export default abstract class SubjectBase implements SubjectActions {
             })
         );
     }
+    
+    async skipOver(direction: common.Direction, skipChar: common.Char) {
+        selections.tryMap(this.context.editor, (selection) =>
+            this.subjectIO.skipOver(this.context.editor.document, skipChar, {
+                startingPosition: selection.end,
+                direction,
+            })
+        );
+    }
 
     async nextOccurrenceOfObject() {
         await vscode.commands.executeCommand(
@@ -308,13 +317,13 @@ export default abstract class SubjectBase implements SubjectActions {
         if (direction === common.IterationDirection.alternate) {
             return this.subjectIO
                 .iterAll(this.context.editor.document, {
-                    startingPosition: this.context.editor.selection,
+                    startingPosition: this.context.editor.selection.start,
                     direction: "forwards",
                     bounds,
                 })
                 .alternateWith(
                     this.subjectIO.iterAll(this.context.editor.document, {
-                        startingPosition: this.context.editor.selection,
+                        startingPosition: this.context.editor.selection.start,
                         direction: "backwards",
                         bounds,
                     })

@@ -143,6 +143,20 @@ export default class CommandMode extends modes.EditorMode {
         await this.subject.skip(direction, skipChar);
     }
 
+    async skipOver(direction: common.Direction): Promise<void> {
+        const skipChar = await editor.inputBoxChar(
+            `Skip ${direction} over the given character to the next ${this.subject.name}`
+        );
+
+        if (skipChar === undefined) {
+            return;
+        }
+
+        this.lastSkip = skipChar;
+
+        await this.subject.skipOver(direction, skipChar);
+    }
+
     async repeatLastSkip(direction: common.Direction): Promise<void> {
         if (!this.lastSkip) {
             return;

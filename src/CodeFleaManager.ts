@@ -196,6 +196,11 @@ export default class CodeFleaManager {
         this.setUI();
     }
 
+    async skipOver(direction: common.Direction) {
+        await this.mode.skipOver(direction);
+        this.setUI();
+    }
+
     async repeatLastSkip(direction: common.Direction) {
         await this.mode.repeatLastSkip(direction);
     }

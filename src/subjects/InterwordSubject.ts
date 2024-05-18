@@ -6,5 +6,5 @@ export default class InterwordSubject extends SubjectBase {
     public outlineColour = { dark: "#964d4d", light: "#964d4d" } as const;
     public readonly name = "INTERWORD";
     public readonly displayName = "inter-word";
-    public readonly jumpPhaseType = "single-phase";
+    public readonly jumpPhaseType = "dual-phase";
 }

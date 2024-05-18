@@ -286,6 +286,12 @@ export const registeredCommands: ExtensionCommand[] = [
         },
     },
     {
+        id: "codeFlea.skipOver",
+        execute: async (manager) => {
+            await manager.skipOver("forwards");
+        },
+    },
+    {
         id: "codeFlea.openSpaceMenu",
         execute: async (manager) => {
             await manager.openSpaceMenu();
@@ -320,6 +326,13 @@ export const registeredCommands: ExtensionCommand[] = [
         execute: async (manager) => {
             await manager.changeMode({ kind: "INSERT" });
             await vscode.commands.executeCommand("deleteLeft");
+        },
+    },
+    {
+        id: "codeFlea.changeToLineEnd",
+        execute: async (manager) => {
+            collapseSelections(manager.editor, "start");
+            await vscode.commands.executeCommand("deleteAllRight");
         },
     },
     {
