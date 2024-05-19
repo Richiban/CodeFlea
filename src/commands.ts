@@ -415,4 +415,10 @@ export const registeredCommands: ExtensionCommand[] = [
             await manager.undo();
         },
     },
+    {
+        id: "codeFlea.flipCaseFirstCharacter",
+        execute: async (manager) => {
+            await manager.executeModifyCommand("flipCaseFirstCharacter");
+        },
+    },
 ];

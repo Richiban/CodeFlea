@@ -8,6 +8,7 @@ import NullMode from "./modes/NullMode";
 import InsertMode from "./modes/InsertMode";
 import * as common from "./common";
 import { SubjectName } from "./subjects/SubjectName";
+import * as modifications from "./utils/modifications";
 
 export default class CodeFleaManager {
     private mode: EditorMode;
@@ -69,6 +70,10 @@ export default class CodeFleaManager {
 
     async executeSubjectCommand(command: SubjectAction) {
         await this.mode.executeSubjectCommand(command);
+    }
+    
+    async executeModifyCommand(command: modifications.ModifyCommand) {
+        await modifications.executeModifyCommand(command);
     }
 
     async onDidChangeTextEditorSelection(

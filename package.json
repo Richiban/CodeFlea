@@ -80,6 +80,10 @@
             {
                 "command": "codeFlea.changeToBlockSubject",
                 "title": "CodeFlea: Change to Block Subject"
+            },
+            {
+                "command": "codeFlea.flipCaseFirstCharacter",
+                "title": "CodeFlea: Flip the case of the first character of the subject"
             }
         ],
         "keybindings": [

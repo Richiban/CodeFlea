@@ -76,6 +76,15 @@ export const ModifyCommands: QuickCommand[] = [
             );
         },
     },
+    {
+        quickKey: char("f"),
+        label: "Flip case of first character",
+        async execute() {
+            await vscode.commands.executeCommand(
+                "codeFlea.flipCaseFirstCharacter"
+            );
+        },
+    },
 ];
 
 export const GoToCommands: QuickCommand[] = [
