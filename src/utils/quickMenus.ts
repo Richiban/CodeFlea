@@ -67,6 +67,15 @@ export const ModifyCommands: QuickCommand[] = [
             );
         },
     },
+    {
+        quickKey: char("p"),
+        label: "Transform to Pascal case",
+        async execute() {
+            await vscode.commands.executeCommand(
+                "editor.action.transformToPascalcase"
+            );
+        },
+    },
 ];
 
 export const GoToCommands: QuickCommand[] = [
