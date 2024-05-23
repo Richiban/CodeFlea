@@ -45,7 +45,7 @@ export const ModifyCommands: QuickCommand[] = [
         label: "Transform to camel case",
         async execute() {
             await vscode.commands.executeCommand(
-                "editor.action.transformToCamelcase"
+                "codeFlea.transformToCamelCase"
             );
         },
     },

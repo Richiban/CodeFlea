@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as common from "../common";
-import Enumerable from "../utils/Enumerable";
+import Seq, { seq } from "../utils/seq";
 import * as lineUtils from "../utils/lines";
 import { positionToRange, rangeToPosition } from "../utils/selectionsAndRanges";
 import SubjectIOBase, { IterationOptions } from "./SubjectIOBase";
@@ -37,9 +37,9 @@ function lineIsBlockStart(
 function iterBlockStarts(
     document: vscode.TextDocument,
     options: BlockIterationOptions
-): Enumerable<vscode.Position> {
-    return new Enumerable(
-        (function* () {
+): Seq<vscode.Position> {
+    return seq(
+        function* () {
             options = <typeof options>{
                 indentationLevel: "same-indentation",
                 currentInclusive: false,
@@ -106,7 +106,7 @@ function iterBlockStarts(
             if (options.direction === Direction.backwards) {
                 yield new vscode.Position(0, 0);
             }
-        })()
+        }
     );
 }
 
@@ -181,7 +181,7 @@ function getContainingBlock(
 function iterVertically(
     document: vscode.TextDocument,
     options: IterationOptions
-): Enumerable<vscode.Range> {
+): Seq<vscode.Range> {
     return iterBlockStarts(document, {
         ...options,
         indentationLevel: "same-indentation",
@@ -191,7 +191,7 @@ function iterVertically(
 function iterHorizontally(
     document: vscode.TextDocument,
     options: IterationOptions
-): Enumerable<vscode.Range> {
+): Seq<vscode.Range> {
     const indentation =
         options.direction === common.Direction.forwards
             ? "more-indentation"
@@ -206,7 +206,7 @@ function iterHorizontally(
 function iterAll(
     document: vscode.TextDocument,
     options: IterationOptions
-): Enumerable<vscode.Range> {
+): Seq<vscode.Range> {
     return iterBlockStarts(document, {
         ...options,
         indentationLevel: "any-indentation",
@@ -264,7 +264,7 @@ function deleteBlock(
 function iterScope(
     document: vscode.TextDocument,
     options: IterationOptions
-): Enumerable<vscode.Range> {
+): Seq<vscode.Range> {
     return iterBlockStarts(document, {
         ...options,
         indentationLevel: "same-indentation",

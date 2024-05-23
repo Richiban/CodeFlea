@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as common from "../common";
-import Enumerable, { enumerable } from "../utils/Enumerable";
+import Seq, { seq } from "../utils/seq";
 import * as lineUtils from "../utils/lines";
 import {
     closerOf,
@@ -112,7 +112,7 @@ function iterSubwordsOfLine(
     line: vscode.TextLine,
     startingPosition: vscode.Position,
     direction: Direction
-): Enumerable<common.TextObject> {
+): Seq<common.TextObject> {
     const rangesAfterStartPosition =
         direction === Direction.forwards
             ? (subText: common.SubTextRange) =>
@@ -120,7 +120,7 @@ function iterSubwordsOfLine(
             : (subText: common.SubTextRange) =>
                   subText.range.end <= startingPosition.character;
 
-    return new Enumerable(splitTextIntoSubWords(line.text, direction))
+    return new Seq(splitTextIntoSubWords(line.text, direction))
         .filter(rangesAfterStartPosition)
         .map(
             ({ range }) =>
@@ -136,8 +136,8 @@ function iterSubwordsOfLine(
 function iterSubwords(
     document: vscode.TextDocument,
     options: IterationOptions
-): Enumerable<vscode.Range> {
-    return new Enumerable<vscode.Range>(
+): Seq<vscode.Range> {
+    return new Seq<vscode.Range>(
         (function* () {
             const startingPosition = rangeToPosition(
                 options.startingPosition,
@@ -177,7 +177,7 @@ function iterSubwords(
 function iterVertically(
     document: vscode.TextDocument,
     options: IterationOptions
-): Enumerable<vscode.Range> {
+): Seq<vscode.Range> {
     throw new Error("Not supported. Use VSCode command instead");
 }
 
@@ -219,7 +219,7 @@ function getClosestRangeAt(
 function iterScope(
     document: vscode.TextDocument,
     options: IterationOptions
-): Enumerable<vscode.Range> {
+): Seq<vscode.Range> {
     const startingPosition = rangeToPosition(
         options.startingPosition,
         options.direction

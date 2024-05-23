@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { IterationOptions } from '../io/SubjectIOBase';
-import Enumerable, { enumerable } from './Enumerable';
+import Seq, { seq } from './seq';
 import { iterLines } from './lines';
 import { rangeToPosition } from './selectionsAndRanges';
 import * as common from "../common";
@@ -8,8 +8,8 @@ import * as common from "../common";
 export function iterCharacters(
     document: vscode.TextDocument,
     options: IterationOptions
-): Enumerable<{ char: string; position: vscode.Position }> {
-    return enumerable(function* () {
+): Seq<{ char: string; position: vscode.Position }> {
+    return seq(function* () {
         let first = true;
 
         const startingPosition = rangeToPosition(

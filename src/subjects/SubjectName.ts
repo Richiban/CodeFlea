@@ -5,4 +5,5 @@ export type SubjectName =
     | "BLOCK"
     | "INTERWORD"
     | "BRACKETS"
-    | "BRACKETS_INCLUSIVE";
+    | "BRACKETS_INCLUSIVE"
+    | "CHAR";

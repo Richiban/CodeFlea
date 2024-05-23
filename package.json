@@ -82,8 +82,16 @@
                 "title": "CodeFlea: Change to Block Subject"
             },
             {
+                "command": "codeFlea.changeToCharSubject",
+                "title": "CodeFlea: Change to Block Subject"
+            },
+            {
                 "command": "codeFlea.flipCaseFirstCharacter",
                 "title": "CodeFlea: Flip the case of the first character of the subject"
+            },
+            {
+                "command": "codeFlea.transformToCamelCase",
+                "title": "CodeFlea: Transform the selected text to camelCase"
             }
         ],
         "keybindings": [
@@ -120,6 +128,11 @@
             {
                 "key": "b",
                 "command": "codeFlea.changeToBlockSubject",
+                "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
+            },
+            {
+                "key": "`",
+                "command": "codeFlea.changeToCharSubject",
                 "when": "editorTextFocus && codeFlea.mode == 'COMMAND' || editorTextFocus && codeFlea.mode == 'EXTEND'"
             },
             {

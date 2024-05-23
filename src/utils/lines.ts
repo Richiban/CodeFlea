@@ -1,10 +1,10 @@
 import * as vscode from "vscode";
 import * as common from "../common";
-import Enumerable from "./Enumerable";
+import Seq, { seq } from "./seq";
 import * as lineUtils from "../utils/lines";
 import { rangeToPosition } from "./selectionsAndRanges";
 import { IterationOptions } from "../io/SubjectIOBase";
-import { Direction } from "../common";
+import { Direction, directionToDelta } from "../common";
 
 export type LinePair =
     | { prev: undefined; current: vscode.TextLine }
@@ -102,9 +102,9 @@ export function getRelativeIndentation(
 export function iterLinePairs(
     document: vscode.TextDocument,
     options: IterationOptions
-): Enumerable<LinePair> {
-    return iterLines(document, { ...options, currentInclusive: true })
-        .pairwise()
+): Seq<LinePair> {
+    return (iterLines(document, { ...options, currentInclusive: true })
+        .pairwise() as Seq<[vscode.TextLine, vscode.TextLine]>)
         .map(([a, b]) =>
             options.direction === Direction.forwards
                 ? { prev: a, current: b }
@@ -178,16 +178,10 @@ function moveToChangeOfIndentation(
     }
 }
 
-function directionToDelta(direction: common.Direction) {
-    return direction === Direction.forwards
-        ? (x: number) => x + 1
-        : (x: number) => x - 1;
-}
-
 export function iterLines(
     document: vscode.TextDocument,
     options: IterationOptions
-): Enumerable<vscode.TextLine> {
+): Seq<vscode.TextLine> {
     const advance = directionToDelta(options.direction);
     let currentLineNumber = rangeToPosition(
         options.startingPosition,
@@ -200,8 +194,8 @@ export function iterLines(
         (!options.bounds || currentLineNumber <= options.bounds.end.line) &&
         currentLineNumber < document.lineCount;
 
-    return new Enumerable(
-        (function* () {
+    return seq(
+        function* () {
             while (withinBounds()) {
                 const newLine = document.lineAt(currentLineNumber);
 
@@ -209,7 +203,7 @@ export function iterLines(
 
                 currentLineNumber = advance(currentLineNumber);
             }
-        })()
+        }
     ).skip(options.currentInclusive ? 0 : 1);
 }
 

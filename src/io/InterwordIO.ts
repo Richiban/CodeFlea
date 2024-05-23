@@ -1,13 +1,12 @@
 import * as vscode from "vscode";
 import * as common from "../common";
-import Enumerable from "../utils/Enumerable";
 import * as lineUtils from "../utils/lines";
 import {
     closerOf,
     positionToRange,
     rangeToPosition,
 } from "../utils/selectionsAndRanges";
-import { enumerable } from "../utils/Enumerable";
+import Seq, { seq } from "../utils/seq";
 import SubjectIOBase, { IterationOptions } from "./SubjectIOBase";
 import * as editor from "../utils/editor";
 import { Direction } from "../common";
@@ -37,7 +36,7 @@ function getCharClass(char: string): CharClass | undefined {
 }
 
 function split(text: string, startingCharacter: number): common.SubTextRange[] {
-    return enumerable(function* () {
+    return seq(function* () {
         let prevCharClass: CharClass | undefined = undefined;
         let current: { text: string; startIndex: number } | undefined;
 
@@ -77,7 +76,7 @@ function split(text: string, startingCharacter: number): common.SubTextRange[] {
         .toArray();
 }
 
-function getContainingRangeAt(
+export function getContainingRangeAt(
     document: vscode.TextDocument,
     position: vscode.Position
 ): vscode.Range | undefined {
@@ -103,7 +102,7 @@ function getContainingRangeAt(
     return undefined;
 }
 
-function getClosestRangeTo(
+export function getClosestRangeTo(
     document: vscode.TextDocument,
     position: vscode.Position
 ) {
@@ -138,8 +137,8 @@ function getClosestRangeTo(
     return positionToRange(position);
 }
 
-function iterAll(document: vscode.TextDocument, options: IterationOptions) {
-    return enumerable(function* () {
+export function iterAll(document: vscode.TextDocument, options: IterationOptions) {
+    return seq(function* () {
         let isFirstLine = true;
         const startingPosition = rangeToPosition(
             options.startingPosition,
@@ -197,11 +196,11 @@ function findBest(
     );
 }
 
-function iterVertically(
+export function iterVertically(
     document: vscode.TextDocument,
     options: IterationOptions
-): Enumerable<vscode.Range> {
-    return new Enumerable<vscode.Range>(
+): Seq<vscode.Range> {
+    return new Seq<vscode.Range>(
         (function* () {
             const startingPosition = rangeToPosition(
                 options.startingPosition,
@@ -275,11 +274,11 @@ export function swapVertically(
     return range;
 }
 
-function iterScope(
+export function iterScope(
     document: vscode.TextDocument,
     options: IterationOptions
-): Enumerable<vscode.Range> {
-    return enumerable(function* () {
+): Seq<vscode.Range> {
+    return seq(function* () {
         const startingPosition = rangeToPosition(
             options.startingPosition,
             options.direction
@@ -325,3 +324,5 @@ export default class InterwordIO extends SubjectIOBase {
         return undefined;
     }
 }
+
+

@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as common from "../common";
-import Enumerable, { enumerable } from "../utils/Enumerable";
+import Seq, { seq } from "../utils/seq";
 import * as positions from "../utils/positions";
 import * as lineUtils from "../utils/lines";
 import {
@@ -14,8 +14,8 @@ import { Direction } from "../common";
 function iterVertically(
     document: vscode.TextDocument,
     options: IterationOptions
-): Enumerable<vscode.Range> {
-    return new Enumerable(
+): Seq<vscode.Range> {
+    return new Seq(
         (function* () {
             let cont = true;
             let currentPosition = rangeToPosition(
@@ -55,8 +55,8 @@ function iterVertically(
 function iterAll(
     document: vscode.TextDocument,
     options: IterationOptions
-): Enumerable<vscode.Range> {
-    return enumerable(function* () {
+): Seq<vscode.Range> {
+    return seq(function* () {
         let searchPosition: vscode.Position | undefined = rangeToPosition(
             options.startingPosition,
             options.direction
@@ -113,7 +113,7 @@ function findWordClosestTo(
 
     const iterObjects = options.limitToCurrentLine ? iterScope : iterAll;
 
-    const wordRange = new Enumerable([
+    const wordRange = new Seq([
         iterObjects(document, {
             startingPosition: position,
             direction: Direction.backwards,
@@ -172,8 +172,8 @@ export function swapVertically(
 function iterScope(
     document: vscode.TextDocument,
     options: IterationOptions
-): Enumerable<vscode.Range> {
-    return enumerable(function* () {
+): Seq<vscode.Range> {
+    return seq(function* () {
         let searchPosition: vscode.Position | undefined = rangeToPosition(
             options.startingPosition,
             options.direction

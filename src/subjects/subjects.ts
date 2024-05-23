@@ -8,6 +8,7 @@ import WordSubject from "./WordSubject";
 import InterwordSubject from "./InterwordSubject";
 import InsideBracketSubject from "./InsideBracketSubject";
 import OutsideBracketSubject from "./OutsideBracketSubject";
+import CharSubject from "./CharSubject";
 
 export function createFrom(
     context: common.ExtensionContext,
@@ -28,5 +29,7 @@ export function createFrom(
             return new InsideBracketSubject(context);
         case "BRACKETS_INCLUSIVE":
             return new OutsideBracketSubject(context);
+        case "CHAR":
+            return new CharSubject(context);
     }
 }

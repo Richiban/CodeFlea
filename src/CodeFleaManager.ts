@@ -81,6 +81,7 @@ export default class CodeFleaManager {
 
     async executeModifyCommand(command: modifications.ModifyCommand) {
         await modifications.executeModifyCommand(command);
+        this.mode.fixSelection();
     }
 
     async onDidChangeTextEditorSelection(

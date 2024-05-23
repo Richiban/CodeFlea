@@ -62,6 +62,16 @@ export function directionToDelta(direction: Direction) {
         : (x: number) => x - 1;
 }
 
+export function directionToFactor(direction: Direction) {
+    return direction === Direction.forwards ? 1 : -1;
+}
+
+export function invert(direction: Direction) {
+    return direction === Direction.forwards
+        ? Direction.backwards
+        : Direction.forwards;
+}
+
 export type ColourString = `#${string}`;
 
 export type Skip =

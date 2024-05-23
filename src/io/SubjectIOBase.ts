@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { Char, Direction, TextObject } from "../common";
-import Enumerable from "../utils/Enumerable";
+import Seq from "../utils/seq";
 import * as editor from "../utils/editor";
 import { positionToRange } from "../utils/selectionsAndRanges";
 import { iterCharacters } from "../utils/characters";
@@ -25,13 +25,13 @@ export default abstract class SubjectIOBase {
     abstract iterScope(
         document: vscode.TextDocument,
         options: IterationOptions
-    ): Enumerable<TextObject>;
+    ): Seq<TextObject>;
 
     getClosestObjectTo(
         document: vscode.TextDocument,
         position: vscode.Position
     ): TextObject {
-        const wordRange = new Enumerable([
+        const wordRange = new Seq([
             this.iterAll(document, {
                 startingPosition: position,
                 direction: Direction.backwards,
@@ -50,17 +50,17 @@ export default abstract class SubjectIOBase {
     abstract iterAll(
         document: vscode.TextDocument,
         options: IterationOptions
-    ): Enumerable<TextObject>;
+    ): Seq<TextObject>;
 
     abstract iterHorizontally(
         document: vscode.TextDocument,
         options: IterationOptions
-    ): Enumerable<TextObject>;
+    ): Seq<TextObject>;
 
     abstract iterVertically(
         document: vscode.TextDocument,
         options: IterationOptions
-    ): Enumerable<TextObject>;
+    ): Seq<TextObject>;
 
     getSeparatingText(
         document: vscode.TextDocument,
@@ -86,7 +86,7 @@ export default abstract class SubjectIOBase {
             ? new vscode.Range(object.end, nextObject.start)
             : undefined;
 
-        const bestMatch = new Enumerable([
+        const bestMatch = new Seq([
             separatingTextRangeBefore,
             separatingTextRangeAfter,
         ])

@@ -3,7 +3,7 @@ import * as selections from "../utils/selectionsAndRanges";
 import * as common from "../common";
 import { SubjectActions } from "./SubjectActions";
 import { SubjectName } from "./SubjectName";
-import Enumerable from "../utils/Enumerable";
+import Seq from "../utils/seq";
 import SubjectIOBase from "../io/SubjectIOBase";
 import { Direction } from "../common";
 
@@ -125,41 +125,33 @@ export default abstract class SubjectBase implements SubjectActions {
     }
 
     async swapWithObjectToLeft() {
-        const newSelections: vscode.Selection[] = [];
-
         await this.context.editor.edit((e) => {
             for (const selection of this.context.editor.selections) {
-                const s = this.subjectIO.swapHorizontally(
+                this.subjectIO.swapHorizontally(
                     this.context.editor.document,
                     e,
                     selection,
                     Direction.backwards
                 );
-
-                newSelections.push(new vscode.Selection(s.end, s.start));
             }
         });
 
-        this.context.editor.selections = newSelections;
+        await this.nextObjectLeft();
     }
 
     async swapWithObjectToRight() {
-        const newSelections: vscode.Selection[] = [];
-
         await this.context.editor.edit((e) => {
             for (const selection of this.context.editor.selections) {
-                const s = this.subjectIO.swapHorizontally(
+                this.subjectIO.swapHorizontally(
                     this.context.editor.document,
                     e,
                     selection,
                     Direction.forwards
                 );
-
-                newSelections.push(new vscode.Selection(s.end, s.start));
             }
         });
 
-        this.context.editor.selections = newSelections;
+        await this.nextObjectRight();
     }
 
     async deleteObject() {
@@ -173,7 +165,7 @@ export default abstract class SubjectBase implements SubjectActions {
             }
         });
 
-        this.fixSelection();
+        await this.fixSelection();
     }
 
     async duplicateObject() {
@@ -239,7 +231,7 @@ export default abstract class SubjectBase implements SubjectActions {
         if (target.kind === "SkipTo") {
             selections.tryMap(this.context.editor, (selection) =>
                 this.subjectIO.skip(this.context.editor.document, target.char, {
-                    startingPosition: selection.end,
+                    startingPosition: selections.rangeToPosition(selection, direction),
                     direction,
                 })
             );
@@ -249,7 +241,7 @@ export default abstract class SubjectBase implements SubjectActions {
                     this.context.editor.document,
                     target.char,
                     {
-                        startingPosition: selection.end,
+                        startingPosition: selections.rangeToPosition(selection, direction),
                         direction,
                     }
                 )
@@ -318,7 +310,7 @@ export default abstract class SubjectBase implements SubjectActions {
     iterAll(
         direction: common.IterationDirection,
         bounds: vscode.Range
-    ): Enumerable<vscode.Range> {
+    ): Seq<vscode.Range> {
         if (direction === common.IterationDirection.alternate) {
             return this.subjectIO
                 .iterAll(this.context.editor.document, {

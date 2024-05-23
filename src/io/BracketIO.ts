@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import Enumerable, { enumerable } from "../utils/Enumerable";
 import {
     closerPositionOf,
     positionToRange,
@@ -9,6 +8,8 @@ import SubjectIOBase, { IterationOptions } from "./SubjectIOBase";
 import { translateWithWrap } from "../utils/positions";
 import { iterCharacters } from "../utils/characters";
 import { Direction } from "../common";
+import Seq, { seq } from "../utils/seq";
+
 
 const openingBrackets = "([{".split("");
 const closingBrackets = ")]}".split("");
@@ -95,7 +96,7 @@ function iterRight(
 
     startingPosition = rangeToPosition(startingPosition, Direction.backwards);
 
-    return enumerable(function* () {
+    return seq(function* () {
         for (const { char, position } of iterCharacters(document, {
             direction: Direction.forwards,
             startingPosition,
@@ -130,7 +131,7 @@ function iterLeft(
     document: vscode.TextDocument,
     startingPosition: vscode.Position | vscode.Range,
     inclusive: boolean
-): Enumerable<vscode.Range> {
+): Seq<vscode.Range> {
     startingPosition = rangeToPosition(startingPosition, Direction.backwards);
 
     const bounds = new vscode.Range(
@@ -138,7 +139,7 @@ function iterLeft(
         startingPosition
     );
 
-    return enumerable(function* () {
+    return seq(function* () {
         const characters = iterCharacters(document, {
             direction: Direction.backwards,
             startingPosition,
@@ -238,8 +239,8 @@ function iterAll(
     document: vscode.TextDocument,
     options: IterationOptions,
     inclusive: boolean
-): Enumerable<vscode.Range> {
-    return enumerable(function* () {
+): Seq<vscode.Range> {
+    return seq(function* () {
         for (const { char, position } of iterCharacters(document, {
             ...options,
             currentInclusive: true,
@@ -272,7 +273,7 @@ function iterHorizontally(
     document: vscode.TextDocument,
     options: IterationOptions,
     inclusive: boolean
-): Enumerable<vscode.Range> {
+): Seq<vscode.Range> {
     if (options.direction === Direction.forwards) {
         return iterRight(document, options.startingPosition, inclusive);
     } else {
@@ -292,7 +293,7 @@ function iterVertically(
     document: vscode.TextDocument,
     options: IterationOptions,
     inclusive: boolean
-): Enumerable<vscode.Range> {
+): Seq<vscode.Range> {
     const startingPosition = rangeToPosition(
         options.startingPosition,
         options.direction
@@ -301,7 +302,7 @@ function iterVertically(
     const bracketsToLookFor =
         options.direction === Direction.forwards ? openingBrackets : closingBrackets;
 
-    return enumerable(function* () {
+    return seq(function* () {
         for (const { char, position } of iterCharacters(document, {
             ...options,
             startingPosition,
@@ -359,7 +360,7 @@ export default class BracketIO extends SubjectIOBase {
     iterScope(
         document: vscode.TextDocument,
         options: IterationOptions
-    ): Enumerable<vscode.Range> {
+    ): Seq<vscode.Range> {
         return iterScope(document, options, this.inclusive);
     }
 }

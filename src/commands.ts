@@ -162,6 +162,15 @@ export const registeredCommands: ExtensionCommand[] = [
         },
     },
     {
+        id: "codeFlea.changeToCharSubject",
+        execute: async (manager: CodeFleaManager) => {
+            manager.changeMode({
+                kind: "COMMAND",
+                subjectName: "CHAR",
+            });
+        },
+    },
+    {
         id: "codeFlea.changeToBlockSubject",
         execute: async (manager: CodeFleaManager) => {
             manager.changeMode({
@@ -426,6 +435,12 @@ export const registeredCommands: ExtensionCommand[] = [
         id: "codeFlea.flipCaseFirstCharacter",
         execute: async (manager) => {
             await manager.executeModifyCommand("flipCaseFirstCharacter");
+        },
+    },
+    {
+        id: "codeFlea.transformToCamelCase",
+        execute: async (manager) => {
+            await manager.executeModifyCommand("transformToCamelCase");
         },
     },
 ];

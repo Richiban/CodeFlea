@@ -1,5 +1,5 @@
 import * as common from "../common";
-import Enumerable from "../utils/Enumerable";
+import Seq, { seq } from "../utils/seq";
 import * as vscode from "vscode";
 import * as subjects from "../subjects/subjects";
 import InsertMode from "./InsertMode";
@@ -181,7 +181,7 @@ export default class ExtendMode extends EditorMode {
         await movement();
         this.actives = this.context.editor.selections;
 
-        this.context.editor.selections = new Enumerable(this.anchors)
+        this.context.editor.selections = new Seq(this.anchors)
             .zipWith(this.context.editor.selections)
             .map(([anchor, active]) => {
                 const newRange = anchor.union(active);

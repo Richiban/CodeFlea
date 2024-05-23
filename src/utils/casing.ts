@@ -1,7 +1,3 @@
-function splitWords(str: string): string[] {
-    return str.split(/(?=[A-Z])|_|-|\s/);
-}
-
 export type Casing =
     | "camel"
     | "pascal"
@@ -9,16 +5,21 @@ export type Casing =
     | "snake"
     | "title"
     | "sentence"
-    | "mid-sentence";
+    | "mid-sentence"
+    | "flip-first-character";
 
-function rejoin(words: string[], casing: Casing): string {
+function splitWords(str: string): string[] {
+    return str.split(/(?=[A-Z])|_|-|\s/);
+}
+
+export function changeCase(text: string, casing: Casing): string {
     switch (casing) {
         case "kebab":
-            return words.map((word) => word.toLowerCase()).join("-");
+            return splitWords(text).map((word) => word.toLowerCase()).join("-");
         case "snake":
-            return words.map((word) => word.toLowerCase()).join("_");
+            return splitWords(text).map((word) => word.toLowerCase()).join("_");
         case "pascal":
-            return words
+            return splitWords(text)
                 .map((word) =>
                     word.replace(
                         /(^\w|\s\w)(\S*)/g,
@@ -30,7 +31,7 @@ function rejoin(words: string[], casing: Casing): string {
             let first = true;
             const newWords = [];
 
-            for (const word of words) {
+            for (const word of splitWords(text)) {
                 if (first) {
                     newWords.push(word.toLowerCase());
                     first = false;
@@ -48,7 +49,7 @@ function rejoin(words: string[], casing: Casing): string {
             return newWords.join("");
         }
         case "title":
-            return words
+            return splitWords(text)
                 .map((word) =>
                     word.replace(
                         /(^\w|\s\w)(\S*)/g,
@@ -60,7 +61,7 @@ function rejoin(words: string[], casing: Casing): string {
             let first = true;
             const newWords = [];
 
-            for (const word of words) {
+            for (const word of splitWords(text)) {
                 if (first) {
                     newWords.push(
                         word.replace(
@@ -78,10 +79,10 @@ function rejoin(words: string[], casing: Casing): string {
             return newWords.join(" ");
         }
         case "mid-sentence":
-            return words.map((word) => word.toLowerCase()).join(" ");
+            return splitWords(text).map((word) => word.toLowerCase()).join(" ");
+        case "flip-first-character":
+            return text[0].toUpperCase() === text[0]
+                ? text[0].toLowerCase() + text.slice(1)
+                : text[0].toUpperCase() + text.slice(1);
     }
-}
-
-export function changeCase(str: string, casing: Casing): string {
-    return rejoin(splitWords(str), casing);
 }
