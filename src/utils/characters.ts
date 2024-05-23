@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { IterationOptions } from '../io/SubjectIOBase';
 import Enumerable, { enumerable } from './Enumerable';
 import { iterLines } from './lines';
-import { wordRangeToPosition } from './selectionsAndRanges';
+import { rangeToPosition } from './selectionsAndRanges';
 import * as common from "../common";
 
 export function iterCharacters(
@@ -12,7 +12,7 @@ export function iterCharacters(
     return enumerable(function* () {
         let first = true;
 
-        const startingPosition = wordRangeToPosition(
+        const startingPosition = rangeToPosition(
             options.startingPosition,
             options.direction
         );

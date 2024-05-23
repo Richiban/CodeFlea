@@ -85,6 +85,24 @@ export const ModifyCommands: QuickCommand[] = [
             );
         },
     },
+    {
+        quickKey: char("a"),
+        label: "Sort lines in selection",
+        async execute() {
+            await vscode.commands.executeCommand(
+                "editor.action.sortLinesAscending"
+            );
+        },
+    },
+    {
+        quickKey: char("A"),
+        label: "Sort lines in selection selection (descending)",
+        async execute() {
+            await vscode.commands.executeCommand(
+                "editor.action.sortLinesDescending"
+            );
+        },
+    },
 ];
 
 export const GoToCommands: QuickCommand[] = [

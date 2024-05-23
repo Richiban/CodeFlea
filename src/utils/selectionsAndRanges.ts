@@ -156,7 +156,7 @@ export function positionToSelection(point: vscode.Position): vscode.Selection {
     return new vscode.Selection(point, point);
 }
 
-export function wordRangeToPosition(
+export function rangeToPosition(
     startingPosition: vscode.Range | vscode.Position,
     direction: common.Direction
 ): vscode.Position {

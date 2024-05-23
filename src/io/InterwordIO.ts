@@ -5,7 +5,7 @@ import * as lineUtils from "../utils/lines";
 import {
     closerOf,
     positionToRange,
-    wordRangeToPosition as rangeToPosition,
+    rangeToPosition,
 } from "../utils/selectionsAndRanges";
 import { enumerable } from "../utils/Enumerable";
 import SubjectIOBase, { IterationOptions } from "./SubjectIOBase";

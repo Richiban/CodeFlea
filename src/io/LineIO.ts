@@ -3,7 +3,7 @@ import * as common from "../common";
 import * as lineUtils from "../utils/lines";
 import { getNextLineOfChangeOfIndentation } from "../utils/lines";
 import Enumerable, { enumerable } from "../utils/Enumerable";
-import { wordRangeToPosition as rangeToPosition } from "../utils/selectionsAndRanges";
+import { rangeToPosition } from "../utils/selectionsAndRanges";
 import SubjectIOBase, { IterationOptions } from "./SubjectIOBase";
 
 function iterAll(

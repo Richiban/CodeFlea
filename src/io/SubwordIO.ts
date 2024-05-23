@@ -5,7 +5,7 @@ import * as lineUtils from "../utils/lines";
 import {
     closerOf,
     positionToRange,
-    wordRangeToPosition,
+    rangeToPosition,
 } from "../utils/selectionsAndRanges";
 import SubjectIOBase, { IterationOptions } from "./SubjectIOBase";
 
@@ -138,7 +138,7 @@ function iterSubwords(
 ): Enumerable<vscode.Range> {
     return new Enumerable<vscode.Range>(
         (function* () {
-            const startingPosition = wordRangeToPosition(
+            const startingPosition = rangeToPosition(
                 options.startingPosition,
                 options.direction
             );
@@ -219,7 +219,7 @@ function iterScope(
     document: vscode.TextDocument,
     options: IterationOptions
 ): Enumerable<vscode.Range> {
-    const startingPosition = wordRangeToPosition(
+    const startingPosition = rangeToPosition(
         options.startingPosition,
         options.direction
     );

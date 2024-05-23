@@ -2,10 +2,7 @@ import * as vscode from "vscode";
 import * as common from "../common";
 import Enumerable from "../utils/Enumerable";
 import * as lineUtils from "../utils/lines";
-import {
-    positionToRange,
-    wordRangeToPosition as rangeToPosition,
-} from "../utils/selectionsAndRanges";
+import { positionToRange, rangeToPosition } from "../utils/selectionsAndRanges";
 import SubjectIOBase, { IterationOptions } from "./SubjectIOBase";
 
 type BlockIterationOptions = IterationOptions & {

@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import * as common from "../common";
 import Enumerable from "./Enumerable";
 import * as lineUtils from "../utils/lines";
-import { wordRangeToPosition } from "./selectionsAndRanges";
+import { rangeToPosition } from "./selectionsAndRanges";
 import { IterationOptions } from "../io/SubjectIOBase";
 
 export type LinePair =
@@ -188,7 +188,7 @@ export function iterLines(
     options: IterationOptions
 ): Enumerable<vscode.TextLine> {
     const advance = directionToDelta(options.direction);
-    let currentLineNumber = wordRangeToPosition(
+    let currentLineNumber = rangeToPosition(
         options.startingPosition,
         options.direction
     ).line;

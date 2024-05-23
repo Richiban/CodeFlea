@@ -5,7 +5,7 @@ import * as positions from "../utils/positions";
 import * as lineUtils from "../utils/lines";
 import {
     positionToRange,
-    wordRangeToPosition,
+    rangeToPosition,
 } from "../utils/selectionsAndRanges";
 import * as editor from "../utils/editor";
 import SubjectIOBase, { IterationOptions } from "./SubjectIOBase";
@@ -17,7 +17,7 @@ function iterVertically(
     return new Enumerable(
         (function* () {
             let cont = true;
-            let currentPosition = wordRangeToPosition(
+            let currentPosition = rangeToPosition(
                 options.startingPosition,
                 options.direction
             );
@@ -56,7 +56,7 @@ function iterAll(
     options: IterationOptions
 ): Enumerable<vscode.Range> {
     return enumerable(function* () {
-        let searchPosition: vscode.Position | undefined = wordRangeToPosition(
+        let searchPosition: vscode.Position | undefined = rangeToPosition(
             options.startingPosition,
             options.direction
         );
@@ -173,7 +173,7 @@ function iterScope(
     options: IterationOptions
 ): Enumerable<vscode.Range> {
     return enumerable(function* () {
-        let searchPosition: vscode.Position | undefined = wordRangeToPosition(
+        let searchPosition: vscode.Position | undefined = rangeToPosition(
             options.startingPosition,
             options.direction
         );

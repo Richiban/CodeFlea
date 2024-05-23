@@ -1,13 +1,11 @@
 import * as vscode from "vscode";
 import Enumerable, { enumerable } from "../utils/Enumerable";
-import * as common from "../common";
 import {
     closerPositionOf,
     positionToRange,
-    wordRangeToPosition as rangeToPosition,
+    rangeToPosition,
 } from "../utils/selectionsAndRanges";
 import SubjectIOBase, { IterationOptions } from "./SubjectIOBase";
-import { iterLines } from "../utils/lines";
 import { translateWithWrap } from "../utils/positions";
 import { iterCharacters } from "../utils/characters";
 
