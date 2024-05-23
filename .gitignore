@@ -40,6 +40,4 @@ test/*.js
 *.map
 out
 
-*.vsix
-
 .ionide/symbolCache.db
