@@ -16,6 +16,10 @@ export default class ExtendMode extends EditorMode {
     readonly cursorStyle = vscode.TextEditorCursorStyle.BlockOutline;
     readonly name = "EXTEND";
     readonly decorationType;
+    readonly decorationTypeTop?: vscode.TextEditorDecorationType | undefined;
+    readonly decorationTypeMid?: vscode.TextEditorDecorationType | undefined;
+    readonly decorationTypeBottom?: vscode.TextEditorDecorationType | undefined;
+
     get statusBarText(): string {
         return `Extend (${this.wrappedMode.subject.name})`;
     }
@@ -38,6 +42,45 @@ export default class ExtendMode extends EditorMode {
             light: {
                 border: `1px dashed ${previousMode.subject.outlineColour.light}`,
             },
+        });
+
+        this.decorationTypeTop = vscode.window.createTextEditorDecorationType({
+            dark: {
+                borderStyle: "dashed none none dashed",
+                borderColor: previousMode.subject.outlineColour.dark,
+                borderWidth: "2px",
+            },
+            light: {
+                borderStyle: "dashed none none dashed",
+                borderColor: previousMode.subject.outlineColour.light,
+                borderWidth: "2px",
+            },   
+        });
+
+        this.decorationTypeMid = vscode.window.createTextEditorDecorationType({
+            dark: {
+                borderStyle: "none none none dashed",
+                borderColor: previousMode.subject.outlineColour.dark,
+                borderWidth: "2px",
+            },
+            light: {
+                borderStyle: "none none none dashed",
+                borderColor: previousMode.subject.outlineColour.light,
+                borderWidth: "2px",
+            },   
+        });
+
+        this.decorationTypeBottom = vscode.window.createTextEditorDecorationType({
+            dark: {
+                borderStyle: "none none dashed dashed",
+                borderColor: previousMode.subject.outlineColour.dark,
+                borderWidth: "2px",
+            },
+            light: {
+                borderStyle: "none none dashed dashed",
+                borderColor: previousMode.subject.outlineColour.light,
+                borderWidth: "2px",
+            },   
         });
     }
 

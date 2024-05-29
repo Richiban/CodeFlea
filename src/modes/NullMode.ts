@@ -7,6 +7,9 @@ import CommandMode from "./CommandMode";
 
 export default class NullMode extends EditorMode {
     readonly decorationType = undefined;
+    readonly decorationTypeTop = undefined;
+    readonly decorationTypeMid = undefined;
+    readonly decorationTypeBottom = undefined;
     readonly cursorStyle = undefined;
     readonly name = "NULL";
     readonly statusBarText = "Initialising...";

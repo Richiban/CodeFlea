@@ -9,6 +9,9 @@ export default class InsertMode extends EditorMode {
     private keySequenceStarted: boolean = false;
     readonly cursorStyle = vscode.TextEditorCursorStyle.Line;
     readonly decorationType = undefined;
+    readonly decorationTypeTop = undefined;
+    readonly decorationTypeMid = undefined;
+    readonly decorationTypeBottom = undefined;
     readonly name = "INSERT";
     readonly statusBarText = "Insert";
 

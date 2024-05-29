@@ -14,6 +14,9 @@ export type EditorModeChangeRequest =
     abstract readonly statusBarText: string;
     abstract readonly cursorStyle: vscode.TextEditorCursorStyle | undefined;
     abstract readonly decorationType?: vscode.TextEditorDecorationType;
+    abstract readonly decorationTypeTop?: vscode.TextEditorDecorationType;
+    abstract readonly decorationTypeMid?: vscode.TextEditorDecorationType;
+    abstract readonly decorationTypeBottom?: vscode.TextEditorDecorationType;
 
     abstract equals(previousMode: EditorMode): boolean;
     abstract changeTo(newMode: EditorModeChangeRequest): Promise<EditorMode>;

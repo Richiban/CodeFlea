@@ -9,6 +9,7 @@ import InsertMode from "./modes/InsertMode";
 import * as common from "./common";
 import { SubjectName } from "./subjects/SubjectName";
 import * as modifications from "./utils/modifications";
+import { splitRange } from "./utils/decorations";
 
 export default class CodeFleaManager {
     private mode: EditorMode;
@@ -28,7 +29,7 @@ export default class CodeFleaManager {
     }
 
     async changeEditor(editor: vscode.TextEditor | undefined) {
-        this.clearUI();
+        this.clearSelections();
 
         if (!editor) {
             return;
@@ -46,32 +47,38 @@ export default class CodeFleaManager {
         this.setUI();
     }
 
-    clearUI() {
+    clearSelections() {
         if (this.mode.decorationType) {
             this.editor.setDecorations(this.mode.decorationType, []);
+        }
+        
+        if (this.mode.decorationTypeTop) {
+            this.editor.setDecorations(this.mode.decorationTypeTop, []);
+        }
+        
+        if (this.mode.decorationTypeMid) {
+            this.editor.setDecorations(this.mode.decorationTypeMid, []);
+        }
+        
+        if (this.mode.decorationTypeBottom) {
+            this.editor.setDecorations(this.mode.decorationTypeBottom, []);
         }
     }
 
     async changeMode(newMode: EditorModeChangeRequest) {
-        this.clearUI();
+        this.clearSelections();
 
         this.mode = await this.mode.changeTo(newMode);
 
         this.setUI();
         this.mode.fixSelection();
-
-        if (this.mode?.decorationType) {
-            this.editor.setDecorations(
-                this.mode.decorationType,
-                this.editor.selections
-            );
-        }
+        this.setDecorations();
     }
 
     async executeSubjectCommand(command: SubjectAction) {
         await this.mode.executeSubjectCommand(command);
     }
-    
+
     async executeModifyCommand(command: modifications.ModifyCommand) {
         await modifications.executeModifyCommand(command);
     }
@@ -79,12 +86,8 @@ export default class CodeFleaManager {
     async onDidChangeTextEditorSelection(
         event: vscode.TextEditorSelectionChangeEvent
     ) {
-        if (this.mode?.decorationType) {
-            this.editor.setDecorations(
-                this.mode.decorationType,
-                this.editor.selections
-            );
-        }
+        this.clearSelections();
+        this.setDecorations();
 
         if (
             event.kind === vscode.TextEditorSelectionChangeKind.Command ||
@@ -107,6 +110,37 @@ export default class CodeFleaManager {
 
         this.mode.fixSelection();
         this.setUI();
+    }
+
+    async setDecorations() {
+        if (this.mode?.decorationType) {
+            for (const selection of this.editor.selections) {
+                const splits = splitRange(this.editor.document, selection);
+
+                if (splits.kind === 'SingleLine') {
+                    this.editor.setDecorations(
+                        this.mode.decorationType,
+                        [splits.range]
+                    );
+                }
+                else {
+                    this.editor.setDecorations(
+                        this.mode.decorationTypeTop ?? this.mode.decorationType,
+                        [splits.firstLine]
+                    );
+
+                    this.editor.setDecorations(
+                        this.mode.decorationTypeMid ?? this.mode.decorationType,
+                        splits.middleLines
+                    );
+
+                    this.editor.setDecorations(
+                        this.mode.decorationTypeBottom ?? this.mode.decorationType,
+                        [splits.lastLine]
+                    );                
+                }
+            }
+        }
     }
 
     setUI() {
@@ -216,20 +250,15 @@ export default class CodeFleaManager {
 
     async jumpToSubject(subjectName: SubjectName) {
         const newMode = await this.mode.jumpToSubject(subjectName);
-        
+
         if (newMode === undefined) return;
 
-        this.clearUI();
+        this.clearSelections();
         this.mode = newMode;
 
         this.setUI();
         this.mode.fixSelection();
 
-        if (this.mode?.decorationType) {
-            this.editor.setDecorations(
-                this.mode.decorationType,
-                this.editor.selections
-            );
-        }
+        this.setDecorations();
     }
 }

@@ -14,10 +14,13 @@ import { SubjectName } from "../subjects/SubjectName";
 export default class CommandMode extends modes.EditorMode {
     private lastSkip: common.Char | undefined = undefined;
 
-    readonly cursorStyle = vscode.TextEditorCursorStyle.UnderlineThin;
+    readonly cursorStyle = vscode.TextEditorCursorStyle.LineThin;
     readonly name = "COMMAND";
 
     readonly decorationType: vscode.TextEditorDecorationType;
+    readonly decorationTypeTop: vscode.TextEditorDecorationType;
+    readonly decorationTypeMid: vscode.TextEditorDecorationType;
+    readonly decorationTypeBottom: vscode.TextEditorDecorationType;
 
     get statusBarText(): string {
         const skipString = this.lastSkip ? ` | Skip: ${this.lastSkip}` : ``;
@@ -33,11 +36,54 @@ export default class CommandMode extends modes.EditorMode {
 
         this.decorationType = vscode.window.createTextEditorDecorationType({
             dark: {
-                border: `1px solid ${subject.outlineColour.dark}`,
+                borderStyle: "solid",
+                borderColor: subject.outlineColour.dark,
+                borderWidth: "1px",
             },
             light: {
-                border: `1px solid ${subject.outlineColour.light}`,
+                borderStyle: "solid",
+                borderColor: subject.outlineColour.light,
+                borderWidth: "1px",
             },
+        });
+
+        this.decorationTypeTop = vscode.window.createTextEditorDecorationType({
+            dark: {
+                borderStyle: "solid none none solid",
+                borderColor: subject.outlineColour.dark,
+                borderWidth: "2px",
+            },
+            light: {
+                borderStyle: "solid none none solid",
+                borderColor: subject.outlineColour.light,
+                borderWidth: "2px",
+            },   
+        });
+
+        this.decorationTypeMid = vscode.window.createTextEditorDecorationType({
+            dark: {
+                borderStyle: "none none none solid",
+                borderColor: subject.outlineColour.dark,
+                borderWidth: "2px",
+            },
+            light: {
+                borderStyle: "none none none solid",
+                borderColor: subject.outlineColour.light,
+                borderWidth: "2px",
+            },   
+        });
+
+        this.decorationTypeBottom = vscode.window.createTextEditorDecorationType({
+            dark: {
+                borderStyle: "none none solid solid",
+                borderColor: subject.outlineColour.dark,
+                borderWidth: "2px",
+            },
+            light: {
+                borderStyle: "none none solid solid",
+                borderColor: subject.outlineColour.light,
+                borderWidth: "2px",
+            },   
         });
     }
 
