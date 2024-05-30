@@ -96,7 +96,8 @@ export function quickCommandPicker(
 }
 
 export function inputBoxChar(
-    placeholder?: string
+    placeholder?: string,
+    allowEmpty = false
 ): Promise<common.Char | undefined> {
     return new Promise((resolve) => {
         const inputBox = vscode.window.createInputBox();
@@ -105,6 +106,14 @@ export function inputBoxChar(
 
         inputBox.onDidChangeValue((ch) => {
             resolve(ch[0] as common.Char);
+            inputBox.dispose();
+        });
+
+        inputBox.onDidAccept(() => {
+            if (!allowEmpty) {
+                return;
+            }
+            resolve(undefined);
             inputBox.dispose();
         });
 

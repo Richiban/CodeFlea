@@ -148,6 +148,7 @@ export default class CodeFleaManager {
 
         if (this.editor) {
             this.editor.options.cursorStyle = this.mode.cursorStyle;
+            this.editor.options.lineNumbers = this.mode.lineNumberStyle;
         }
 
         vscode.commands.executeCommand(

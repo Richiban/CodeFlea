@@ -8,8 +8,8 @@ export type EditorModeType = "NULL" | "INSERT" | "COMMAND" | "EXTEND";
 export type EditorModeChangeRequest =
     | { kind: "INSERT" }
     | { kind: "COMMAND" | "EXTEND"; subjectName?: SubjectName };
-    export abstract class EditorMode implements vscode.Disposable {
-        
+
+export abstract class EditorMode implements vscode.Disposable {        
     abstract readonly name: EditorModeType;
     abstract readonly statusBarText: string;
     abstract readonly cursorStyle: vscode.TextEditorCursorStyle | undefined;
@@ -17,6 +17,7 @@ export type EditorModeChangeRequest =
     abstract readonly decorationTypeTop?: vscode.TextEditorDecorationType;
     abstract readonly decorationTypeMid?: vscode.TextEditorDecorationType;
     abstract readonly decorationTypeBottom?: vscode.TextEditorDecorationType;
+    abstract readonly lineNumberStyle?: vscode.TextEditorLineNumbersStyle;
 
     abstract equals(previousMode: EditorMode): boolean;
     abstract changeTo(newMode: EditorModeChangeRequest): Promise<EditorMode>;

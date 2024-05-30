@@ -292,6 +292,12 @@ export const registeredCommands: ExtensionCommand[] = [
         },
     },
     {
+        id: "codeFlea.skipOverBackwards",
+        execute: async (manager) => {
+            await manager.skipOver("backwards");
+        },
+    },
+    {
         id: "codeFlea.openSpaceMenu",
         execute: async (manager) => {
             await manager.openSpaceMenu();

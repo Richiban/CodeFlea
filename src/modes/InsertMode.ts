@@ -8,6 +8,7 @@ import * as subjects from "../subjects/subjects";
 export default class InsertMode extends EditorMode {
     private keySequenceStarted: boolean = false;
     readonly cursorStyle = vscode.TextEditorCursorStyle.Line;
+    readonly lineNumberStyle = vscode.TextEditorLineNumbersStyle.On;
     readonly decorationType = undefined;
     readonly decorationTypeTop = undefined;
     readonly decorationTypeMid = undefined;

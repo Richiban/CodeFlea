@@ -12,9 +12,10 @@ import JumpInterface from "../handlers/JumpInterface";
 import { SubjectName } from "../subjects/SubjectName";
 
 export default class CommandMode extends modes.EditorMode {
-    private lastSkip: common.Char | undefined = undefined;
+    private lastSkip: common.Skip | undefined = undefined;
 
     readonly cursorStyle = vscode.TextEditorCursorStyle.LineThin;
+    readonly lineNumberStyle = vscode.TextEditorLineNumbersStyle.Relative;
     readonly name = "COMMAND";
 
     readonly decorationType: vscode.TextEditorDecorationType;
@@ -23,7 +24,12 @@ export default class CommandMode extends modes.EditorMode {
     readonly decorationTypeBottom: vscode.TextEditorDecorationType;
 
     get statusBarText(): string {
-        const skipString = this.lastSkip ? ` | Skip: ${this.lastSkip}` : ``;
+        const skipString =
+            this.lastSkip?.kind === "SkipTo"
+                ? ` | Skip: ${this.lastSkip.char}`
+                : this.lastSkip?.kind === "SkipOver"
+                ? ` | Skip over: ${this.lastSkip.char || "¶"}`
+                : ``;
 
         return `Command mode (${this.subject.displayName})${skipString}`;
     }
@@ -57,7 +63,7 @@ export default class CommandMode extends modes.EditorMode {
                 borderStyle: "solid none none solid",
                 borderColor: subject.outlineColour.light,
                 borderWidth: "2px",
-            },   
+            },
         });
 
         this.decorationTypeMid = vscode.window.createTextEditorDecorationType({
@@ -70,21 +76,22 @@ export default class CommandMode extends modes.EditorMode {
                 borderStyle: "none none none solid",
                 borderColor: subject.outlineColour.light,
                 borderWidth: "2px",
-            },   
+            },
         });
 
-        this.decorationTypeBottom = vscode.window.createTextEditorDecorationType({
-            dark: {
-                borderStyle: "none none solid solid",
-                borderColor: subject.outlineColour.dark,
-                borderWidth: "2px",
-            },
-            light: {
-                borderStyle: "none none solid solid",
-                borderColor: subject.outlineColour.light,
-                borderWidth: "2px",
-            },   
-        });
+        this.decorationTypeBottom =
+            vscode.window.createTextEditorDecorationType({
+                dark: {
+                    borderStyle: "none none solid solid",
+                    borderColor: subject.outlineColour.dark,
+                    borderWidth: "2px",
+                },
+                light: {
+                    borderStyle: "none none solid solid",
+                    borderColor: subject.outlineColour.light,
+                    borderWidth: "2px",
+                },
+            });
     }
 
     equals(previousMode: modes.EditorMode): boolean {
@@ -184,23 +191,20 @@ export default class CommandMode extends modes.EditorMode {
             return;
         }
 
-        this.lastSkip = skipChar;
+        this.lastSkip = { kind: "SkipTo", char: skipChar };
 
-        await this.subject.skip(direction, skipChar);
+        await this.subject.skip(direction, this.lastSkip);
     }
 
     async skipOver(direction: common.Direction): Promise<void> {
         const skipChar = await editor.inputBoxChar(
-            `Skip ${direction} over the given character to the next ${this.subject.name}`
+            `Skip ${direction} over the given character to the next ${this.subject.name}`,
+            true
         );
 
-        if (skipChar === undefined) {
-            return;
-        }
+        this.lastSkip = { kind: "SkipOver", char: skipChar };
 
-        this.lastSkip = skipChar;
-
-        await this.subject.skipOver(direction, skipChar);
+        await this.subject.skip(direction, this.lastSkip);
     }
 
     async repeatLastSkip(direction: common.Direction): Promise<void> {
@@ -236,7 +240,7 @@ export default class CommandMode extends modes.EditorMode {
 
     async jumpToSubject(subjectName: SubjectName) {
         const tempSubject = subjects.createFrom(this.context, subjectName);
-        
+
         const jumpLocations = tempSubject
             .iterAll(
                 common.IterationDirection.alternate,

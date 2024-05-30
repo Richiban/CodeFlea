@@ -234,22 +234,26 @@ export default abstract class SubjectBase implements SubjectActions {
         );
     }
 
-    async skip(direction: common.Direction, target: common.Char) {
-        selections.tryMap(this.context.editor, (selection) =>
-            this.subjectIO.skip(this.context.editor.document, target, {
-                startingPosition: selection.end,
-                direction,
-            })
-        );
-    }
-    
-    async skipOver(direction: common.Direction, skipChar: common.Char) {
-        selections.tryMap(this.context.editor, (selection) =>
-            this.subjectIO.skipOver(this.context.editor.document, skipChar, {
-                startingPosition: selection.end,
-                direction,
-            })
-        );
+    async skip(direction: common.Direction, target: common.Skip) {
+        if (target.kind === "SkipTo") {
+            selections.tryMap(this.context.editor, (selection) =>
+                this.subjectIO.skip(this.context.editor.document, target.char, {
+                    startingPosition: selection.end,
+                    direction,
+                })
+            );
+        } else {
+            selections.tryMap(this.context.editor, (selection) =>
+                this.subjectIO.skipOver(
+                    this.context.editor.document,
+                    target.char,
+                    {
+                        startingPosition: selection.end,
+                        direction,
+                    }
+                )
+            );
+        }
     }
 
     async nextOccurrenceOfObject() {

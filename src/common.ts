@@ -1,6 +1,5 @@
 import { Config } from "./config";
 import * as vscode from "vscode";
-import Enumerable from "./utils/Enumerable";
 
 export type TextObject = vscode.Range;
 
@@ -64,3 +63,7 @@ export function directionToDelta(direction: Direction) {
 }
 
 export type ColourString = `#${string}`;
+
+export type Skip =
+    | { kind: "SkipTo"; char: Char }
+    | { kind: "SkipOver"; char?: Char };

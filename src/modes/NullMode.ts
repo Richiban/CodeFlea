@@ -11,6 +11,7 @@ export default class NullMode extends EditorMode {
     readonly decorationTypeMid = undefined;
     readonly decorationTypeBottom = undefined;
     readonly cursorStyle = undefined;
+    readonly lineNumberStyle = undefined;
     readonly name = "NULL";
     readonly statusBarText = "Initialising...";
 

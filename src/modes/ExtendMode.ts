@@ -14,6 +14,7 @@ export default class ExtendMode extends EditorMode {
     private actives: readonly vscode.Selection[] = [];
 
     readonly cursorStyle = vscode.TextEditorCursorStyle.BlockOutline;
+    readonly lineNumberStyle = vscode.TextEditorLineNumbersStyle.Relative;
     readonly name = "EXTEND";
     readonly decorationType;
     readonly decorationTypeTop?: vscode.TextEditorDecorationType | undefined;
