@@ -256,7 +256,7 @@ By first changing the _subject_ to _Block_, we can reorder the methods of a clas
 | `←` / `n`          | `codeFlea.nextSubjectLeft`         | Move to the next object to the left                   |
 | `→` / `i`          | `codeFlea.nextSubjectRight`        | Move to the next object to the right                  |
 | `;`                |                                    | Go back                                               |
-| `shift + ;`        |                                    | Go forwards                                           |
+| `shift + ;`        |                                    | Go Direction.forwards                                           |
 | `s`                | `codeFlea.skip`                    | Forward skip of objects by their first character      |
 | `f`                | `codeFlea.skipBackwards`           | Backward skip of objects by their first character     |
 | `t`                | `codeFlea.jump`                    | Jump to a particular object (see [Jumping](#jumping)) |

@@ -9,6 +9,7 @@ import {
 } from "../utils/selectionsAndRanges";
 import * as editor from "../utils/editor";
 import SubjectIOBase, { IterationOptions } from "./SubjectIOBase";
+import { Direction } from "../common";
 
 function iterVertically(
     document: vscode.TextDocument,
@@ -61,7 +62,7 @@ function iterAll(
             options.direction
         );
 
-        const diff = options.direction === "forwards" ? 2 : -2;
+        const diff = options.direction === Direction.forwards ? 2 : -2;
         let first = true;
 
         do {
@@ -75,7 +76,7 @@ function iterAll(
                 searchPosition = positions.translateWithWrap(
                     document,
                     wordRange[
-                        options.direction === "forwards" ? "end" : "start"
+                        options.direction === Direction.forwards ? "end" : "start"
                     ],
                     diff
                 );
@@ -115,11 +116,11 @@ function findWordClosestTo(
     const wordRange = new Enumerable([
         iterObjects(document, {
             startingPosition: position,
-            direction: "backwards",
+            direction: Direction.backwards,
         }).tryFirst(),
         iterObjects(document, {
             startingPosition: position,
-            direction: "forwards",
+            direction: Direction.forwards,
         }).tryFirst(),
     ])
         .filterUndefined()
@@ -180,7 +181,7 @@ function iterScope(
 
         const startingLine = searchPosition.line;
 
-        const diff = options.direction === "forwards" ? 2 : -2;
+        const diff = options.direction === Direction.forwards ? 2 : -2;
         let first = true;
 
         do {
@@ -193,7 +194,7 @@ function iterScope(
 
                 searchPosition = positions.translateWithWrap(
                     document,
-                    options.direction === "forwards"
+                    options.direction === Direction.forwards
                         ? wordRange.end
                         : wordRange.start,
                     diff

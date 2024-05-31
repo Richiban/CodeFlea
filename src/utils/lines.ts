@@ -4,6 +4,7 @@ import Enumerable from "./Enumerable";
 import * as lineUtils from "../utils/lines";
 import { rangeToPosition } from "./selectionsAndRanges";
 import { IterationOptions } from "../io/SubjectIOBase";
+import { Direction } from "../common";
 
 export type LinePair =
     | { prev: undefined; current: vscode.TextLine }
@@ -105,7 +106,7 @@ export function iterLinePairs(
     return iterLines(document, { ...options, currentInclusive: true })
         .pairwise()
         .map(([a, b]) =>
-            options.direction === "forwards"
+            options.direction === Direction.forwards
                 ? { prev: a, current: b }
                 : { prev: b, current: a }
         );
@@ -156,8 +157,8 @@ function moveToChangeOfIndentation(
                 );
                 break;
             }
-            case "backwards":
-            case "forwards": {
+            case Direction.backwards:
+            case Direction.forwards: {
                 line = lineUtils.getNextLineOfChangeOfIndentation(
                     change,
                     direction,
@@ -178,7 +179,7 @@ function moveToChangeOfIndentation(
 }
 
 function directionToDelta(direction: common.Direction) {
-    return direction === "forwards"
+    return direction === Direction.forwards
         ? (x: number) => x + 1
         : (x: number) => x - 1;
 }

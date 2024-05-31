@@ -5,6 +5,7 @@ import { getNextLineOfChangeOfIndentation } from "../utils/lines";
 import Enumerable, { enumerable } from "../utils/Enumerable";
 import { rangeToPosition } from "../utils/selectionsAndRanges";
 import SubjectIOBase, { IterationOptions } from "./SubjectIOBase";
+import { Direction } from "../common";
 
 function iterAll(
     document: vscode.TextDocument,
@@ -24,7 +25,7 @@ function iterHorizontally(
             rangeToPosition(options.startingPosition, options.direction)
         );
         const indentation: common.Change =
-            options.direction === "forwards" ? "greaterThan" : "lessThan";
+            options.direction === Direction.forwards ? "greaterThan" : "lessThan";
         let first = true;
 
         do {
@@ -59,7 +60,7 @@ export function swapHorizontally(
 ): vscode.Range {
     const sourceLine = document.lineAt(range.start.line);
     const targetIndentation: common.Change =
-        direction === "forwards" ? "greaterThan" : "lessThan";
+        direction === Direction.forwards ? "greaterThan" : "lessThan";
 
     const targetLine = getNextLineOfChangeOfIndentation(
         targetIndentation,

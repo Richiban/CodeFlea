@@ -10,6 +10,7 @@ import {
 import { enumerable } from "../utils/Enumerable";
 import SubjectIOBase, { IterationOptions } from "./SubjectIOBase";
 import * as editor from "../utils/editor";
+import { Direction } from "../common";
 
 type CharClass = "word" | "operator" | "whitespace";
 
@@ -117,21 +118,21 @@ function getClosestRangeTo(
         direction: common.Direction.backwards,
     }).tryFirst();
 
-    const subwordForwards = iterAll(document, {
+    const subwordDirectionForwards = iterAll(document, {
         startingPosition: positionToRange(position),
         direction: common.Direction.forwards,
     }).tryFirst();
 
-    if (subwordBackwards && subwordForwards) {
-        return closerOf(position, subwordBackwards, subwordForwards);
+    if (subwordBackwards && subwordDirectionForwards) {
+        return closerOf(position, subwordBackwards, subwordDirectionForwards);
     }
 
     if (subwordBackwards) {
         return subwordBackwards;
     }
 
-    if (subwordForwards) {
-        return subwordForwards;
+    if (subwordDirectionForwards) {
+        return subwordDirectionForwards;
     }
 
     return positionToRange(position);
@@ -150,7 +151,7 @@ function iterAll(document: vscode.TextDocument, options: IterationOptions) {
             currentInclusive: true,
         })) {
             const subwords =
-                options.direction === "forwards"
+                options.direction === Direction.forwards
                     ? split(
                           line.text,
                           line.firstNonWhitespaceCharacterIndex
@@ -235,7 +236,7 @@ export function swapHorizontally(
     direction: common.Direction
 ): vscode.Range {
     const getEnd: keyof vscode.Range =
-        direction === "forwards" ? "end" : "start";
+        direction === Direction.forwards ? "end" : "start";
 
     const targetWordRange = iterAll(document, {
         startingPosition: range[getEnd],
@@ -258,7 +259,7 @@ export function swapVertically(
     direction: common.Direction
 ): vscode.Range {
     const getEnd: keyof vscode.Range =
-        direction === "forwards" ? "end" : "start";
+        direction === Direction.forwards ? "end" : "start";
 
     const targetWordRange = iterVertically(document, {
         startingPosition: range[getEnd],
@@ -287,7 +288,7 @@ function iterScope(
         const line = document.lineAt(startingPosition);
 
         const subwords =
-            options.direction === "forwards"
+            options.direction === Direction.forwards
                 ? split(
                       line.text,
                       line.firstNonWhitespaceCharacterIndex

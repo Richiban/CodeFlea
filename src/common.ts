@@ -53,11 +53,11 @@ export type ExtensionContext = {
 export type Char = string & { length: 1 };
 
 export function opposite(direction: Direction) {
-    return direction === "forwards" ? "backwards" : "forwards";
+    return direction === Direction.forwards ? Direction.backwards : Direction.forwards;
 }
 
 export function directionToDelta(direction: Direction) {
-    return direction === "forwards"
+    return direction === Direction.forwards
         ? (x: number) => x + 1
         : (x: number) => x - 1;
 }

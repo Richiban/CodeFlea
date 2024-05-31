@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import * as editor from "./utils/editor";
 import type CodeFleaManager from "./CodeFleaManager";
 import { collapseSelections } from "./utils/selectionsAndRanges";
+import { Direction } from "./common";
 
 type ExtensionCommand = {
     id: string;
@@ -264,37 +265,37 @@ export const registeredCommands: ExtensionCommand[] = [
     {
         id: "codeFlea.repeatLastSkip",
         execute: async (manager) => {
-            await manager.repeatLastSkip("forwards");
+            await manager.repeatLastSkip(Direction.forwards);
         },
     },
     {
         id: "codeFlea.repeatLastSkipBackwards",
         execute: async (manager) => {
-            await manager.repeatLastSkip("backwards");
+            await manager.repeatLastSkip(Direction.backwards);
         },
     },
     {
         id: "codeFlea.skip",
         execute: async (manager) => {
-            await manager.skip("forwards");
+            await manager.skip(Direction.forwards);
         },
     },
     {
         id: "codeFlea.skipBackwards",
         execute: async (manager) => {
-            await manager.skip("backwards");
+            await manager.skip(Direction.backwards);
         },
     },
     {
         id: "codeFlea.skipOver",
         execute: async (manager) => {
-            await manager.skipOver("forwards");
+            await manager.skipOver(Direction.forwards);
         },
     },
     {
         id: "codeFlea.skipOverBackwards",
         execute: async (manager) => {
-            await manager.skipOver("backwards");
+            await manager.skipOver(Direction.backwards);
         },
     },
     {

@@ -5,6 +5,7 @@ import { SubjectActions } from "./SubjectActions";
 import { SubjectName } from "./SubjectName";
 import Enumerable from "../utils/Enumerable";
 import SubjectIOBase from "../io/SubjectIOBase";
+import { Direction } from "../common";
 
 export default abstract class SubjectBase implements SubjectActions {
     constructor(protected context: common.ExtensionContext) {}
@@ -23,7 +24,7 @@ export default abstract class SubjectBase implements SubjectActions {
             this.subjectIO
                 .iterVertically(this.context.editor.document, {
                     startingPosition: selection,
-                    direction: "forwards",
+                    direction: Direction.forwards,
                 })
                 .tryFirst()
         );
@@ -34,7 +35,7 @@ export default abstract class SubjectBase implements SubjectActions {
             this.subjectIO
                 .iterHorizontally(this.context.editor.document, {
                     startingPosition: selection,
-                    direction: "forwards",
+                    direction: Direction.forwards,
                 })
                 .tryFirst()
         );
@@ -45,7 +46,7 @@ export default abstract class SubjectBase implements SubjectActions {
             this.subjectIO
                 .iterVertically(this.context.editor.document, {
                     startingPosition: selection,
-                    direction: "backwards",
+                    direction: Direction.backwards,
                 })
                 .tryFirst()
         );
@@ -56,7 +57,7 @@ export default abstract class SubjectBase implements SubjectActions {
             this.subjectIO
                 .iterHorizontally(this.context.editor.document, {
                     startingPosition: selection,
-                    direction: "backwards",
+                    direction: Direction.backwards,
                 })
                 .tryFirst()
         );
@@ -105,7 +106,7 @@ export default abstract class SubjectBase implements SubjectActions {
                     this.context.editor.document,
                     e,
                     selection,
-                    "forwards"
+                    Direction.forwards
                 )
             );
         });
@@ -117,7 +118,7 @@ export default abstract class SubjectBase implements SubjectActions {
                     this.context.editor.document,
                     e,
                     selection,
-                    "backwards"
+                    Direction.backwards
                 )
             );
         });
@@ -132,7 +133,7 @@ export default abstract class SubjectBase implements SubjectActions {
                     this.context.editor.document,
                     e,
                     selection,
-                    "backwards"
+                    Direction.backwards
                 );
 
                 newSelections.push(new vscode.Selection(s.end, s.start));
@@ -151,7 +152,7 @@ export default abstract class SubjectBase implements SubjectActions {
                     this.context.editor.document,
                     e,
                     selection,
-                    "forwards"
+                    Direction.forwards
                 );
 
                 newSelections.push(new vscode.Selection(s.end, s.start));
@@ -218,7 +219,7 @@ export default abstract class SubjectBase implements SubjectActions {
             this.subjectIO
                 .iterScope(this.context.editor.document, {
                     startingPosition: selection,
-                    direction: "backwards",
+                    direction: Direction.backwards,
                 })
                 .tryLast()
         );
@@ -228,7 +229,7 @@ export default abstract class SubjectBase implements SubjectActions {
             this.subjectIO
                 .iterScope(this.context.editor.document, {
                     startingPosition: selection,
-                    direction: "forwards",
+                    direction: Direction.forwards,
                 })
                 .tryLast()
         );
@@ -322,13 +323,13 @@ export default abstract class SubjectBase implements SubjectActions {
             return this.subjectIO
                 .iterAll(this.context.editor.document, {
                     startingPosition: this.context.editor.selection.start,
-                    direction: "forwards",
+                    direction: Direction.forwards,
                     bounds,
                 })
                 .alternateWith(
                     this.subjectIO.iterAll(this.context.editor.document, {
                         startingPosition: this.context.editor.selection.start,
-                        direction: "backwards",
+                        direction: Direction.backwards,
                         bounds,
                     })
                 );

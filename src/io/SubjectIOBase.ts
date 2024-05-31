@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import * as common from "../common";
+import { Char, Direction, TextObject } from "../common";
 import Enumerable from "../utils/Enumerable";
 import * as editor from "../utils/editor";
 import { positionToRange } from "../utils/selectionsAndRanges";
@@ -7,10 +7,10 @@ import { iterCharacters } from "../utils/characters";
 import { iterLines } from "../utils/lines";
 
 export type IterationOptions = {
-    startingPosition: common.TextObject | vscode.Position;
-    direction: common.Direction;
+    startingPosition: TextObject | vscode.Position;
+    direction: Direction;
     currentInclusive?: boolean;
-    bounds?: common.TextObject;
+    bounds?: TextObject;
 };
 
 export default abstract class SubjectIOBase {
@@ -20,25 +20,25 @@ export default abstract class SubjectIOBase {
     abstract getContainingObjectAt(
         document: vscode.TextDocument,
         position: vscode.Position
-    ): common.TextObject | undefined;
+    ): TextObject | undefined;
 
     abstract iterScope(
         document: vscode.TextDocument,
         options: IterationOptions
-    ): Enumerable<common.TextObject>;
+    ): Enumerable<TextObject>;
 
     getClosestObjectTo(
         document: vscode.TextDocument,
         position: vscode.Position
-    ): common.TextObject {
+    ): TextObject {
         const wordRange = new Enumerable([
             this.iterAll(document, {
                 startingPosition: position,
-                direction: "backwards",
+                direction: Direction.backwards,
             }).tryFirst(),
             this.iterAll(document, {
                 startingPosition: position,
-                direction: "forwards",
+                direction: Direction.forwards,
             }).tryFirst(),
         ])
             .filterUndefined()
@@ -50,30 +50,30 @@ export default abstract class SubjectIOBase {
     abstract iterAll(
         document: vscode.TextDocument,
         options: IterationOptions
-    ): Enumerable<common.TextObject>;
+    ): Enumerable<TextObject>;
 
     abstract iterHorizontally(
         document: vscode.TextDocument,
         options: IterationOptions
-    ): Enumerable<common.TextObject>;
+    ): Enumerable<TextObject>;
 
     abstract iterVertically(
         document: vscode.TextDocument,
         options: IterationOptions
-    ): Enumerable<common.TextObject>;
+    ): Enumerable<TextObject>;
 
     getSeparatingText(
         document: vscode.TextDocument,
-        object: common.TextObject
+        object: TextObject
     ): vscode.Range | undefined {
         const prevObject = this.iterScope(document, {
-            direction: common.Direction.backwards,
+            direction: Direction.backwards,
             startingPosition: object,
             currentInclusive: false,
         }).tryFirst();
 
         const nextObject = this.iterScope(document, {
-            direction: common.Direction.forwards,
+            direction: Direction.forwards,
             startingPosition: object,
             currentInclusive: false,
         }).tryFirst();
@@ -110,9 +110,9 @@ export default abstract class SubjectIOBase {
 
     skip(
         document: vscode.TextDocument,
-        targetChar: common.Char,
+        targetChar: Char,
         options: IterationOptions
-    ): common.TextObject | undefined {
+    ): TextObject | undefined {
         for (const textObject of this.iterAll(document, options)) {
             const char = editor.charAt(document, textObject.start);
 
@@ -126,9 +126,9 @@ export default abstract class SubjectIOBase {
 
     skipOver(
         document: vscode.TextDocument,
-        skipChar: common.Char | undefined,
+        skipChar: Char | undefined,
         options: IterationOptions
-    ): common.TextObject | undefined {
+    ): TextObject | undefined {
         if (!skipChar) {
             for (const line of iterLines(document, options)) {
                 if (line.isEmptyOrWhitespace) {
@@ -159,7 +159,7 @@ export default abstract class SubjectIOBase {
     deleteObject(
         document: vscode.TextDocument,
         textEdit: vscode.TextEditorEdit,
-        object: common.TextObject
+        object: TextObject
     ): void {
         textEdit.delete(object);
         const separatingText = this.getSeparatingText(document, object);
@@ -190,8 +190,8 @@ export default abstract class SubjectIOBase {
     insertNew(
         document: vscode.TextDocument,
         textEdit: vscode.TextEditorEdit,
-        currentObject: common.TextObject,
-        direction: common.Direction
+        currentObject: TextObject,
+        direction: Direction
     ) {
         const separationTextRange = this.getSeparatingText(
             document,
@@ -202,14 +202,14 @@ export default abstract class SubjectIOBase {
             ? document.getText(separationTextRange)
             : this.defaultSeparationText;
 
-        if (direction === common.Direction.forwards) {
+        if (direction === Direction.forwards) {
             textEdit.insert(currentObject.end, separationText);
         } else {
             textEdit.insert(currentObject.start, separationText);
         }
 
         const insertionPoint =
-            direction === "forwards" ? currentObject.end : currentObject.start;
+            direction === Direction.forwards ? currentObject.end : currentObject.start;
 
         textEdit.insert(insertionPoint, "");
 
@@ -219,8 +219,8 @@ export default abstract class SubjectIOBase {
     swapVertically(
         document: vscode.TextDocument,
         edit: vscode.TextEditorEdit,
-        currentObject: common.TextObject,
-        direction: common.Direction
+        currentObject: TextObject,
+        direction: Direction
     ): vscode.Range {
         const thisObject = this.getContainingObjectAt(
             document,
@@ -244,9 +244,9 @@ export default abstract class SubjectIOBase {
     swapHorizontally(
         document: vscode.TextDocument,
         edit: vscode.TextEditorEdit,
-        currentObject: common.TextObject,
-        direction: common.Direction
-    ): common.TextObject {
+        currentObject: TextObject,
+        direction: Direction
+    ): TextObject {
         const thisObject = this.getContainingObjectAt(
             document,
             currentObject.start

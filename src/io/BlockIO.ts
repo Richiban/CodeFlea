@@ -4,6 +4,7 @@ import Enumerable from "../utils/Enumerable";
 import * as lineUtils from "../utils/lines";
 import { positionToRange, rangeToPosition } from "../utils/selectionsAndRanges";
 import SubjectIOBase, { IterationOptions } from "./SubjectIOBase";
+import { Direction } from "../common";
 
 type BlockIterationOptions = IterationOptions & {
     indentationLevel?: common.IndentationRequest;
@@ -50,7 +51,7 @@ function iterBlockStarts(
                 ...options,
                 startingPosition: rangeToPosition(
                     options.startingPosition,
-                    "backwards"
+                    Direction.backwards
                 ),
             });
 
@@ -102,7 +103,7 @@ function iterBlockStarts(
                 }
             }
 
-            if (options.direction === "backwards") {
+            if (options.direction === Direction.backwards) {
                 yield new vscode.Position(0, 0);
             }
         })()
@@ -132,7 +133,7 @@ function findCorrespondingBlockEnd(
 
     for (const { prev, current } of lineUtils.iterLinePairs(document, {
         startingPosition: new vscode.Range(blockStart, blockStart),
-        direction: "forwards",
+        direction: Direction.forwards,
         currentInclusive: true,
     })) {
         if (!current || !prev) {
@@ -235,7 +236,7 @@ function deleteBlock(
 ) {
     const nextBlock = iterScope(document, {
         startingPosition: object.end,
-        direction: "forwards",
+        direction: Direction.forwards,
     }).tryFirst();
 
     if (nextBlock) {
@@ -246,7 +247,7 @@ function deleteBlock(
 
     const prevBlock = iterScope(document, {
         startingPosition: object.start,
-        direction: "backwards",
+        direction: Direction.backwards,
     }).tryFirst();
 
     if (prevBlock) {

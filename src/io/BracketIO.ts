@@ -8,6 +8,7 @@ import {
 import SubjectIOBase, { IterationOptions } from "./SubjectIOBase";
 import { translateWithWrap } from "../utils/positions";
 import { iterCharacters } from "../utils/characters";
+import { Direction } from "../common";
 
 const openingBrackets = "([{".split("");
 const closingBrackets = ")]}".split("");
@@ -21,7 +22,7 @@ function getLeftBracket(
 
     for (const { char, position } of iterCharacters(document, {
         startingPosition,
-        direction: "backwards",
+        direction: Direction.backwards,
         currentInclusive: true,
     })) {
         if (openingBrackets.includes(char)) {
@@ -53,7 +54,7 @@ function getRightBracket(
 
     for (const { char, position } of iterCharacters(document, {
         startingPosition,
-        direction: "forwards",
+        direction: Direction.forwards,
         currentInclusive: true,
     })) {
         if (closingBrackets.includes(char)) {
@@ -92,11 +93,11 @@ function iterRight(
             ? startingPosition
             : new vscode.Range(startingPosition, getLastPositionIn(document));
 
-    startingPosition = rangeToPosition(startingPosition, "backwards");
+    startingPosition = rangeToPosition(startingPosition, Direction.backwards);
 
     return enumerable(function* () {
         for (const { char, position } of iterCharacters(document, {
-            direction: "forwards",
+            direction: Direction.forwards,
             startingPosition,
             bounds,
             currentInclusive: true,
@@ -130,7 +131,7 @@ function iterLeft(
     startingPosition: vscode.Position | vscode.Range,
     inclusive: boolean
 ): Enumerable<vscode.Range> {
-    startingPosition = rangeToPosition(startingPosition, "backwards");
+    startingPosition = rangeToPosition(startingPosition, Direction.backwards);
 
     const bounds = new vscode.Range(
         new vscode.Position(0, 0),
@@ -139,7 +140,7 @@ function iterLeft(
 
     return enumerable(function* () {
         const characters = iterCharacters(document, {
-            direction: "backwards",
+            direction: Direction.backwards,
             startingPosition,
             bounds,
             currentInclusive: true,
@@ -197,7 +198,7 @@ function getClosestObjectTo(
 ): vscode.Range {
     const leftBracket = iterCharacters(document, {
         startingPosition: position,
-        direction: "backwards",
+        direction: Direction.backwards,
     })
         .filter(
             ({ char }) =>
@@ -207,7 +208,7 @@ function getClosestObjectTo(
 
     const rightBracket = iterCharacters(document, {
         startingPosition: position,
-        direction: "forwards",
+        direction: Direction.forwards,
     })
         .filter(
             ({ char }) =>
@@ -272,7 +273,7 @@ function iterHorizontally(
     options: IterationOptions,
     inclusive: boolean
 ): Enumerable<vscode.Range> {
-    if (options.direction === "forwards") {
+    if (options.direction === Direction.forwards) {
         return iterRight(document, options.startingPosition, inclusive);
     } else {
         return iterLeft(document, options.startingPosition, inclusive);
@@ -298,7 +299,7 @@ function iterVertically(
     );
 
     const bracketsToLookFor =
-        options.direction === "forwards" ? openingBrackets : closingBrackets;
+        options.direction === Direction.forwards ? openingBrackets : closingBrackets;
 
     return enumerable(function* () {
         for (const { char, position } of iterCharacters(document, {

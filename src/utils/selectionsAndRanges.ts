@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import * as common from "../common";
 import Enumerable from "./Enumerable";
+import { Direction } from "../common";
 
 export type SelectionCollapsePoint = "start" | "end" | "midpoint" | "surround";
 
@@ -161,6 +162,6 @@ export function rangeToPosition(
     direction: common.Direction
 ): vscode.Position {
     return startingPosition instanceof vscode.Range
-        ? startingPosition[direction === "forwards" ? "end" : "start"]
+        ? startingPosition[direction === Direction.forwards ? "end" : "start"]
         : startingPosition;
 }

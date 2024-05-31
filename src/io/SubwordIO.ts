@@ -8,6 +8,7 @@ import {
     rangeToPosition,
 } from "../utils/selectionsAndRanges";
 import SubjectIOBase, { IterationOptions } from "./SubjectIOBase";
+import { Direction } from "../common";
 
 type CharClass = "wordStart" | "wordCont" | "operator" | "whitespace";
 
@@ -78,7 +79,7 @@ function splitTextIntoSubWords(
         });
     }
 
-    return direction === "forwards" ? results : results.reverse();
+    return direction === Direction.forwards ? results : results.reverse();
 }
 
 function getSubwordRangeAtPosition(
@@ -87,7 +88,7 @@ function getSubwordRangeAtPosition(
 ): vscode.Range | undefined {
     const line = document.lineAt(position.line);
 
-    const subwords = splitTextIntoSubWords(line.text, "forwards");
+    const subwords = splitTextIntoSubWords(line.text, Direction.forwards);
 
     const range = subwords.find(
         (w) =>
@@ -110,10 +111,10 @@ function getSubwordRangeAtPosition(
 function iterSubwordsOfLine(
     line: vscode.TextLine,
     startingPosition: vscode.Position,
-    direction: "forwards" | "backwards"
+    direction: Direction
 ): Enumerable<common.TextObject> {
     const rangesAfterStartPosition =
-        direction === "forwards"
+        direction === Direction.forwards
             ? (subText: common.SubTextRange) =>
                   subText.range.start >= startingPosition.character
             : (subText: common.SubTextRange) =>
@@ -195,21 +196,21 @@ function getClosestRangeAt(
         direction: common.Direction.backwards,
     }).tryFirst();
 
-    const subwordForwards = iterSubwords(document, {
+    const subwordDirectionForwards = iterSubwords(document, {
         startingPosition: positionToRange(position),
         direction: common.Direction.forwards,
     }).tryFirst();
 
-    if (subwordBackwards && subwordForwards) {
-        return closerOf(position, subwordBackwards, subwordForwards);
+    if (subwordBackwards && subwordDirectionForwards) {
+        return closerOf(position, subwordBackwards, subwordDirectionForwards);
     }
 
     if (subwordBackwards) {
         return subwordBackwards;
     }
 
-    if (subwordForwards) {
-        return subwordForwards;
+    if (subwordDirectionForwards) {
+        return subwordDirectionForwards;
     }
 
     return new vscode.Range(position, position);
