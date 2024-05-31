@@ -423,5 +423,5 @@
         "eslint": "^8.26.0",
         "typescript": "^4.9.5"
     },
-    "version": "2.0.12"
+    "version": "2.1.0"
 }
