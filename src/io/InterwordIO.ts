@@ -9,7 +9,7 @@ import {
 import Seq, { seq } from "../utils/seq";
 import SubjectIOBase, { IterationOptions } from "./SubjectIOBase";
 import * as editor from "../utils/editor";
-import { Direction } from "../common";
+import { Direction, TextObject } from "../common";
 
 type CharClass = "word" | "operator" | "whitespace";
 
@@ -137,7 +137,10 @@ export function getClosestRangeTo(
     return positionToRange(position);
 }
 
-export function iterAll(document: vscode.TextDocument, options: IterationOptions) {
+export function iterAll(
+    document: vscode.TextDocument,
+    options: IterationOptions
+) {
     return seq(function* () {
         let isFirstLine = true;
         const startingPosition = rangeToPosition(
@@ -199,33 +202,31 @@ function findBest(
 export function iterVertically(
     document: vscode.TextDocument,
     options: IterationOptions
-): Seq<vscode.Range> {
-    return new Seq<vscode.Range>(
-        (function* () {
-            const startingPosition = rangeToPosition(
-                options.startingPosition,
-                options.direction
+): Seq<TextObject> {
+    return seq(function* () {
+        const startingPosition = rangeToPosition(
+            options.startingPosition,
+            options.direction
+        );
+
+        for (const line of lineUtils.iterLines(document, options)) {
+            const interWords = split(
+                line.text,
+                line.firstNonWhitespaceCharacterIndex
             );
 
-            for (const line of lineUtils.iterLines(document, options)) {
-                const interWords = split(
-                    line.text,
-                    line.firstNonWhitespaceCharacterIndex
+            const match = findBest(interWords, startingPosition);
+
+            if (match) {
+                yield new vscode.Range(
+                    line.lineNumber,
+                    match.range.start,
+                    line.lineNumber,
+                    match.range.end
                 );
-
-                const match = findBest(interWords, startingPosition);
-
-                if (match) {
-                    yield new vscode.Range(
-                        line.lineNumber,
-                        match.range.start,
-                        line.lineNumber,
-                        match.range.end
-                    );
-                }
             }
-        })()
-    );
+        }
+    });
 }
 
 export function swapHorizontally(
@@ -277,7 +278,7 @@ export function swapVertically(
 export function iterScope(
     document: vscode.TextDocument,
     options: IterationOptions
-): Seq<vscode.Range> {
+): Seq<TextObject> {
     return seq(function* () {
         const startingPosition = rangeToPosition(
             options.startingPosition,
@@ -324,5 +325,3 @@ export default class InterwordIO extends SubjectIOBase {
         return undefined;
     }
 }
-
-

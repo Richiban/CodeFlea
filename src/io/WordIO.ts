@@ -9,13 +9,13 @@ import {
 } from "../utils/selectionsAndRanges";
 import * as editor from "../utils/editor";
 import SubjectIOBase, { IterationOptions } from "./SubjectIOBase";
-import { Direction } from "../common";
+import { Direction, TextObject } from "../common";
 
 function iterVertically(
     document: vscode.TextDocument,
     options: IterationOptions
-): Seq<vscode.Range> {
-    return new Seq(
+): Seq<TextObject> {
+    return seq(
         (function* () {
             let cont = true;
             let currentPosition = rangeToPosition(
@@ -48,14 +48,14 @@ function iterVertically(
                     }
                 }
             }
-        })()
+        })
     );
 }
 
 function iterAll(
     document: vscode.TextDocument,
     options: IterationOptions
-): Seq<vscode.Range> {
+): Seq<TextObject> {
     return seq(function* () {
         let searchPosition: vscode.Position | undefined = rangeToPosition(
             options.startingPosition,
@@ -113,7 +113,7 @@ function findWordClosestTo(
 
     const iterObjects = options.limitToCurrentLine ? iterScope : iterAll;
 
-    const wordRange = new Seq([
+    const wordRange = seq([
         iterObjects(document, {
             startingPosition: position,
             direction: Direction.backwards,
@@ -172,7 +172,7 @@ export function swapVertically(
 function iterScope(
     document: vscode.TextDocument,
     options: IterationOptions
-): Seq<vscode.Range> {
+): Seq<TextObject> {
     return seq(function* () {
         let searchPosition: vscode.Position | undefined = rangeToPosition(
             options.startingPosition,

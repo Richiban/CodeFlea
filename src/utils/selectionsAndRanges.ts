@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as common from "../common";
 import { Direction } from "../common";
-import Seq from "./seq";
+import Seq, { seq } from "./seq";
 
 export type SelectionCollapsePoint = "start" | "end" | "midpoint" | "surround";
 
@@ -20,14 +20,14 @@ export function closerOf(
 ): vscode.Range {
     if (a.start.line !== b.start.line) {
         return (
-            new Seq([a, b]).tryMinBy((r) =>
+            seq([a, b]).tryMinBy((r) =>
                 Math.abs(startingPosition.line - r.start.line)
             ) ?? a
         );
     }
 
     return (
-        new Seq([a, b]).tryMinBy((r) =>
+        seq([a, b]).tryMinBy((r) =>
             Math.abs(startingPosition.character - r.start.character)
         ) ?? a
     );
@@ -48,7 +48,7 @@ export function closerPositionOf(
     }
 
     return (
-        new Seq([a, b]).tryMinBy((r) =>
+        seq([a, b]).tryMinBy((r) =>
             Math.abs(document.offsetAt(startingPosition) - document.offsetAt(r))
         ) ?? a
     );

@@ -7,9 +7,13 @@ export type EditorModeType = "NULL" | "INSERT" | "COMMAND" | "EXTEND";
 
 export type EditorModeChangeRequest =
     | { kind: "INSERT" }
-    | { kind: "COMMAND" | "EXTEND"; subjectName?: SubjectName };
+    | {
+          kind: "COMMAND" | "EXTEND";
+          subjectName?: SubjectName;
+          half?: "LEFT" | "RIGHT";
+      };
 
-export abstract class EditorMode implements vscode.Disposable {        
+export abstract class EditorMode implements vscode.Disposable {
     abstract readonly name: EditorModeType;
     abstract readonly statusBarText: string;
     abstract readonly cursorStyle: vscode.TextEditorCursorStyle | undefined;
@@ -22,7 +26,7 @@ export abstract class EditorMode implements vscode.Disposable {
     abstract equals(previousMode: EditorMode): boolean;
     abstract changeTo(newMode: EditorModeChangeRequest): Promise<EditorMode>;
     async dispose(): Promise<void> {}
-    async fixSelection() {}
+    async fixSelection(half?: "LEFT"|"RIGHT") {}
 
     abstract executeSubjectCommand(command: SubjectAction): Promise<void>;
 
@@ -30,6 +34,7 @@ export abstract class EditorMode implements vscode.Disposable {
     abstract skipOver(direction: string): Promise<void>;
     abstract repeatLastSkip(direction: Direction): Promise<void>;
     abstract jump(): Promise<void>;
-    abstract jumpToSubject(subjectName: string): Promise<EditorMode | undefined>;
-
+    abstract jumpToSubject(
+        subjectName: string
+    ): Promise<EditorMode | undefined>;
 }

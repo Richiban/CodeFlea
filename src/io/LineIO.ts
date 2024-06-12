@@ -5,12 +5,12 @@ import { getNextLineOfChangeOfIndentation } from "../utils/lines";
 import Seq, { seq } from "../utils/seq";
 import { rangeToPosition } from "../utils/selectionsAndRanges";
 import SubjectIOBase, { IterationOptions } from "./SubjectIOBase";
-import { Direction } from "../common";
+import { Direction, TextObject } from "../common";
 
 function iterAll(
     document: vscode.TextDocument,
     options: IterationOptions
-): Seq<vscode.Range> {
+): Seq<TextObject> {
     return lineUtils
         .iterLines(document, options)
         .map((l) => lineUtils.rangeWithoutIndentation(l));
@@ -19,7 +19,7 @@ function iterAll(
 function iterHorizontally(
     document: vscode.TextDocument,
     options: IterationOptions
-): Seq<vscode.Range> {
+): Seq<TextObject> {
     return seq(function* () {
         let currentLine: vscode.TextLine | undefined = document.lineAt(
             rangeToPosition(options.startingPosition, options.direction)
@@ -121,7 +121,7 @@ export function duplicate(
 function iterScope(
     document: vscode.TextDocument,
     options: IterationOptions
-): Seq<vscode.Range> {
+): Seq<TextObject> {
     const startingPosition = rangeToPosition(
         options.startingPosition,
         options.direction

@@ -310,8 +310,11 @@ export default class Seq<out T> implements Iterable<T> {
     }
 }
 
-export function seq<T>(f: () => Iterable<T>): Seq<T> {
-    return new Seq(f());
+export function seq<T>(iter: Iterable<T>): Seq<T>;
+export function seq<T>(f: () => Iterable<T>): Seq<T>;
+export function seq<T>(target: (() => Iterable<T>) | Iterable<T>): Seq<T> {
+    if (typeof target === "function") return new Seq(target());
+    else return new Seq(target);
 }
 
 seq.empty = new Seq([]);

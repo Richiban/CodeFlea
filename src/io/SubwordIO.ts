@@ -8,7 +8,7 @@ import {
     rangeToPosition,
 } from "../utils/selectionsAndRanges";
 import SubjectIOBase, { IterationOptions } from "./SubjectIOBase";
-import { Direction } from "../common";
+import { Direction, TextObject } from "../common";
 
 type CharClass = "wordStart" | "wordCont" | "operator" | "whitespace";
 
@@ -120,7 +120,7 @@ function iterSubwordsOfLine(
             : (subText: common.SubTextRange) =>
                   subText.range.end <= startingPosition.character;
 
-    return new Seq(splitTextIntoSubWords(line.text, direction))
+    return seq(splitTextIntoSubWords(line.text, direction))
         .filter(rangesAfterStartPosition)
         .map(
             ({ range }) =>
@@ -136,9 +136,9 @@ function iterSubwordsOfLine(
 function iterSubwords(
     document: vscode.TextDocument,
     options: IterationOptions
-): Seq<vscode.Range> {
-    return new Seq<vscode.Range>(
-        (function* () {
+): Seq<TextObject> {
+    return seq<TextObject>(
+        function* () {
             const startingPosition = rangeToPosition(
                 options.startingPosition,
                 options.direction
@@ -170,14 +170,14 @@ function iterSubwords(
                     );
                 }
             }
-        })()
+        }
     );
 }
 
 function iterVertically(
     document: vscode.TextDocument,
     options: IterationOptions
-): Seq<vscode.Range> {
+): Seq<TextObject> {
     throw new Error("Not supported. Use VSCode command instead");
 }
 
@@ -219,7 +219,7 @@ function getClosestRangeAt(
 function iterScope(
     document: vscode.TextDocument,
     options: IterationOptions
-): Seq<vscode.Range> {
+): Seq<TextObject> {
     const startingPosition = rangeToPosition(
         options.startingPosition,
         options.direction

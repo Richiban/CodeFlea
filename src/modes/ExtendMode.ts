@@ -181,7 +181,7 @@ export default class ExtendMode extends EditorMode {
         await movement();
         this.actives = this.context.editor.selections;
 
-        this.context.editor.selections = new Seq(this.anchors)
+        this.context.editor.selections = seq(this.anchors)
             .zipWith(this.context.editor.selections)
             .map(([anchor, active]) => {
                 const newRange = anchor.union(active);

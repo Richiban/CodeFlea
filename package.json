@@ -82,8 +82,12 @@
                 "title": "CodeFlea: Change to Block Subject"
             },
             {
-                "command": "codeFlea.changeToCharSubject",
+                "command": "codeFlea.changeToSubwordSubject",
                 "title": "CodeFlea: Change to Block Subject"
+            },
+            {
+                "command": "codeFlea.changeToCharSubject",
+                "title": "CodeFlea: Change to Character Subject"
             },
             {
                 "command": "codeFlea.flipCaseFirstCharacter",

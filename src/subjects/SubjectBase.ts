@@ -5,7 +5,7 @@ import { SubjectActions } from "./SubjectActions";
 import { SubjectName } from "./SubjectName";
 import Seq from "../utils/seq";
 import SubjectIOBase from "../io/SubjectIOBase";
-import { Direction } from "../common";
+import { Direction, TextObject } from "../common";
 
 export default abstract class SubjectBase implements SubjectActions {
     constructor(protected context: common.ExtensionContext) {}
@@ -231,7 +231,10 @@ export default abstract class SubjectBase implements SubjectActions {
         if (target.kind === "SkipTo") {
             selections.tryMap(this.context.editor, (selection) =>
                 this.subjectIO.skip(this.context.editor.document, target.char, {
-                    startingPosition: selections.rangeToPosition(selection, direction),
+                    startingPosition: selections.rangeToPosition(
+                        selection,
+                        direction
+                    ),
                     direction,
                 })
             );
@@ -241,7 +244,10 @@ export default abstract class SubjectBase implements SubjectActions {
                     this.context.editor.document,
                     target.char,
                     {
-                        startingPosition: selections.rangeToPosition(selection, direction),
+                        startingPosition: selections.rangeToPosition(
+                            selection,
+                            direction
+                        ),
                         direction,
                     }
                 )
@@ -273,7 +279,7 @@ export default abstract class SubjectBase implements SubjectActions {
         );
     }
 
-    async fixSelection(): Promise<void> {
+    async fixSelection(half?: "LEFT" | "RIGHT"): Promise<void> {
         selections.tryMap(this.context.editor, (selection) => {
             const startRange = this.subjectIO.getContainingObjectAt(
                 this.context.editor.document,
@@ -286,6 +292,8 @@ export default abstract class SubjectBase implements SubjectActions {
             );
 
             const fixedRange =
+                half === "LEFT"  && startRange ? new vscode.Range(startRange.start, selection.start) :
+                half === "RIGHT" && endRange ? new vscode.Range(selection.end, endRange.end) :
                 startRange && endRange
                     ? startRange.union(endRange)
                     : startRange
@@ -310,7 +318,7 @@ export default abstract class SubjectBase implements SubjectActions {
     iterAll(
         direction: common.IterationDirection,
         bounds: vscode.Range
-    ): Seq<vscode.Range> {
+    ): Seq<TextObject> {
         if (direction === common.IterationDirection.alternate) {
             return this.subjectIO
                 .iterAll(this.context.editor.document, {

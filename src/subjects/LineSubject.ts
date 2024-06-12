@@ -10,7 +10,7 @@ export default class LineSubject extends SubjectBase {
     public readonly displayName = "line";
     public readonly jumpPhaseType = "single-phase";
 
-    async fixSelection() {
+    async fixSelection(half?: "LEFT" | "RIGHT") {
         selections.tryMap(this.context.editor, (selection) => {
             const startLine = this.context.editor.document.lineAt(
                 selection.start.line
@@ -19,13 +19,25 @@ export default class LineSubject extends SubjectBase {
                 selection.end.line
             );
 
-            return new vscode.Selection(
+            const linesRange = new vscode.Selection(
                 endLine.range.end,
                 new vscode.Position(
                     startLine.lineNumber,
                     startLine.firstNonWhitespaceCharacterIndex
                 )
             );
+
+            return half === "LEFT"
+                ? new vscode.Range(linesRange.start, selection.start)
+                : half === "RIGHT"
+                ? new vscode.Range(selection.end, linesRange.end)
+                : new vscode.Selection(
+                      endLine.range.end,
+                      new vscode.Position(
+                          startLine.lineNumber,
+                          startLine.firstNonWhitespaceCharacterIndex
+                      )
+                  );
         });
     }
 

@@ -125,7 +125,8 @@ export default class CommandMode extends modes.EditorMode {
 
             case "COMMAND":
                 if (editor) {
-                    selections.collapseSelections(this.context.editor, "start");
+                    const collapsePos = newMode.half === "RIGHT" ? "end" : "start";
+                    selections.collapseSelections(this.context.editor, collapsePos);
                 }
 
                 if (!newMode.subjectName) {
@@ -178,8 +179,8 @@ export default class CommandMode extends modes.EditorMode {
         await this.subject[command]();
     }
 
-    async fixSelection() {
-        await this.subject.fixSelection();
+    async fixSelection(half? : "LEFT" | "RIGHT") {
+        await this.subject.fixSelection(half);
     }
 
     async skip(direction: common.Direction): Promise<void> {

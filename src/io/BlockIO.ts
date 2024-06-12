@@ -4,7 +4,7 @@ import Seq, { seq } from "../utils/seq";
 import * as lineUtils from "../utils/lines";
 import { positionToRange, rangeToPosition } from "../utils/selectionsAndRanges";
 import SubjectIOBase, { IterationOptions } from "./SubjectIOBase";
-import { Direction } from "../common";
+import { Direction, TextObject } from "../common";
 
 type BlockIterationOptions = IterationOptions & {
     indentationLevel?: common.IndentationRequest;
@@ -181,7 +181,7 @@ function getContainingBlock(
 function iterVertically(
     document: vscode.TextDocument,
     options: IterationOptions
-): Seq<vscode.Range> {
+): Seq<TextObject> {
     return iterBlockStarts(document, {
         ...options,
         indentationLevel: "same-indentation",
@@ -191,7 +191,7 @@ function iterVertically(
 function iterHorizontally(
     document: vscode.TextDocument,
     options: IterationOptions
-): Seq<vscode.Range> {
+): Seq<TextObject> {
     const indentation =
         options.direction === common.Direction.forwards
             ? "more-indentation"
@@ -206,7 +206,7 @@ function iterHorizontally(
 function iterAll(
     document: vscode.TextDocument,
     options: IterationOptions
-): Seq<vscode.Range> {
+): Seq<TextObject> {
     return iterBlockStarts(document, {
         ...options,
         indentationLevel: "any-indentation",
@@ -264,7 +264,7 @@ function deleteBlock(
 function iterScope(
     document: vscode.TextDocument,
     options: IterationOptions
-): Seq<vscode.Range> {
+): Seq<TextObject> {
     return iterBlockStarts(document, {
         ...options,
         indentationLevel: "same-indentation",

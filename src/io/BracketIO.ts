@@ -7,7 +7,7 @@ import {
 import SubjectIOBase, { IterationOptions } from "./SubjectIOBase";
 import { translateWithWrap } from "../utils/positions";
 import { iterCharacters } from "../utils/characters";
-import { Direction } from "../common";
+import { Direction, TextObject } from "../common";
 import Seq, { seq } from "../utils/seq";
 
 
@@ -131,7 +131,7 @@ function iterLeft(
     document: vscode.TextDocument,
     startingPosition: vscode.Position | vscode.Range,
     inclusive: boolean
-): Seq<vscode.Range> {
+): Seq<TextObject> {
     startingPosition = rangeToPosition(startingPosition, Direction.backwards);
 
     const bounds = new vscode.Range(
@@ -239,7 +239,7 @@ function iterAll(
     document: vscode.TextDocument,
     options: IterationOptions,
     inclusive: boolean
-): Seq<vscode.Range> {
+): Seq<TextObject> {
     return seq(function* () {
         for (const { char, position } of iterCharacters(document, {
             ...options,
@@ -273,7 +273,7 @@ function iterHorizontally(
     document: vscode.TextDocument,
     options: IterationOptions,
     inclusive: boolean
-): Seq<vscode.Range> {
+): Seq<TextObject> {
     if (options.direction === Direction.forwards) {
         return iterRight(document, options.startingPosition, inclusive);
     } else {
@@ -293,7 +293,7 @@ function iterVertically(
     document: vscode.TextDocument,
     options: IterationOptions,
     inclusive: boolean
-): Seq<vscode.Range> {
+): Seq<TextObject> {
     const startingPosition = rangeToPosition(
         options.startingPosition,
         options.direction
@@ -360,7 +360,7 @@ export default class BracketIO extends SubjectIOBase {
     iterScope(
         document: vscode.TextDocument,
         options: IterationOptions
-    ): Seq<vscode.Range> {
+    ): Seq<TextObject> {
         return iterScope(document, options, this.inclusive);
     }
 }

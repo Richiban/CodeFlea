@@ -30,7 +30,7 @@ function getContainingRangeAt(
 function iterAll(
     document: TextDocument,
     options: IterationOptions
-): Seq<Range> {
+): Seq<TextObject> {
     return seq(function* () {
         let offset = document.offsetAt(
             rangeToPosition(options.startingPosition, invert(options.direction))
@@ -73,7 +73,7 @@ function getClosestObjectTo(
 function iterVertically(
     document: TextDocument,
     options: IterationOptions
-): Seq<Range> {
+): Seq<TextObject> {
     return seq(function* () {
         let current: vscode.Position | undefined = rangeToPosition(
             options.startingPosition,
@@ -94,7 +94,7 @@ function iterVertically(
 function iterScope(
     document: TextDocument,
     options: IterationOptions
-): Seq<Range> {
+): Seq<TextObject> {
     const startingLine = document.lineAt(
         rangeToPosition(options.startingPosition, options.direction).line
     );

@@ -162,6 +162,46 @@ export const registeredCommands: ExtensionCommand[] = [
         },
     },
     {
+        id: "codeFlea.changeToHalfBracketSubjectRight",
+        execute: async (manager: CodeFleaManager) => {
+            manager.changeMode({
+                kind: "COMMAND",
+                subjectName: "BRACKETS",
+                half: "RIGHT"
+            });
+        },
+    },
+    {
+        id: "codeFlea.changeToHalfBracketSubjectLeft",
+        execute: async (manager: CodeFleaManager) => {
+            manager.changeMode({
+                kind: "COMMAND",
+                subjectName: "BRACKETS",
+                half: "LEFT"
+            });
+        },
+    },
+    {
+        id: "codeFlea.changeToHalfLineSubjectRight",
+        execute: async (manager: CodeFleaManager) => {
+            manager.changeMode({
+                kind: "COMMAND",
+                subjectName: "LINE",
+                half: "RIGHT"
+            });
+        },
+    },
+    {
+        id: "codeFlea.changeToHalfLineSubjectLeft",
+        execute: async (manager: CodeFleaManager) => {
+            manager.changeMode({
+                kind: "COMMAND",
+                subjectName: "LINE",
+                half: "LEFT"
+            });
+        },
+    },
+    {
         id: "codeFlea.changeToCharSubject",
         execute: async (manager: CodeFleaManager) => {
             manager.changeMode({

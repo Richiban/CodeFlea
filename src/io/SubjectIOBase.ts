@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { Char, Direction, TextObject } from "../common";
-import Seq from "../utils/seq";
+import Seq, { seq } from "../utils/seq";
 import * as editor from "../utils/editor";
 import { positionToRange } from "../utils/selectionsAndRanges";
 import { iterCharacters } from "../utils/characters";
@@ -31,7 +31,7 @@ export default abstract class SubjectIOBase {
         document: vscode.TextDocument,
         position: vscode.Position
     ): TextObject {
-        const wordRange = new Seq([
+        const wordRange = seq([
             this.iterAll(document, {
                 startingPosition: position,
                 direction: Direction.backwards,
@@ -86,7 +86,7 @@ export default abstract class SubjectIOBase {
             ? new vscode.Range(object.end, nextObject.start)
             : undefined;
 
-        const bestMatch = new Seq([
+        const bestMatch = seq([
             separatingTextRangeBefore,
             separatingTextRangeAfter,
         ])

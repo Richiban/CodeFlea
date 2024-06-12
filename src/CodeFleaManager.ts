@@ -70,8 +70,10 @@ export default class CodeFleaManager {
 
         this.mode = await this.mode.changeTo(newMode);
 
+        const half = newMode.kind === "INSERT" ? undefined : newMode.half;
+
         this.setUI();
-        this.mode.fixSelection();
+        this.mode.fixSelection(half);
         this.setDecorations();
     }
 
@@ -217,7 +219,7 @@ export default class CodeFleaManager {
             await vscode.commands.executeCommand(command);
         }
 
-        this.mode.fixSelection();
+        // this.mode.fixSelection();
     }
 
     async undoLastCommand() {
