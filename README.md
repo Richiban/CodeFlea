@@ -318,8 +318,26 @@ If you'd like to contribute
 ## Building and running
 
 -   Run `npm install` in your terminal to install dependencies
--   In VS Code run the `Run Extension` target in the Debug View.
+-   Run `npm run compile` to build the extension
+-   In VS Code, run the `Run Extension` target in the Debug View for desktop testing
+-   For web extension testing, run the `Run Web Extension` target in the Debug View
+
+The extension now builds to a single bundled file using esbuild, supporting both desktop and web environments.
+
+## Building
+
+-   `npm run compile` - Build the extension with source maps for development
+-   `npm run watch` - Watch mode that rebuilds on file changes
+-   `npm run package` - Production build with minification
 
 ## Packaging
 
-If you would like to make changes to the extension and then install install your dev version in your local VS Code instance, run `vsce package` in your terminal. This will create a `.vsix` file which you can install in VS Code.
+If you would like to make changes to the extension and then install your dev version in your local VS Code instance, run `vsce package` in your terminal. This will create a `.vsix` file which you can install in VS Code.
+
+## Web Extension Support
+
+CodeFlea is now a web extension and can run in:
+- VS Code for Desktop (traditional)
+- vscode.dev (VS Code in the browser)
+- github.dev (GitHub's web-based editor)
+- Any other VS Code-compatible web environment
