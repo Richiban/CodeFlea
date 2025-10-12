@@ -10,6 +10,12 @@
         "vscode": "^1.63.0"
     },
     "browser": "./out/extension.js",
+    "capabilities": {
+        "virtualWorkspaces": true,
+        "untrustedWorkspaces": {
+            "supported": true
+        }
+    },
     "categories": [
         "Other"
     ],

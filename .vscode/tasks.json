@@ -6,7 +6,14 @@
 		{
 			"type": "npm",
 			"script": "watch",
-			"problemMatcher": "$tsc-watch",
+			"problemMatcher": {
+				"base": "$esbuild-watch",
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": "^\\[watch\\] build started",
+					"endsPattern": "^\\[watch\\] build finished"
+				}
+			},
 			"isBackground": true,
 			"presentation": {
 				"reveal": "never"
@@ -20,7 +27,7 @@
 			"type": "npm",
 			"script": "compile",
 			"problemMatcher": [
-				"$tsc"
+				"$esbuild"
 			],
 			"group": "build"
 		}
