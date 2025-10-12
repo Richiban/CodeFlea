@@ -318,11 +318,10 @@ If you'd like to contribute
 ## Building and running
 
 -   Run `npm install` in your terminal to install dependencies
--   Run `npm run compile` to build the extension
 -   In VS Code, run the `Run Extension` target in the Debug View for desktop testing
 -   For web extension testing, run the `Run Web Extension` target in the Debug View
 
-The extension now builds to a single bundled file using esbuild, supporting both desktop and web environments.
+The debug configurations will automatically build the extension before launching. The extension now builds to a single bundled file using esbuild, supporting both desktop and web environments.
 
 ## Building
 
