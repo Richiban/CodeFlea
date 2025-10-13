@@ -6,6 +6,7 @@
     "repository": {
         "url": "https://github.com/Richiban/CodeFlea/"
     },
+    "homepage": "https://codeflea.dev",
     "engines": {
         "vscode": "^1.63.0"
     },
