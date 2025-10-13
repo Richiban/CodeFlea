@@ -47,6 +47,7 @@ The available subjects are:
 -   [Inter-words](#inter-words)
 -   [Subwords](#subwords)
 -   [Blocks](#blocks)
+-   [Brackets](#brackets)
 
 Commands are available to:
 
@@ -58,13 +59,15 @@ Commands are available to:
 
 The editor will draw a border around the current selection(s) with a colour that corresponds to the current subject.
 
-| Subject | Colour                                                          | Border |
-| ------- | --------------------------------------------------------------- | ------ |
-| Line    | ![#8feb34](https://via.placeholder.com/15/8feb34/000000?text=+) | Solid  |
-| Word    | ![#964d4d](https://via.placeholder.com/15/964d4d/000000?text=+) | Solid  |
-| Inter   | ![#964d4d](https://via.placeholder.com/15/964d4d/000000?text=+) | Dotted |
-| Subword | ![#9900ff](https://via.placeholder.com/15/9900ff/000000?text=+) | Solid  |
-| Block   | ![#aba246](https://via.placeholder.com/15/aba246/000000?text=+) | Solid  |
+| Subject    | Colour                                                          | Border |
+| ---------- | --------------------------------------------------------------- | ------ |
+| Line       | ![#8feb34](https://via.placeholder.com/15/8feb34/000000?text=+) | Solid  |
+| Word       | ![#964d4d](https://via.placeholder.com/15/964d4d/000000?text=+) | Solid  |
+| Inter      | ![#964d4d](https://via.placeholder.com/15/964d4d/000000?text=+) | Dotted |
+| Subword    | ![#9900ff](https://via.placeholder.com/15/9900ff/000000?text=+) | Solid  |
+| Block      | ![#aba246](https://via.placeholder.com/15/aba246/000000?text=+) | Solid  |
+| Brackets   | ![#9900ff](https://via.placeholder.com/15/aba246/000000?text=+) | Solid  |
+| Characters | ![#ff8000](https://via.placeholder.com/15/aba246/000000?text=+) | Solid  |
 
 # Subjects in depth
 
@@ -169,6 +172,14 @@ Example 3, Haskell:
         print $ third tuple3
 
 ```
+
+## Brackets
+
+Brackets are `()` `{}` and `[]`. Press the bracket key once to select inside brackets; press it again to select outside brackets.
+
+## Characters
+
+Individual characters. Useful for fine-tuned selections.
 
 # Movements
 
