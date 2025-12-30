@@ -330,6 +330,12 @@ export const registeredCommands: ExtensionCommand[] = [
         },
     },
     {
+        id: "codeFlea.fastSkip",
+        execute: async (manager) => {
+            await manager.fastSkip(Direction.forwards);
+        },
+    },
+    {
         id: "codeFlea.skipBackwards",
         execute: async (manager) => {
             await manager.skip(Direction.backwards);

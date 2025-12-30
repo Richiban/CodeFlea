@@ -10,6 +10,7 @@ import SubjectBase from "../subjects/SubjectBase";
 import { SubjectAction } from "../subjects/SubjectActions";
 import JumpInterface from "../handlers/JumpInterface";
 import { SubjectName } from "../subjects/SubjectName";
+import { InlineInput } from '../utils/inlineInput';
 
 export default class CommandMode extends modes.EditorMode {
     private lastSkip: common.Skip | undefined = undefined;
@@ -183,6 +184,7 @@ export default class CommandMode extends modes.EditorMode {
         await this.subject.fixSelection(half);
     }
 
+
     async skip(direction: common.Direction): Promise<void> {
         const skipChar = await editor.inputBoxChar(
             `Skip ${direction} to a ${this.subject.name} by its first character`
@@ -195,6 +197,47 @@ export default class CommandMode extends modes.EditorMode {
         this.lastSkip = { kind: "SkipTo", char: skipChar };
 
         await this.subject.skip(direction, this.lastSkip);
+    }
+
+    async fastSkip(direction: common.Direction): Promise<void> {
+        await new Promise<void>((resolve) => {
+            const handleInput = async (_: string, char: common.Char) => {
+                if (this.subject.name === "WORD" && !/[a-zA-Z0-9_]/.test(char)) {
+                    const newMode = await this.changeTo({ kind: "COMMAND", subjectName: "CHAR" });
+                    if (newMode instanceof CommandMode) {
+                        const skip: common.Skip = {
+                            kind: "SkipTo",
+                            char,
+                        };
+                        this.lastSkip = { kind: "SkipOver", char: char };
+                        await newMode.subject.skip(direction, skip);
+                    }
+                } else {
+                    const skip: common.Skip = {
+                        kind: "SkipTo",
+                        char,
+
+                    };
+                    this.lastSkip = { kind: "SkipOver", char: char };
+                    await this.subject.skip(direction, skip);
+                }
+                
+                resolve();
+            };
+
+            const inlineInput = new InlineInput({
+                textEditor: this.context.editor,
+                onInput: handleInput,
+                onCancel: async () => {
+                    resolve();
+                }
+            });
+
+            inlineInput.updateStatusBar(
+                `Skip ${direction} to ${this.subject.displayName} by first character`,
+                0
+            );
+        });
     }
 
     async skipOver(direction: common.Direction): Promise<void> {

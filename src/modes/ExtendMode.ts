@@ -152,6 +152,10 @@ export default class ExtendMode extends EditorMode {
         await this.extendSelections(() => this.wrappedMode.skip(direction));
     }
 
+    async fastSkip(direction: common.Direction) {
+        await this.extendSelections(() => this.wrappedMode.skip(direction));  // just use normal skip
+    }
+
     async skipOver(direction: common.Direction) {
         await this.extendSelections(() => this.wrappedMode.skipOver(direction));
     }

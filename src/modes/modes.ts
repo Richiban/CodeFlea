@@ -31,6 +31,7 @@ export abstract class EditorMode implements vscode.Disposable {
     abstract executeSubjectCommand(command: SubjectAction): Promise<void>;
 
     abstract skip(direction: Direction): Promise<void>;
+    abstract fastSkip(direction: Direction): Promise<void>;
     abstract skipOver(direction: string): Promise<void>;
     abstract repeatLastSkip(direction: Direction): Promise<void>;
     abstract jump(): Promise<void>;
