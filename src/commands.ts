@@ -101,8 +101,7 @@ export const registeredCommands: ExtensionCommand[] = [
     {
         id: "codeFlea.changeToBracketSubject",
         execute: async (manager) => {
-            manager.changeMode({
-                kind: "COMMAND",
+            manager.changeSubject({
                 subjectName: "BRACKETS",
             });
         },
@@ -116,8 +115,7 @@ export const registeredCommands: ExtensionCommand[] = [
     {
         id: "codeFlea.changeToWordSubject",
         execute: async (manager: CodeFleaManager) => {
-            manager.changeMode({
-                kind: "COMMAND",
+            manager.changeSubject({
                 subjectName: "WORD",
             });
         },
@@ -131,8 +129,7 @@ export const registeredCommands: ExtensionCommand[] = [
     {
         id: "codeFlea.changeToLineSubject",
         execute: async (manager: CodeFleaManager) => {
-            manager.changeMode({
-                kind: "COMMAND",
+            manager.changeSubject({
                 subjectName: "LINE",
             });
         },
@@ -146,8 +143,7 @@ export const registeredCommands: ExtensionCommand[] = [
     {
         id: "codeFlea.changeToInterwordSubject",
         execute: async (manager: CodeFleaManager) => {
-            manager.changeMode({
-                kind: "COMMAND",
+            manager.changeSubject({
                 subjectName: "INTERWORD",
             });
         },
@@ -155,8 +151,7 @@ export const registeredCommands: ExtensionCommand[] = [
     {
         id: "codeFlea.changeToSubwordSubject",
         execute: async (manager: CodeFleaManager) => {
-            manager.changeMode({
-                kind: "COMMAND",
+            manager.changeSubject({
                 subjectName: "SUBWORD",
             });
         },
@@ -164,8 +159,7 @@ export const registeredCommands: ExtensionCommand[] = [
     {
         id: "codeFlea.changeToHalfBracketSubjectRight",
         execute: async (manager: CodeFleaManager) => {
-            manager.changeMode({
-                kind: "COMMAND",
+            manager.changeSubject({
                 subjectName: "BRACKETS",
                 half: "RIGHT"
             });
@@ -174,8 +168,7 @@ export const registeredCommands: ExtensionCommand[] = [
     {
         id: "codeFlea.changeToHalfBracketSubjectLeft",
         execute: async (manager: CodeFleaManager) => {
-            manager.changeMode({
-                kind: "COMMAND",
+            manager.changeSubject({
                 subjectName: "BRACKETS",
                 half: "LEFT"
             });
@@ -184,8 +177,7 @@ export const registeredCommands: ExtensionCommand[] = [
     {
         id: "codeFlea.changeToHalfLineSubjectRight",
         execute: async (manager: CodeFleaManager) => {
-            manager.changeMode({
-                kind: "COMMAND",
+            manager.changeSubject({
                 subjectName: "LINE",
                 half: "RIGHT"
             });
@@ -194,8 +186,7 @@ export const registeredCommands: ExtensionCommand[] = [
     {
         id: "codeFlea.changeToHalfLineSubjectLeft",
         execute: async (manager: CodeFleaManager) => {
-            manager.changeMode({
-                kind: "COMMAND",
+            manager.changeSubject({
                 subjectName: "LINE",
                 half: "LEFT"
             });
@@ -204,8 +195,7 @@ export const registeredCommands: ExtensionCommand[] = [
     {
         id: "codeFlea.changeToCharSubject",
         execute: async (manager: CodeFleaManager) => {
-            manager.changeMode({
-                kind: "COMMAND",
+            manager.changeSubject({
                 subjectName: "CHAR",
             });
         },
@@ -213,8 +203,7 @@ export const registeredCommands: ExtensionCommand[] = [
     {
         id: "codeFlea.changeToBlockSubject",
         execute: async (manager: CodeFleaManager) => {
-            manager.changeMode({
-                kind: "COMMAND",
+            manager.changeSubject({
                 subjectName: "BLOCK",
             });
         },
