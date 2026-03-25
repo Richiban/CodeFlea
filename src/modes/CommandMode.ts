@@ -125,33 +125,44 @@ export default class CommandMode extends modes.EditorMode {
             return this
         }
 
+        let newMode: CommandMode | undefined
+
         if (request.subjectName !== this.subject.name) {
-            return this.with({
+            newMode = this.with({
                 subject: subjects.createFrom(this.context, request.subjectName),
             })
+        } else {
+            // This handles the "cyclable" subjects, e.g. "WORD" -> "INTERWORD" -> "WORD" etc
+            switch (request.subjectName) {
+                case "WORD":
+                    newMode = this.with({
+                        subject: subjects.createFrom(this.context, "INTERWORD"),
+                    })
+                    break
+                case "INTERWORD":
+                    newMode = this.with({
+                        subject: subjects.createFrom(this.context, "WORD"),
+                    })
+                    break
+                case "BRACKETS":
+                    newMode = this.with({
+                        subject: subjects.createFrom(
+                            this.context,
+                            "BRACKETS_INCLUSIVE",
+                        ),
+                    })
+                    break
+                case "BRACKETS_INCLUSIVE":
+                    newMode = this.with({
+                        subject: subjects.createFrom(this.context, "BRACKETS"),
+                    })
+                    break
+            }
         }
 
-        // This handles the "cyclable" subjects, e.g. "WORD" -> "INTERWORD" -> "WORD" etc
-        switch (request.subjectName) {
-            case "WORD":
-                return this.with({
-                    subject: subjects.createFrom(this.context, "INTERWORD"),
-                })
-            case "INTERWORD":
-                return this.with({
-                    subject: subjects.createFrom(this.context, "WORD"),
-                })
-            case "BRACKETS":
-                return this.with({
-                    subject: subjects.createFrom(
-                        this.context,
-                        "BRACKETS_INCLUSIVE",
-                    ),
-                })
-            case "BRACKETS_INCLUSIVE":
-                return this.with({
-                    subject: subjects.createFrom(this.context, "BRACKETS"),
-                })
+        if (newMode) {
+            await newMode.fixSelection(request.half)
+            return newMode
         }
 
         return this
