@@ -1,49 +1,53 @@
-import { createFrom } from "../subjects/subjects";
-import InsertMode from "./InsertMode";
-import ExtendMode from "./ExtendMode";
-import * as common from "../common";
-import { EditorMode, EditorModeChangeRequest } from "./modes";
-import CommandMode from "./CommandMode";
+import { createFrom } from "../subjects/subjects"
+import InsertMode from "./InsertMode"
+import ExtendMode from "./ExtendMode"
+import * as common from "../common"
+import { EditorMode, EditorModeChangeRequest } from "./modes"
+import CommandMode from "./CommandMode"
 
 export default class NullMode extends EditorMode {
-    readonly decorationType = undefined;
-    readonly decorationTypeTop = undefined;
-    readonly decorationTypeMid = undefined;
-    readonly decorationTypeBottom = undefined;
-    readonly cursorStyle = undefined;
-    readonly lineNumberStyle = undefined;
-    readonly name = "NULL";
-    readonly statusBarText = "Initialising...";
+    readonly decorationType = undefined
+    readonly decorationTypeTop = undefined
+    readonly decorationTypeMid = undefined
+    readonly decorationTypeBottom = undefined
+    readonly cursorStyle = undefined
+    readonly lineNumberStyle = undefined
+    readonly name = "NULL"
+    readonly statusBarText = "Initialising..."
 
     constructor(private readonly context: common.ExtensionContext) {
-        super();
+        super()
     }
 
     equals(previousMode: EditorMode): boolean {
-        return previousMode instanceof NullMode;
+        return previousMode instanceof NullMode
     }
 
     async changeTo(newMode: EditorModeChangeRequest): Promise<EditorMode> {
-        const defaultSubject = createFrom(this.context, "WORD");
-        const navigateMode = new CommandMode(this.context, defaultSubject);
+        const defaultSubject = createFrom(this.context, "WORD")
+        const navigateMode = new CommandMode(this.context, defaultSubject)
 
         switch (newMode.kind) {
             case "INSERT":
-                return new InsertMode(this.context, navigateMode);
+                return new InsertMode(this.context, navigateMode)
 
             case "EXTEND":
-                return new ExtendMode(this.context, navigateMode);
+                return new ExtendMode(this.context, navigateMode)
 
             case "COMMAND":
-                return navigateMode;
+                return navigateMode
         }
     }
 
+    async changeSubjectTo() {
+        return this
+    }
     async executeSubjectCommand() {}
     async skip() {}
     async skipOver() {}
     async repeatLastSkip() {}
     async jump() {}
-    async jumpToSubject() { return undefined; }
-
+    async jumpToSubject() {
+        return undefined
+    }
 }

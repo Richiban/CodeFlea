@@ -1,52 +1,56 @@
-import * as vscode from "vscode";
-import * as common from "../common";
-import ExtendMode from "./ExtendMode";
-import { EditorMode, EditorModeChangeRequest } from "./modes";
-import CommandMode from "./CommandMode";
-import * as subjects from "../subjects/subjects";
+import * as vscode from "vscode"
+import * as common from "../common"
+import ExtendMode from "./ExtendMode"
+import { EditorMode, EditorModeChangeRequest, SubjectChangeRequest } from "./modes"
+import CommandMode from "./CommandMode"
+import * as subjects from "../subjects/subjects"
 
 export default class InsertMode extends EditorMode {
-    private keySequenceStarted: boolean = false;
-    readonly cursorStyle = vscode.TextEditorCursorStyle.Line;
-    readonly lineNumberStyle = vscode.TextEditorLineNumbersStyle.On;
-    readonly decorationType = undefined;
-    readonly decorationTypeTop = undefined;
-    readonly decorationTypeMid = undefined;
-    readonly decorationTypeBottom = undefined;
-    readonly name = "INSERT";
-    readonly statusBarText = "Insert";
+    private keySequenceStarted: boolean = false
+    readonly cursorStyle = vscode.TextEditorCursorStyle.Line
+    readonly lineNumberStyle = vscode.TextEditorLineNumbersStyle.On
+    readonly decorationType = undefined
+    readonly decorationTypeTop = undefined
+    readonly decorationTypeMid = undefined
+    readonly decorationTypeBottom = undefined
+    readonly name = "INSERT"
+    readonly statusBarText = "Insert"
 
     constructor(
         private readonly context: common.ExtensionContext,
-        private previousNavigateMode: CommandMode
+        private previousNavigateMode: CommandMode,
     ) {
-        super();
+        super()
     }
 
     equals(previousMode: EditorMode): boolean {
         return (
             previousMode instanceof InsertMode &&
             previousMode.keySequenceStarted === this.keySequenceStarted
-        );
+        )
+    }
+
+    async changeSubjectTo(_request: SubjectChangeRequest): Promise<EditorMode> {
+        return this
     }
 
     async changeTo(newMode: EditorModeChangeRequest): Promise<EditorMode> {
         switch (newMode.kind) {
             case "INSERT":
-                return this;
+                return this
             case "EXTEND":
-                return new ExtendMode(this.context, this.previousNavigateMode);
+                return new ExtendMode(this.context, this.previousNavigateMode)
 
             case "COMMAND":
                 if (!newMode.subjectName) {
-                    return this.previousNavigateMode;
+                    return this.previousNavigateMode
                 } else {
                     const subject = subjects.createFrom(
                         this.context,
-                        newMode.subjectName
-                    );
+                        newMode.subjectName,
+                    )
 
-                    return new CommandMode(this.context, subject);
+                    return new CommandMode(this.context, subject)
                 }
         }
     }
@@ -56,5 +60,7 @@ export default class InsertMode extends EditorMode {
     async skip() {}
     async skipOver() {}
     async jump() {}
-    async jumpToSubject() { return undefined; }
+    async jumpToSubject() {
+        return undefined
+    }
 }
